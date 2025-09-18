@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import AdvancedStudy from "@/components/study/AdvancedStudy";
+import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
 import { 
   Building2, 
   MapPin, 
@@ -255,168 +257,11 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="study" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Diagnostic approfondi</CardTitle>
-                <CardDescription>Données factuelles utilisées pour le diagnostic</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-6 mb-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-success mb-2">8.2/10</div>
-                    <div className="text-sm font-medium">Viabilité économique</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary mb-2">7.8/10</div>
-                    <div className="text-sm font-medium">Solvabilité financière</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-success mb-2">8.5/10</div>
-                    <div className="text-sm font-medium">Conformité juridique</div>
-                  </div>
-                </div>
-                
-                <Separator className="my-6" />
-                
-                <div className="space-y-6">
-                  {/* Economic & Financial Section */}
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center">
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Économique & Financière
-                    </h4>
-                    <div className="bg-slate-50 rounded-lg p-4 space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-sm">Dépôts de comptes</span>
-                        <Badge variant="secondary" className="bg-success-light text-success">À jour</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm">Chiffre d'affaires 2023</span>
-                        <span className="text-sm font-medium">2.4M€ (+12%)</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm">Résultat net</span>
-                        <span className="text-sm font-medium text-success">+185K€</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm">Score RubyPayeur</span>
-                        <Badge variant="secondary" className="bg-success-light text-success">Excellent</Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Fiscal Section */}
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center">
-                      <Shield className="h-4 w-4 mr-2" />
-                      Fiscal
-                    </h4>
-                    <div className="bg-slate-50 rounded-lg p-4 space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-sm">Conformité TVA</span>
-                        <Badge variant="secondary" className="bg-success-light text-success">Conforme</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm">Impôt sur les sociétés</span>
-                        <Badge variant="secondary" className="bg-success-light text-success">À jour</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm">URSSAF</span>
-                        <Badge variant="secondary" className="bg-warning-light text-warning">Retard mineur</Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Legal Section */}
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Juridique
-                    </h4>
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <div className="text-center py-8 text-muted-foreground">
-                        <CheckCircle className="h-12 w-12 mx-auto mb-3 text-success" />
-                        <p className="text-sm">Aucune procédure juridique en cours</p>
-                        <p className="text-xs">Historique clean depuis la création</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <AdvancedStudy />
           </TabsContent>
 
           <TabsContent value="predictive" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="h-5 w-5 mr-2" />
-                  Analyse prédictive
-                </CardTitle>
-                <CardDescription>Projection des risques basée sur l'IA</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-6 mb-6">
-                  <div className="text-center p-4 bg-success-light rounded-lg">
-                    <div className="text-2xl font-bold text-success mb-2">2.1%</div>
-                    <div className="text-sm font-medium">Risque 3 mois</div>
-                  </div>
-                  <div className="text-center p-4 bg-success-light rounded-lg">
-                    <div className="text-2xl font-bold text-success mb-2">3.8%</div>
-                    <div className="text-sm font-medium">Risque 6 mois</div>
-                  </div>
-                  <div className="text-center p-4 bg-warning-light rounded-lg">
-                    <div className="text-2xl font-bold text-warning mb-2">4.9%</div>
-                    <div className="text-sm font-medium">Risque 12 mois</div>
-                  </div>
-                </div>
-
-                <Separator className="my-6" />
-
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold mb-3">Facteurs protecteurs</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-sm">
-                        <CheckCircle className="h-4 w-4 mr-2 text-success" />
-                        Croissance du chiffre d'affaires stable (+12%)
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <CheckCircle className="h-4 w-4 mr-2 text-success" />
-                        Trésorerie positive et en amélioration
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <CheckCircle className="h-4 w-4 mr-2 text-success" />
-                        Secteur porteur (tech/digital)
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-3">Points de vigilance</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-sm">
-                        <AlertTriangle className="h-4 w-4 mr-2 text-warning" />
-                        Léger retard URSSAF à surveiller
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <AlertTriangle className="h-4 w-4 mr-2 text-warning" />
-                        Dépendance à quelques clients majeurs
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-100 rounded-lg p-4">
-                    <h4 className="font-semibold mb-2">Recommandations IA</h4>
-                    <p className="text-sm text-muted-foreground">
-                      L'entreprise présente un profil de risque faible à court et moyen terme. 
-                      Il est recommandé de surveiller la régularisation du retard URSSAF et 
-                      la diversification du portefeuille clients pour optimiser la stabilité financière.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PredictiveAnalysis />
           </TabsContent>
 
           <TabsContent value="reports" className="space-y-6">

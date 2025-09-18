@@ -99,26 +99,28 @@ const AdvancedStudy = () => {
           <CardDescription>Analyse multidimensionnelle par volets spécialisés</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-success mb-2">8.4/10</div>
-              <div className="text-sm font-medium">Performance Économique</div>
-              <Progress value={84} className="mt-2" />
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary mb-2">7.8/10</div>
-              <div className="text-sm font-medium">Solidité Financière</div>
-              <Progress value={78} className="mt-2" />
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-success mb-2">9.1/10</div>
-              <div className="text-sm font-medium">Conformité Légale</div>
-              <Progress value={91} className="mt-2" />
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary mb-2">8.2/10</div>
-              <div className="text-sm font-medium">Gouvernance</div>
-              <Progress value={82} className="mt-2" />
+          <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-6 rounded-lg border border-primary/10">
+            <div className="flex items-start space-x-4">
+              <div className="bg-primary/10 p-3 rounded-full">
+                <Award className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold mb-3 text-primary">Diagnostic IA Explicable</h3>
+                <div className="prose prose-sm text-muted-foreground space-y-3">
+                  <p>
+                    <strong className="text-foreground">Profil d'excellence globale</strong> - L'entreprise présente un profil remarquablement équilibré avec une note moyenne de <span className="font-semibold text-success">8.4/10</span>, plaçant l'organisation dans le quartile supérieur de son secteur.
+                  </p>
+                  <p>
+                    <strong className="text-foreground">Points forts critiques :</strong> La conformité légale (9.1/10) constitue un avantage concurrentiel majeur, témoignant d'une culture de rigueur et de transparence exceptionnelle. La performance économique (8.4/10) reflète une stratégie commerciale bien maîtrisée avec une croissance soutenue et un positionnement concurrentiel solide.
+                  </p>
+                  <p>
+                    <strong className="text-foreground">Axes d'optimisation :</strong> La solidité financière (7.8/10), bien que satisfaisante, présente un potentiel d'amélioration notable. L'optimisation de la structure de capital et l'amélioration des ratios de liquidité pourraient renforcer significativement la résilience financière.
+                  </p>
+                  <p>
+                    <strong className="text-foreground">Recommandation stratégique :</strong> Maintenir l'excellence opérationnelle actuelle tout en investissant dans le renforcement des fondamentaux financiers pour sécuriser la croissance à long terme.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

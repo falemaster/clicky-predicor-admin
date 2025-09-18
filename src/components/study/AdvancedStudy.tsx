@@ -462,6 +462,107 @@ const AdvancedStudy = () => {
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* Nouvelle sous-section Conformité Judiciaire */}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold mb-4 flex items-center">
+                    <Gavel className="h-5 w-5 mr-2 text-primary" />
+                    Conformité Judiciaire
+                  </h4>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center">
+                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          Contentieux Fiscal
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-3 bg-success-light/20 border border-success-light rounded-lg">
+                            <div className="flex items-center space-x-2">
+                              <CheckCircle className="h-4 w-4 text-success" />
+                              <span className="text-sm font-medium">Aucun contentieux en cours</span>
+                            </div>
+                            <Badge variant="secondary" className="bg-success-light text-success">
+                              0 dossier
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Dernière vérification : Décembre 2023
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Redressements 5 ans</span>
+                              <span className="font-medium">0</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span>Contrôles fiscaux</span>
+                              <span className="font-medium">1 (2021)</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span>Pénalités</span>
+                              <span className="font-medium text-success">0€</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center">
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Contentieux Judiciaire
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-3 bg-warning-light/20 border border-warning-light rounded-lg">
+                            <div className="flex items-center space-x-2">
+                              <AlertTriangle className="h-4 w-4 text-warning" />
+                              <span className="text-sm font-medium">Procédures en cours</span>
+                            </div>
+                            <Badge variant="secondary" className="bg-warning-light text-warning">
+                              1 dossier
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Dernière mise à jour : Janvier 2024
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Litiges commerciaux</span>
+                              <span className="font-medium">1</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span>Montant estimé</span>
+                              <span className="font-medium">45 K€</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span>Provision constituée</span>
+                              <span className="font-medium text-success">45 K€</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <Shield className="h-5 w-5 text-primary mt-0.5" />
+                      <div className="flex-1">
+                        <h5 className="font-medium text-sm mb-2">Analyse de Risque Juridique</h5>
+                        <p className="text-xs text-muted-foreground">
+                          Profil de risque judiciaire <strong>faible à modéré</strong>. Le contentieux commercial identifié est isolé et fait l'objet d'un provisionnement intégral. 
+                          L'absence de contentieux fiscal témoigne d'une gestion rigoureuse des obligations déclaratives. 
+                          Recommandation : maintenir la veille juridique active et le suivi préventif des relations contractuelles.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </CollapsibleContent>
           </Collapsible>

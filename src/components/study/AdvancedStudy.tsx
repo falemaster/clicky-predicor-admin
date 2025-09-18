@@ -1,83 +1,74 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { 
-  TrendingUp, 
-  TrendingDown,
-  Users,
-  Target,
-  Building,
-  CreditCard,
-  BarChart3,
-  PieChart,
-  Activity,
-  Award,
-  CheckCircle,
-  AlertTriangle,
-  XCircle
-} from "lucide-react";
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend
-} from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
+import { TrendingUp, TrendingDown, Building, Shield, Users, ChevronDown, ChevronRight, Award, CheckCircle, AlertTriangle, XCircle, CreditCard, FileText, Gavel, Crown } from "lucide-react";
 
 const AdvancedStudy = () => {
-  const financialEvolution = [
-    { year: '2019', ca: 1850, resultat: 95, tresorerie: 420 },
-    { year: '2020', ca: 1920, resultat: 125, tresorerie: 380 },
-    { year: '2021', ca: 2100, resultat: 150, tresorerie: 445 },
-    { year: '2022', ca: 2250, resultat: 165, tresorerie: 510 },
-    { year: '2023', ca: 2400, resultat: 185, tresorerie: 580 }
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    economic: false,
+    financial: false,
+    compliance: false,
+    governance: false
+  });
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  // Data for Economic & Commercial Analysis
+  const marketEvolution = [
+    { year: '2019', ca: 1850, partMarche: 2.1, croissance: 5.2 },
+    { year: '2020', ca: 1920, partMarche: 2.3, croissance: 3.8 },
+    { year: '2021', ca: 2100, partMarche: 2.6, croissance: 9.4 },
+    { year: '2022', ca: 2250, partMarche: 2.8, croissance: 7.1 },
+    { year: '2023', ca: 2400, partMarche: 3.1, croissance: 6.7 }
   ];
 
-  const sectorComparison = [
-    { subject: 'Rentabilité', company: 85, sector: 68, fullMark: 100 },
-    { subject: 'Liquidité', company: 78, sector: 72, fullMark: 100 },
-    { subject: 'Solvabilité', company: 82, sector: 65, fullMark: 100 },
-    { subject: 'Efficacité', company: 75, sector: 70, fullMark: 100 },
-    { subject: 'Croissance', company: 88, sector: 55, fullMark: 100 }
+  const competitivePosition = [
+    { subject: 'Innovation', company: 85, sector: 68, fullMark: 100 },
+    { subject: 'Prix', company: 78, sector: 72, fullMark: 100 },
+    { subject: 'Qualité', company: 92, sector: 75, fullMark: 100 },
+    { subject: 'Service', company: 88, sector: 70, fullMark: 100 },
+    { subject: 'Distribution', company: 75, sector: 65, fullMark: 100 }
   ];
 
-  const clientDistribution = [
-    { name: 'Top 3 clients', value: 45, color: 'hsl(var(--primary))' },
-    { name: 'Clients moyens', value: 35, color: 'hsl(var(--secondary))' },
-    { name: 'Petits clients', value: 20, color: 'hsl(var(--accent))' }
+  // Data for Financial Analysis
+  const financialRatios = [
+    { year: '2019', liquidite: 1.65, endettement: 0.45, rentabilite: 5.1, roe: 12.8 },
+    { year: '2020', liquidite: 1.72, endettement: 0.42, rentabilite: 6.5, roe: 14.2 },
+    { year: '2021', liquidite: 1.78, endettement: 0.38, rentabilite: 7.1, roe: 15.8 },
+    { year: '2022', liquidite: 1.82, endettement: 0.36, rentabilite: 7.3, roe: 15.1 },
+    { year: '2023', liquidite: 1.85, endettement: 0.35, rentabilite: 7.7, roe: 15.2 }
   ];
 
-  const employeeEvolution = [
-    { year: '2019', effectif: 18, turnover: 8, formations: 24 },
-    { year: '2020', effectif: 22, turnover: 12, formations: 31 },
-    { year: '2021', effectif: 28, turnover: 15, formations: 45 },
-    { year: '2022', effectif: 35, turnover: 18, formations: 52 },
-    { year: '2023', effectif: 42, turnover: 22, formations: 68 }
+  const cashflowAnalysis = [
+    { year: '2019', operationnel: 185, investissement: -95, financement: -45 },
+    { year: '2020', operationnel: 220, investissement: -120, financement: -35 },
+    { year: '2021', operationnel: 285, investissement: -140, financement: -25 },
+    { year: '2022', operationnel: 315, investissement: -165, financement: -15 },
+    { year: '2023', operationnel: 385, investissement: -185, financement: 12 }
   ];
 
-  const ratios = [
-    { name: 'Liquidité générale', value: 1.85, benchmark: 1.5, status: 'good' },
-    { name: 'Endettement', value: 0.35, benchmark: 0.6, status: 'good' },
-    { name: 'Rentabilité nette', value: 7.7, benchmark: 5.2, status: 'excellent' },
-    { name: 'ROE', value: 15.2, benchmark: 12.0, status: 'good' },
-    { name: 'Rotation stocks', value: 8.5, benchmark: 6.0, status: 'excellent' }
+  // Data for Compliance
+  const complianceItems = [
+    { domain: 'Fiscal', status: 'excellent', lastAudit: '2023-11', score: 95 },
+    { domain: 'Social', status: 'good', lastAudit: '2023-09', score: 88 },
+    { domain: 'Environnemental', status: 'good', lastAudit: '2023-10', score: 92 },
+    { domain: 'RGPD', status: 'excellent', lastAudit: '2023-12', score: 96 },
+    { domain: 'Secteur spécifique', status: 'good', lastAudit: '2023-08', score: 89 }
+  ];
+
+  // Data for Governance
+  const governanceStructure = [
+    { name: 'Conseil Administration', value: 7, color: 'hsl(var(--primary))' },
+    { name: 'Direction Générale', value: 3, color: 'hsl(var(--secondary))' },
+    { name: 'Comités spécialisés', value: 4, color: 'hsl(var(--accent))' }
   ];
 
   const getStatusIcon = (status: string) => {
@@ -86,495 +77,539 @@ const AdvancedStudy = () => {
       case 'good': return <CheckCircle className="h-4 w-4 text-primary" />;
       case 'warning': return <AlertTriangle className="h-4 w-4 text-warning" />;
       case 'poor': return <XCircle className="h-4 w-4 text-destructive" />;
-      default: return <Activity className="h-4 w-4 text-muted-foreground" />;
+      default: return <CheckCircle className="h-4 w-4 text-muted-foreground" />;
     }
+  };
+
+  const getStatusBadge = (status: string, score: number) => {
+    const variant = status === 'excellent' ? 'default' : status === 'good' ? 'secondary' : 'destructive';
+    return (
+      <Badge variant={variant} className="ml-2">
+        {score}/100
+      </Badge>
+    );
   };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Diagnostic approfondi</CardTitle>
-          <CardDescription>Analyse multidimensionnelle complète</CardDescription>
+          <CardTitle>Étude Approfondie</CardTitle>
+          <CardDescription>Analyse multidimensionnelle par volets spécialisés</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-3 gap-6 mb-6">
+          <div className="grid md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-success mb-2">8.2/10</div>
-              <div className="text-sm font-medium">Viabilité économique</div>
-              <Progress value={82} className="mt-2" />
+              <div className="text-2xl font-bold text-success mb-2">8.4/10</div>
+              <div className="text-sm font-medium">Performance Économique</div>
+              <Progress value={84} className="mt-2" />
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-primary mb-2">7.8/10</div>
-              <div className="text-sm font-medium">Solvabilité financière</div>
+              <div className="text-sm font-medium">Solidité Financière</div>
               <Progress value={78} className="mt-2" />
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-success mb-2">8.5/10</div>
-              <div className="text-sm font-medium">Conformité juridique</div>
-              <Progress value={85} className="mt-2" />
+              <div className="text-2xl font-bold text-success mb-2">9.1/10</div>
+              <div className="text-sm font-medium">Conformité Légale</div>
+              <Progress value={91} className="mt-2" />
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary mb-2">8.2/10</div>
+              <div className="text-sm font-medium">Gouvernance</div>
+              <Progress value={82} className="mt-2" />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="financial" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="financial">Analyse Financière</TabsTrigger>
-          <TabsTrigger value="social">Données Sociales & RH</TabsTrigger>
-          <TabsTrigger value="commercial">Performance Commerciale</TabsTrigger>
-          <TabsTrigger value="operational">Données Opérationnelles</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="financial" className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-base">
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Évolution Financière (5 ans)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={financialEvolution}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="ca" 
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={2}
-                      name="CA (K€)" 
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="resultat" 
-                      stroke="hsl(var(--success))" 
-                      strokeWidth={2}
-                      name="Résultat (K€)" 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-base">
-                  <Target className="h-4 w-4 mr-2" />
-                  Comparaison Sectorielle
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <RadarChart data={sectorComparison}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="subject" />
-                    <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                    <Radar
-                      name="Entreprise"
-                      dataKey="company"
-                      stroke="hsl(var(--primary))"
-                      fill="hsl(var(--primary))"
-                      fillOpacity={0.1}
-                      strokeWidth={2}
-                    />
-                    <Radar
-                      name="Secteur"
-                      dataKey="sector"
-                      stroke="hsl(var(--secondary))"
-                      fill="hsl(var(--secondary))"
-                      fillOpacity={0.1}
-                      strokeWidth={2}
-                    />
-                    <Legend />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Ratios Financiers Clés
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {ratios.map((ratio, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {getStatusIcon(ratio.status)}
-                      <span className="text-sm font-medium">{ratio.name}</span>
+      <div className="space-y-4">
+        {/* Analyse économique et commerciale */}
+        <Card>
+          <Collapsible 
+            open={openSections.economic} 
+            onOpenChange={() => toggleSection('economic')}
+          >
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg">Analyse Économique et Commerciale</CardTitle>
+                      <CardDescription>Performance marché et positionnement concurrentiel</CardDescription>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <div className="text-sm font-bold">{ratio.value}%</div>
-                        <div className="text-xs text-muted-foreground">
-                          Secteur: {ratio.benchmark}%
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="default" className="bg-success text-success-foreground">
+                      Excellent 8.4/10
+                    </Badge>
+                    {openSections.economic ? 
+                      <ChevronDown className="h-4 w-4" /> : 
+                      <ChevronRight className="h-4 w-4" />
+                    }
+                  </div>
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Évolution Marché & Performance</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={marketEvolution}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="year" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="ca" stroke="hsl(var(--primary))" strokeWidth={2} name="CA (K€)" />
+                          <Line type="monotone" dataKey="croissance" stroke="hsl(var(--success))" strokeWidth={2} name="Croissance %" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Position Concurrentielle</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <RadarChart data={competitivePosition}>
+                          <PolarGrid />
+                          <PolarAngleAxis dataKey="subject" />
+                          <PolarRadiusAxis angle={90} domain={[0, 100]} />
+                          <Radar
+                            name="Entreprise"
+                            dataKey="company"
+                            stroke="hsl(var(--primary))"
+                            fill="hsl(var(--primary))"
+                            fillOpacity={0.2}
+                            strokeWidth={2}
+                          />
+                          <Radar
+                            name="Secteur"
+                            dataKey="sector"
+                            stroke="hsl(var(--secondary))"
+                            fill="hsl(var(--secondary))"
+                            fillOpacity={0.1}
+                            strokeWidth={2}
+                          />
+                        </RadarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary mb-2">3.1%</div>
+                    <div className="text-sm text-muted-foreground">Part de marché</div>
+                    <Badge variant="secondary" className="mt-2">+0.3pts vs 2022</Badge>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-success mb-2">6.7%</div>
+                    <div className="text-sm text-muted-foreground">Croissance 2023</div>
+                    <Badge variant="secondary" className="mt-2">Secteur: 4.2%</Badge>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary mb-2">85%</div>
+                    <div className="text-sm text-muted-foreground">Satisfaction client</div>
+                    <Badge variant="secondary" className="mt-2">NPS +52</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
+        {/* Situation financière */}
+        <Card>
+          <Collapsible 
+            open={openSections.financial} 
+            onOpenChange={() => toggleSection('financial')}
+          >
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg">Situation Financière</CardTitle>
+                      <CardDescription>Santé financière et ratios de gestion</CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="secondary" className="bg-primary-light text-primary">
+                      Solide 7.8/10
+                    </Badge>
+                    {openSections.financial ? 
+                      <ChevronDown className="h-4 w-4" /> : 
+                      <ChevronRight className="h-4 w-4" />
+                    }
+                  </div>
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Évolution des Ratios Clés</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={financialRatios}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="year" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="liquidite" stroke="hsl(var(--primary))" strokeWidth={2} name="Liquidité" />
+                          <Line type="monotone" dataKey="rentabilite" stroke="hsl(var(--success))" strokeWidth={2} name="Rentabilité %" />
+                          <Line type="monotone" dataKey="endettement" stroke="hsl(var(--warning))" strokeWidth={2} name="Endettement" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Analyse des Flux de Trésorerie</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <BarChart data={cashflowAnalysis}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="year" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="operationnel" fill="hsl(var(--success))" name="Opérationnel" />
+                          <Bar dataKey="investissement" fill="hsl(var(--warning))" name="Investissement" />
+                          <Bar dataKey="financement" fill="hsl(var(--primary))" name="Financement" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary mb-2">1.85</div>
+                    <div className="text-sm text-muted-foreground">Ratio liquidité</div>
+                    <Badge variant="secondary" className="mt-2">Seuil: 1.5</Badge>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-success mb-2">7.7%</div>
+                    <div className="text-sm text-muted-foreground">Rentabilité nette</div>
+                    <Badge variant="secondary" className="mt-2">Secteur: 5.2%</Badge>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary mb-2">35%</div>
+                    <div className="text-sm text-muted-foreground">Taux endettement</div>
+                    <Badge variant="secondary" className="mt-2">Limite: 60%</Badge>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-success mb-2">385K€</div>
+                    <div className="text-sm text-muted-foreground">Cash-flow 2023</div>
+                    <Badge variant="secondary" className="mt-2">+22% vs 2022</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
+        {/* Conformités et obligations légales */}
+        <Card>
+          <Collapsible 
+            open={openSections.compliance} 
+            onOpenChange={() => toggleSection('compliance')}
+          >
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Shield className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg">Conformités et Obligations Légales</CardTitle>
+                      <CardDescription>Respect des réglementations et audits de conformité</CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="default" className="bg-success text-success-foreground">
+                      Excellent 9.1/10
+                    </Badge>
+                    {openSections.compliance ? 
+                      <ChevronDown className="h-4 w-4" /> : 
+                      <ChevronRight className="h-4 w-4" />
+                    }
+                  </div>
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-1 gap-4">
+                  {complianceItems.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        {getStatusIcon(item.status)}
+                        <div>
+                          <div className="font-medium">{item.domain}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Dernier audit: {new Date(item.lastAudit).toLocaleDateString('fr-FR')}
+                          </div>
                         </div>
                       </div>
-                      <div className="w-20">
-                        <Progress 
-                          value={Math.min((ratio.value / ratio.benchmark) * 50, 100)} 
-                          className="h-2" 
-                        />
+                      <div className="flex items-center space-x-4">
+                        <div className="text-right">
+                          <div className="text-sm font-bold">{item.score}/100</div>
+                          <div className="text-xs text-muted-foreground">Score conformité</div>
+                        </div>
+                        <div className="w-20">
+                          <Progress value={item.score} className="h-2" />
+                        </div>
+                        {getStatusBadge(item.status, item.score)}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  ))}
+                </div>
 
-        <TabsContent value="social" className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-base">
-                  <Users className="h-4 w-4 mr-2" />
-                  Évolution des Effectifs & Formation
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <AreaChart data={employeeEvolution}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Area
-                      type="monotone"
-                      dataKey="effectif"
-                      stackId="1"
-                      stroke="hsl(var(--primary))"
-                      fill="hsl(var(--primary))"
-                      fillOpacity={0.3}
-                      name="Effectif"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="formations"
-                      stackId="2"
-                      stroke="hsl(var(--success))"
-                      fill="hsl(var(--success))"
-                      fillOpacity={0.3}
-                      name="Formations (h)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+                <div className="grid md:grid-cols-3 gap-6 mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <Gavel className="h-4 w-4 mr-2" />
+                        Obligations Fiscales
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>TVA</span>
+                          <Badge variant="secondary" className="bg-success-light text-success">À jour</Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>IS</span>
+                          <Badge variant="secondary" className="bg-success-light text-success">À jour</Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>CET</span>
+                          <Badge variant="secondary" className="bg-success-light text-success">À jour</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-base">
-                  <Award className="h-4 w-4 mr-2" />
-                  Indicateurs RH
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Turn-over annuel</span>
-                      <span className="text-sm font-medium">8.5%</span>
-                    </div>
-                    <Progress value={8.5} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Secteur moyen: 12.3%
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Satisfaction collaborateurs</span>
-                      <span className="text-sm font-medium">8.2/10</span>
-                    </div>
-                    <Progress value={82} className="h-2" />
-                  </div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <Users className="h-4 w-4 mr-2" />
+                        Obligations Sociales
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>URSSAF</span>
+                          <Badge variant="secondary" className="bg-success-light text-success">À jour</Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Retraite</span>
+                          <Badge variant="secondary" className="bg-success-light text-success">À jour</Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Mutuelle</span>
+                          <Badge variant="secondary" className="bg-success-light text-success">À jour</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Formation continue</span>
-                      <span className="text-sm font-medium">68h/an</span>
-                    </div>
-                    <Progress value={85} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Obligation légale: 40h/an
-                    </p>
-                  </div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Certifications
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>ISO 27001</span>
+                          <Badge variant="secondary" className="bg-primary-light text-primary">Valide</Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>RGPD</span>
+                          <Badge variant="secondary" className="bg-success-light text-success">Conforme</Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Qualiopi</span>
+                          <Badge variant="secondary" className="bg-primary-light text-primary">Certifié</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </CardContent>
-            </Card>
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Structure Organisationnelle</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary mb-2">42</div>
-                  <div className="text-sm text-muted-foreground">Collaborateurs</div>
-                  <Badge variant="secondary" className="mt-2">+17% vs 2022</Badge>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-success mb-2">5.2</div>
-                  <div className="text-sm text-muted-foreground">Ancienneté moyenne</div>
-                  <Badge variant="secondary" className="mt-2">Stable</Badge>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary mb-2">85%</div>
-                  <div className="text-sm text-muted-foreground">CDI</div>
-                  <Badge variant="secondary" className="mt-2">Excellent</Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="commercial" className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-base">
-                  <PieChart className="h-4 w-4 mr-2" />
-                  Répartition Clientèle
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <RechartsPieChart>
-                    <Pie
-                      dataKey="value"
-                      data={clientDistribution}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      label={({name, value}) => `${name}: ${value}%`}
-                    >
-                      {clientDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-base">
-                  <Target className="h-4 w-4 mr-2" />
-                  Performance Commerciale
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Taux de conversion</span>
-                    <Badge variant="secondary" className="bg-success-light text-success">
-                      45%
-                    </Badge>
+        {/* Structuration, Gouvernance et Management */}
+        <Card>
+          <Collapsible 
+            open={openSections.governance} 
+            onOpenChange={() => toggleSection('governance')}
+          >
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Crown className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg">Structuration, Gouvernance et Management</CardTitle>
+                      <CardDescription>Organisation, processus de décision et management</CardDescription>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Panier moyen</span>
-                    <span className="text-sm font-medium">57K€</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Récurrence clients</span>
+                  <div className="flex items-center space-x-2">
                     <Badge variant="secondary" className="bg-primary-light text-primary">
-                      78%
+                      Solide 8.2/10
                     </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">NPS Score</span>
-                    <Badge variant="secondary" className="bg-success-light text-success">
-                      +52
-                    </Badge>
+                    {openSections.governance ? 
+                      <ChevronDown className="h-4 w-4" /> : 
+                      <ChevronRight className="h-4 w-4" />
+                    }
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Analyse des Marchés</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div>
-                  <h4 className="font-semibold mb-3">Secteurs d'activité</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>PME Tech</span>
-                      <span>65%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Startups</span>
-                      <span>25%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Grands comptes</span>
-                      <span>10%</span>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-3">Géographie</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Île-de-France</span>
-                      <span>55%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Régions</span>
-                      <span>35%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>International</span>
-                      <span>10%</span>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-3">Canaux</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Direct</span>
-                      <span>70%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Partenaires</span>
-                      <span>20%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Digital</span>
-                      <span>10%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="operational" className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Building className="h-4 w-4 mr-2" />
-                  Certifications & Qualité
-                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">ISO 9001</span>
-                    <Badge variant="secondary" className="bg-success-light text-success">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Certifié
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">ISO 27001</span>
-                    <Badge variant="secondary" className="bg-success-light text-success">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Certifié
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">RGPD</span>
-                    <Badge variant="secondary" className="bg-success-light text-success">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Conforme
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Cyber Score</span>
-                    <Badge variant="secondary" className="bg-primary-light text-primary">
-                      8.5/10
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Structure de Gouvernance</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <PieChart>
+                          <Pie
+                            dataKey="value"
+                            data={governanceStructure}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={60}
+                            label={({name, value}) => `${name}: ${value}`}
+                          >
+                            {governanceStructure.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Activity className="h-4 w-4 mr-2" />
-                  Capacité Opérationnelle
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Utilisation des capacités</span>
-                      <span className="text-sm font-medium">78%</span>
-                    </div>
-                    <Progress value={78} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Productivité</span>
-                      <span className="text-sm font-medium">+15% vs 2022</span>
-                    </div>
-                    <Progress value={85} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Automatisation</span>
-                      <span className="text-sm font-medium">65%</span>
-                    </div>
-                    <Progress value={65} className="h-2" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Indicateurs Management</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm">Autonomie équipes</span>
+                            <span className="text-sm font-medium">85%</span>
+                          </div>
+                          <Progress value={85} className="h-2" />
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm">Processus documentés</span>
+                            <span className="text-sm font-medium">92%</span>
+                          </div>
+                          <Progress value={92} className="h-2" />
+                        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Infrastructure & Technologie</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-primary mb-1">99.8%</div>
-                  <div className="text-xs text-muted-foreground">Uptime</div>
+                        <div>
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm">Réactivité décision</span>
+                            <span className="text-sm font-medium">78%</span>
+                          </div>
+                          <Progress value={78} className="h-2" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-success mb-1">&lt; 2ms</div>
-                  <div className="text-xs text-muted-foreground">Latence API</div>
+
+                <div className="grid md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary mb-2">7</div>
+                    <div className="text-sm text-muted-foreground">Membres CA</div>
+                    <Badge variant="secondary" className="mt-2">3 indépendants</Badge>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-success mb-2">4</div>
+                    <div className="text-sm text-muted-foreground">Comités spécialisés</div>
+                    <Badge variant="secondary" className="mt-2">Audit, RH, Tech</Badge>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary mb-2">92%</div>
+                    <div className="text-sm text-muted-foreground">Processus qualité</div>
+                    <Badge variant="secondary" className="mt-2">ISO certifié</Badge>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-success mb-2">5.8</div>
+                    <div className="text-sm text-muted-foreground">Ancienneté dirigeants</div>
+                    <Badge variant="secondary" className="mt-2">Expérience</Badge>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-primary mb-1">Cloud</div>
-                  <div className="text-xs text-muted-foreground">100% AWS</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-success mb-1">A+</div>
-                  <div className="text-xs text-muted-foreground">Security Rating</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Analyse des Risques Organisationnels</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-semibold mb-3 text-success">Points forts</h4>
+                        <ul className="space-y-1 text-sm">
+                          <li>• Gouvernance transparente et structurée</li>
+                          <li>• Processus de décision optimisés</li>
+                          <li>• Management expérimenté et stable</li>
+                          <li>• Délégation efficace des responsabilités</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-3 text-warning">Points d'attention</h4>
+                        <ul className="space-y-1 text-sm">
+                          <li>• Succession dirigeant à préparer</li>
+                          <li>• Digitalisation processus RH</li>
+                          <li>• Formation management intermédiaire</li>
+                          <li>• Améliorer reporting performance</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+      </div>
     </div>
   );
 };

@@ -105,7 +105,7 @@ const AdvancedStudy = () => {
                 <Award className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-3 text-primary">Diagnostic IA Explicable</h3>
+                <h3 className="text-lg font-semibold mb-3 text-primary">Synthèse Exécutive</h3>
                 <div className="prose prose-sm text-muted-foreground space-y-3">
                   <p>
                     <strong className="text-foreground">Profil d'excellence globale</strong> - L'entreprise présente un profil remarquablement équilibré avec une note moyenne de <span className="font-semibold text-success">8.4/10</span>, plaçant l'organisation dans le quartile supérieur de son secteur.

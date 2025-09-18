@@ -85,7 +85,7 @@ const PredictiveAnalysis = () => {
   return (
     <div className="space-y-6">
       {/* Risk Summary Cards */}
-      <div className="grid md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">

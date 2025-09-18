@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
 import { TrendingUp, TrendingDown, Building, Shield, Users, ChevronDown, ChevronRight, Award, CheckCircle, AlertTriangle, XCircle, CreditCard, FileText, Gavel, Crown } from "lucide-react";
+import CompanyMap from "../visualization/CompanyMap";
 
 const AdvancedStudy = () => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -577,6 +578,9 @@ const AdvancedStudy = () => {
                     <Badge variant="secondary" className="mt-2">Expérience</Badge>
                   </div>
                 </div>
+
+                {/* Cartographie de l'entreprise */}
+                <CompanyMap />
 
                 <Card>
                   <CardHeader>

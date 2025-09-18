@@ -254,6 +254,147 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Informations juridiques détaillées */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center">
+                      <FileText className="h-5 w-5 mr-2" />
+                      Informations juridiques
+                    </CardTitle>
+                    <Button size="sm" variant="outline">
+                      <FileText className="h-4 w-4 mr-1" />
+                      Avis situation SIRENE
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">SIREN :</span>
+                      <div className="font-medium">{companyData.siren}</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">SIRET (siège) :</span>
+                      <div className="font-medium">{companyData.siret}</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Forme juridique :</span>
+                      <div className="font-medium">SAS, société par actions simplifiée</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Numéro de TVA :</span>
+                      <div className="font-medium">FR{companyData.siren.replace(/\s/g, '')}</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Inscription RCS :</span>
+                      <div className="font-medium text-success">
+                        <CheckCircle className="h-3 w-3 inline mr-1" />
+                        INSCRIT (au greffe de PARIS, le 15/03/2015)
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Inscription RNE :</span>
+                      <div className="font-medium text-success">
+                        <CheckCircle className="h-3 w-3 inline mr-1" />
+                        INSCRIT (le 15/03/2015)
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Numéro RCS :</span>
+                      <div className="font-medium">{companyData.siren} R.C.S. Paris</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Capital social :</span>
+                      <div className="font-medium">150 000,00 €</div>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Shield className="h-4 w-4 mr-1" />
+                      Extrait INPI
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <FileText className="h-4 w-4 mr-1" />
+                      Extrait Pappers
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Building2 className="h-5 w-5 mr-2" />
+                    Activité
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <span className="text-sm text-muted-foreground">Activité principale déclarée :</span>
+                    <div className="font-medium mt-1">
+                      Conseil en systèmes et logiciels informatiques, développement de solutions digitales sur mesure
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Code NAF ou APE :</span>
+                      <div className="font-medium">
+                        6202A <Badge variant="outline" className="ml-1 text-xs">Commerce</Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        (Conseil en systèmes et logiciels informatiques)
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Domaine d'activité :</span>
+                      <div className="font-medium">Services aux entreprises</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Forme d'exercice :</span>
+                      <div className="font-medium">Commerciale</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Convention collective :</span>
+                      <div className="font-medium">
+                        Syntec - IDCC 1486
+                        <Badge variant="outline" className="ml-1 text-xs">supposée</Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Date de clôture exercice :</span>
+                      <div className="font-medium">31/12/2024</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Durée exercice :</span>
+                      <div className="font-medium">12 mois</div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h4 className="font-semibold mb-2">Activités secondaires</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Formation professionnelle</span>
+                        <Badge variant="outline" className="text-xs">8559A</Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Maintenance informatique</span>
+                        <Badge variant="outline" className="text-xs">9511Z</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="study" className="space-y-6">

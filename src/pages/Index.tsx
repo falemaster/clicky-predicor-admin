@@ -57,7 +57,7 @@ const Index = () => {
       {/* Header */}
       <header className="bg-background border-b shadow-sm">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center space-x-4">
               <div className="h-8 w-8 rounded bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">P</span>
@@ -68,7 +68,8 @@ const Index = () => {
               <Badge variant="outline" className="text-success border-success">Admin</Badge>
               <Button variant="outline" size="sm">
                 <User className="h-4 w-4 mr-2" />
-                J. Martin
+                <span className="hidden sm:inline">J. Martin</span>
+                <span className="sm:hidden">JM</span>
               </Button>
             </div>
           </div>
@@ -78,28 +79,28 @@ const Index = () => {
       {/* Company Header */}
       <div className="bg-background border-b">
         <div className="container mx-auto px-6 py-6">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
             <div className="flex items-center space-x-4">
               <div className="h-16 w-16 rounded-lg bg-slate-100 flex items-center justify-center">
                 <Building2 className="h-8 w-8 text-slate-600" />
               </div>
               <div>
-                <div className="flex items-center space-x-3 mb-2">
-                  <h2 className="text-2xl font-bold text-foreground">{companyData.name}</h2>
-                  <Badge variant="secondary" className="bg-success-light text-success">
+                <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-3 mb-2">
+                  <h2 className="text-xl md:text-2xl font-bold text-foreground">{companyData.name}</h2>
+                  <Badge variant="secondary" className="bg-success-light text-success w-fit">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     {companyData.status}
                   </Badge>
                 </div>
-                <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+                <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-6 text-sm text-muted-foreground">
                   <span>SIREN: {companyData.siren}</span>
                   <span>SIRET: {companyData.siret}</span>
                   <span>{companyData.naf}</span>
                 </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-primary mb-1">{scores.global}/10</div>
+            <div className="text-center md:text-right">
+              <div className="text-2xl md:text-3xl font-bold text-primary mb-1">{scores.global}/10</div>
               <div className="text-sm text-muted-foreground">Score global</div>
             </div>
           </div>
@@ -109,7 +110,7 @@ const Index = () => {
       {/* Main Content */}
       <div className="container mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="study">Étude approfondie</TabsTrigger>
             <TabsTrigger value="predictive">Analyse prédictive</TabsTrigger>

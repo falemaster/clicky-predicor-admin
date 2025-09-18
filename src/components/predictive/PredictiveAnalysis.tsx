@@ -361,7 +361,7 @@ const PredictiveAnalysis = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Shield className="h-5 w-5 mr-2" />
-            Analyse du Risque de Contrôle Fiscal
+            Conformité et Santé Fiscale
           </CardTitle>
           <CardDescription>
             Évaluation prédictive du risque de vérification fiscale

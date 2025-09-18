@@ -356,6 +356,223 @@ const PredictiveAnalysis = () => {
         </CardContent>
       </Card>
 
+      {/* Analyse du Risque de Contrôle Fiscal */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Shield className="h-5 w-5 mr-2" />
+            Analyse du Risque de Contrôle Fiscal
+          </CardTitle>
+          <CardDescription>
+            Évaluation prédictive du risque de vérification fiscale
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Score de Risque Fiscal Global */}
+            <div className="bg-gradient-to-r from-success/5 to-primary/5 p-6 rounded-lg border border-success/10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-lg font-semibold text-success mb-2">Score de Risque Fiscal</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Probabilité de contrôle fiscal dans les 36 prochains mois
+                  </p>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-3xl font-bold text-success">12%</div>
+                    <Badge variant="secondary" className="bg-success-light text-success">
+                      Risque Faible
+                    </Badge>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground mb-2">Secteur médian</div>
+                  <div className="text-xl font-semibold text-muted-foreground">18%</div>
+                  <Badge variant="outline" className="mt-2">-6 pts</Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Facteurs de Risque Identifiés */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Facteurs de Risque Détectés
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-success" />
+                        <span className="text-sm">Cohérence TVA/CA</span>
+                      </div>
+                      <Badge variant="secondary" className="bg-success-light text-success text-xs">
+                        Conforme
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <AlertTriangle className="h-4 w-4 text-warning" />
+                        <span className="text-sm">Croissance CA rapide</span>
+                      </div>
+                      <Badge variant="secondary" className="bg-warning-light text-warning text-xs">
+                        Attention
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-success" />
+                        <span className="text-sm">Ratios sectoriels</span>
+                      </div>
+                      <Badge variant="secondary" className="bg-success-light text-success text-xs">
+                        Normaux
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-success" />
+                        <span className="text-sm">Régularité déclarative</span>
+                      </div>
+                      <Badge variant="secondary" className="bg-success-light text-success text-xs">
+                        Exemplaire
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Analyse Probabiliste */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Probabilité par Méthode de Sélection
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium">Sélection aléatoire</span>
+                        <span className="text-sm font-semibold text-primary">3.2%</span>
+                      </div>
+                      <Progress value={32} className="h-2" />
+                      <div className="text-xs text-muted-foreground mt-1">Base secteur + taille</div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium">Ciblage comportemental</span>
+                        <span className="text-sm font-semibold text-warning">8.7%</span>
+                      </div>
+                      <Progress value={87} className="h-2" />
+                      <div className="text-xs text-muted-foreground mt-1">Croissance + investissements</div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium">Data-mining fiscal</span>
+                        <span className="text-sm font-semibold text-success">2.8%</span>
+                      </div>
+                      <Progress value={28} className="h-2" />
+                      <div className="text-xs text-muted-foreground mt-1">Algorithmes DGFIP</div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium">Contrôle croisé</span>
+                        <span className="text-sm font-semibold text-success">4.1%</span>
+                      </div>
+                      <Progress value={41} className="h-2" />
+                      <div className="text-xs text-muted-foreground mt-1">Partenaires commerciaux</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Historique et Prévisions */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-success mb-2">0</div>
+                    <div className="text-sm font-medium mb-2">Contrôles subis</div>
+                    <div className="text-xs text-muted-foreground">Depuis 2019</div>
+                    <Badge variant="secondary" className="bg-success-light text-success mt-2">
+                      Historique propre
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary mb-2">2.4</div>
+                    <div className="text-sm font-medium mb-2">Années médiane</div>
+                    <div className="text-xs text-muted-foreground">Fréquence secteur</div>
+                    <Badge variant="secondary" className="bg-primary-light text-primary mt-2">
+                      Référence marché
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-warning mb-2">85%</div>
+                    <div className="text-sm font-medium mb-2">Préparation</div>
+                    <div className="text-xs text-muted-foreground">Niveau de prêt</div>
+                    <Badge variant="secondary" className="bg-warning-light text-warning mt-2">
+                      Bien préparé
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recommandations Préventives */}
+            <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg p-6">
+              <div className="flex items-center mb-4">
+                <Shield className="h-5 w-5 text-primary mr-2" />
+                <h4 className="font-semibold">Stratégie de Mitigation Fiscale</h4>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4 text-sm">
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-2">
+                    <ArrowRight className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
+                    <span><strong>Documentation renforcée</strong> - Justificatifs opérationnels pour croissance</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <ArrowRight className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
+                    <span><strong>Audit préventif</strong> - Revue prix de transfert et charges déductibles</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <ArrowRight className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
+                    <span><strong>Suivi ratio-clés</strong> - Monitoring mensuel indicateurs DGFIP</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-2">
+                    <ArrowRight className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
+                    <span><strong>Conformité TVA</strong> - Validation automatisée des déclarations</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <ArrowRight className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
+                    <span><strong>Veille réglementaire</strong> - Anticipation changements fiscaux</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <ArrowRight className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
+                    <span><strong>Plan de réponse</strong> - Procédure standardisée si contrôle</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Scenario Simulation */}
       <Card>
         <CardHeader>

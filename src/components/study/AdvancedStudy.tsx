@@ -549,6 +549,105 @@ const AdvancedStudy = () => {
                     </Card>
                   </div>
                   
+                  {/* Encarts Procédures Juridiques et Judiciaires */}
+                  <div className="mt-6 grid md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Procédures Juridiques
+                        </CardTitle>
+                        <CardDescription className="text-xs">
+                          Suivi des procédures pré-contentieuses et contractuelles
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-sm py-2 border-b border-muted/20">
+                            <span className="font-medium text-muted-foreground">Nature</span>
+                            <span className="font-medium text-muted-foreground">Statut</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Mise en demeure</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucune</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Commandement de payer par huissier</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucun</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Résiliation de contrat</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucune</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Inscription privilèges/nantissements</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucune</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Radiation d'office du RCS</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Non</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Procédure amiable</span>
+                            <Badge variant="outline" className="text-xs bg-primary-light text-primary border-primary">1 en cours</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Déclaration de créance</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucune</Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center">
+                          <Gavel className="h-4 w-4 mr-2" />
+                          Procédures Judiciaires
+                        </CardTitle>
+                        <CardDescription className="text-xs">
+                          Suivi des procédures contentieuses et juridictionnelles
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-sm py-2 border-b border-muted/20">
+                            <span className="font-medium text-muted-foreground">Nature</span>
+                            <span className="font-medium text-muted-foreground">Statut</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Assignation Tribunal de commerce</span>
+                            <Badge variant="outline" className="text-xs bg-warning-light text-warning border-warning">1 active</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Injonction de payer</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucune</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Référé commercial</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucun</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Procédure collective</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Non</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Appel des décisions</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucun</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Contentieux prud'homal</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucun</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Contentieux administratif</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucun</Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
                   <div className="mt-4 p-4 bg-muted/30 rounded-lg">
                     <div className="flex items-start space-x-3">
                       <Shield className="h-5 w-5 text-primary mt-0.5" />

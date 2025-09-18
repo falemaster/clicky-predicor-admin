@@ -186,174 +186,53 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Diagnostic IA Explicable */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Diagnostic IA Explicable
-                </CardTitle>
-                <CardDescription>
-                  Analyse synthétique et interprétation des scores par intelligence artificielle
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Score global avec explication */}
-                  <div className="flex items-start space-x-4 p-4 bg-success-light/20 rounded-lg border border-success-light">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-success flex items-center justify-center">
-                        <CheckCircle className="h-6 w-6 text-success-foreground" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="font-semibold text-success">Profil d'entreprise SOLIDE</h3>
-                        <Badge variant="default" className="bg-success text-success-foreground">Score global 8.1/10</Badge>
-                      </div>
-                      <p className="text-sm text-foreground leading-relaxed">
-                        <strong>TECH SOLUTIONS FRANCE</strong> présente un profil d'entreprise remarquablement équilibré. 
-                        L'analyse croisée des 4 dimensions évaluées révèle une organisation mature avec des fondamentaux solides.
-                      </p>
-                    </div>
-                  </div>
+            {/* Scores */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center">
+                    <TrendingUp className="h-4 w-4 mr-2 text-success" />
+                    Santé financière
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-success mb-2">{scores.financial}/10</div>
+                  <p className="text-sm text-muted-foreground">
+                    Résultats stables avec une croissance du CA de +12% sur l'exercice.
+                  </p>
+                </CardContent>
+              </Card>
 
-                  {/* Analyse détaillée par volet */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
-                        <TrendingUp className="h-5 w-5 text-success" />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-sm">Performance Économique</span>
-                            <Badge variant="secondary" className="bg-success-light text-success">8.4/10</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Croissance soutenue (+6.7%) et position concurrentielle renforcée
-                          </p>
-                        </div>
-                      </div>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-primary" />
+                    Conformité légale
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-primary mb-2">{scores.legal}/10</div>
+                  <p className="text-sm text-muted-foreground">
+                    Excellent respect des obligations légales et réglementaires.
+                  </p>
+                </CardContent>
+              </Card>
 
-                      <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
-                        <CreditCard className="h-5 w-5 text-primary" />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-sm">Solidité Financière</span>
-                            <Badge variant="secondary" className="bg-primary-light text-primary">7.8/10</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Ratios équilibrés, cash-flow positif et structure financière optimisée
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
-                        <Shield className="h-5 w-5 text-success" />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-sm">Conformité Légale</span>
-                            <Badge variant="secondary" className="bg-success-light text-success">9.1/10</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Excellent respect des obligations, certifications à jour
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
-                        <Building2 className="h-5 w-5 text-primary" />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-sm">Gouvernance</span>
-                            <Badge variant="secondary" className="bg-primary-light text-primary">8.2/10</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Structure organisée, processus documentés, management expérimenté
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Points clés de l'analyse IA */}
-                  <Separator />
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold text-success mb-3 flex items-center">
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Forces identifiées par l'IA
-                      </h4>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-start space-x-2">
-                          <div className="w-1 h-1 rounded-full bg-success mt-2 flex-shrink-0"></div>
-                          <span>Trajectoire de croissance maîtrisée et rentable</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <div className="w-1 h-1 rounded-full bg-success mt-2 flex-shrink-0"></div>
-                          <span>Excellence opérationnelle en conformité réglementaire</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <div className="w-1 h-1 rounded-full bg-success mt-2 flex-shrink-0"></div>
-                          <span>Gouvernance transparente et processus structurés</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <div className="w-1 h-1 rounded-full bg-success mt-2 flex-shrink-0"></div>
-                          <span>Position concurrentielle différenciée sur son marché</span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold text-warning mb-3 flex items-center">
-                        <AlertTriangle className="h-4 w-4 mr-2" />
-                        Axes d'amélioration suggérés
-                      </h4>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-start space-x-2">
-                          <div className="w-1 h-1 rounded-full bg-warning mt-2 flex-shrink-0"></div>
-                          <span>Anticiper la succession des dirigeants clés</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <div className="w-1 h-1 rounded-full bg-warning mt-2 flex-shrink-0"></div>
-                          <span>Renforcer la diversification géographique</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <div className="w-1 h-1 rounded-full bg-warning mt-2 flex-shrink-0"></div>
-                          <span>Optimiser la digitalisation des processus internes</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <div className="w-1 h-1 rounded-full bg-warning mt-2 flex-shrink-0"></div>
-                          <span>Développer les compétences managériales intermédiaires</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Conclusion IA */}
-                  <div className="p-4 bg-gradient-to-r from-primary/5 to-success/5 rounded-lg border border-primary/20">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-8 h-8 rounded bg-gradient-to-br from-primary to-success flex items-center justify-center flex-shrink-0">
-                        <span className="text-white font-bold text-xs">IA</span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-2">Recommandation IA</h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          L'entreprise TECH SOLUTIONS FRANCE présente un profil d'investissement attractif avec un 
-                          <strong className="text-success"> risque de défaillance très faible (&lt;5%)</strong> sur 12 mois. 
-                          Les indicateurs convergent vers une recommandation 
-                          <strong className="text-success"> "FAVORABLE"</strong> pour l'octroi de crédit ou l'établissement 
-                          de partenariats commerciaux. La maturité organisationnelle et la solidité financière constituent 
-                          des gages de pérennité à moyen terme.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center">
+                    <BarChart3 className="h-4 w-4 mr-2 text-warning" />
+                    Risque prédictif 12m
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-success mb-2">{scores.defaultRisk}</div>
+                  <p className="text-sm text-muted-foreground">
+                    Probabilité de défaillance inférieure à 5% sur 12 mois.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
 
             {/* AI Analysis */}
             <Card>

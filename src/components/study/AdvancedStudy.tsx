@@ -615,6 +615,9 @@ const AdvancedStudy = () => {
                             <span className="font-medium text-muted-foreground">Nature</span>
                             <span className="font-medium text-muted-foreground">Statut</span>
                           </div>
+                          <div className="text-xs text-muted-foreground mb-2 italic">
+                            Source des données : Portalys
+                          </div>
                           <div className="flex justify-between items-center text-sm py-1">
                             <span>Assignation Tribunal de commerce</span>
                             <Badge variant="outline" className="text-xs bg-warning-light text-warning border-warning">1 active</Badge>

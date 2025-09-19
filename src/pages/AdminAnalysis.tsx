@@ -946,31 +946,16 @@ const AdminAnalysis = () => {
                       </h3>
                       <div className="prose prose-sm text-muted-foreground space-y-3">
                         <EditableField
-                          field="executive-summary-p1"
-                          value="Profil d'excellence globale - L'entreprise présente un profil remarquablement équilibré avec une note moyenne de 8.4/10, plaçant l'organisation dans le quartile supérieur de son secteur."
+                          field="executive-summary-full"
+                          value="Profil d'excellence globale - L'entreprise présente un profil remarquablement équilibré avec une note moyenne de 8.4/10, plaçant l'organisation dans le quartile supérieur de son secteur.
+
+Points forts critiques : La conformité légale (9.1/10) constitue un avantage concurrentiel majeur, témoignant d'une culture de rigueur et de transparence exceptionnelle. La performance économique (8.4/10) reflète une stratégie commerciale bien maîtrisée avec une croissance soutenue et un positionnement concurrentiel solide.
+
+Axes d'optimisation : La solidité financière (7.8/10), bien que satisfaisante, présente un potentiel d'amélioration notable. L'optimisation de la structure de capital et l'amélioration des ratios de liquidité pourraient renforcer significativement la résilience financière.
+
+Recommandation stratégique : Maintenir l'excellence opérationnelle actuelle tout en investissant dans le renforcement des fondamentaux financiers pour sécuriser la croissance à long terme."
                           onUpdate={() => {}}
-                          className="block"
-                          multiline
-                        />
-                        <EditableField
-                          field="executive-summary-p2"
-                          value="Points forts critiques : La conformité légale (9.1/10) constitue un avantage concurrentiel majeur, témoignant d'une culture de rigueur et de transparence exceptionnelle. La performance économique (8.4/10) reflète une stratégie commerciale bien maîtrisée avec une croissance soutenue et un positionnement concurrentiel solide."
-                          onUpdate={() => {}}
-                          className="block"
-                          multiline
-                        />
-                        <EditableField
-                          field="executive-summary-p3"
-                          value="Axes d'optimisation : La solidité financière (7.8/10), bien que satisfaisante, présente un potentiel d'amélioration notable. L'optimisation de la structure de capital et l'amélioration des ratios de liquidité pourraient renforcer significativement la résilience financière."
-                          onUpdate={() => {}}
-                          className="block"
-                          multiline
-                        />
-                        <EditableField
-                          field="executive-summary-p4"
-                          value="Recommandation stratégique : Maintenir l'excellence opérationnelle actuelle tout en investissant dans le renforcement des fondamentaux financiers pour sécuriser la croissance à long terme."
-                          onUpdate={() => {}}
-                          className="block"
+                          className="block w-full min-h-[120px]"
                           multiline
                         />
                       </div>

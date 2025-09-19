@@ -2,3 +2,12 @@ project_id = "vwnkziovsjhrsqokmfzi"
 
 [functions.extrapolate-analysis]
 verify_jwt = false
+
+[functions.pappers-api]
+verify_jwt = false
+
+[functions.predictor-analysis]
+verify_jwt = false
+
+[functions.rubypayeur-api]
+verify_jwt = false

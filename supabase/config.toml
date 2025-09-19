@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.rubypayeur-api]
 verify_jwt = false
+
+[functions.sirene-search]
+verify_jwt = false

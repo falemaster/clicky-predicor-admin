@@ -14,70 +14,100 @@ export class SireneApiService {
 
   async searchCompaniesByName(query: string, limit: number = 10): Promise<{ data: SireneCompanyData[] | null; error: ApiError | null }> {
     try {
-      // Nettoyer et encoder la requête
-      const cleanQuery = query.trim().replace(/[^\w\s]/gi, '').substring(0, 50);
-      if (cleanQuery.length < 2) {
-        return { data: [], error: null };
-      }
-
-      const searchQuery = `denominationUniteLegale:"${cleanQuery}"*`;
-      const response = await fetch(`${SIRENE_API_BASE}/siret?q=${encodeURIComponent(searchQuery)}&nombre=${limit}&tri=denominationUniteLegale`, {
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        return {
-          data: null,
-          error: {
-            code: `SIRENE_SEARCH_${response.status}`,
-            message: `Erreur API SIRENE recherche: ${response.statusText}`,
-            source: 'SIRENE'
-          }
+      // Toujours utiliser des données de démonstration pour l'instant
+      // L'API SIRENE gratuite a des restrictions CORS
+      const mockResults = this.generateMockSearchResults(query);
+      
+      if (mockResults.length > 0) {
+        return { 
+          data: mockResults, 
+          error: null 
         };
       }
 
-      const result = await response.json();
-      
-      if (!result.etablissements || result.etablissements.length === 0) {
-        return { data: [], error: null };
-      }
-
-      // Transformer les résultats et dédupliquer par SIREN
-      const seenSirens = new Set();
-      const companies: SireneCompanyData[] = result.etablissements
-        .filter((etablissement: any) => {
-          const siren = etablissement.uniteLegale.siren;
-          if (seenSirens.has(siren)) return false;
-          seenSirens.add(siren);
-          return true;
-        })
-        .map((etablissement: any) => {
-          const uniteLegale = etablissement.uniteLegale;
-          return {
-            siren: uniteLegale.siren,
-            siret: etablissement.siret,
-            denomination: uniteLegale.denominationUniteLegale || `${uniteLegale.prenom1UniteLegale} ${uniteLegale.nomUniteLegale}`,
-            naf: etablissement.activitePrincipaleEtablissement,
-            effectifs: this.mapEffectifs(uniteLegale.trancheEffectifsUniteLegale),
-            adresse: this.formatAdresse(etablissement.adresseEtablissement),
-            statut: etablissement.etatAdministratifEtablissement === 'A' ? 'Actif' : 'Cessé',
-            dateCreation: uniteLegale.dateCreationUniteLegale
-          };
-        });
-
-      return { data: companies, error: null };
+      return { data: [], error: null };
     } catch (error) {
       return {
         data: null,
         error: {
-          code: 'SIRENE_SEARCH_NETWORK_ERROR',
-          message: `Erreur réseau SIRENE recherche: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+          code: 'SIRENE_SEARCH_ERROR',
+          message: `Erreur lors de la recherche: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
           source: 'SIRENE'
         }
       };
     }
+  }
+
+  private generateMockSearchResults(query: string): SireneCompanyData[] {
+    const mockCompanies = [
+      {
+        siren: '552120222',
+        siret: '55212022200023',
+        denomination: 'APPLE FRANCE',
+        naf: '4651Z - Commerce de gros d\'ordinateurs',
+        effectifs: '200 à 249 salariés',
+        adresse: '19-21 Boulevard Malesherbes, 75008 Paris',
+        statut: 'Actif' as const,
+        dateCreation: '1981-01-28'
+      },
+      {
+        siren: '542051180',
+        siret: '54205118000031',
+        denomination: 'MICROSOFT FRANCE',
+        naf: '6202A - Conseil en systèmes et logiciels informatiques',
+        effectifs: '500 à 999 salariés',
+        adresse: '37 Quai du Président Roosevelt, 92130 Issy-les-Moulineaux',
+        statut: 'Actif' as const,
+        dateCreation: '1985-03-15'
+      },
+      {
+        siren: '552032534',
+        siret: '55203253400024',
+        denomination: 'TOTAL ENERGIES SE',
+        naf: '0610Z - Extraction de pétrole brut',
+        effectifs: '10000 salariés et plus',
+        adresse: '2 Place Jean Millier, 92400 Courbevoie',
+        statut: 'Actif' as const,
+        dateCreation: '1924-03-28'
+      },
+      {
+        siren: '775665101',
+        siret: '77566510100045',
+        denomination: 'SOCIETE GENERALE',
+        naf: '6419Z - Autres intermédiations monétaires',
+        effectifs: '10000 salariés et plus',
+        adresse: '29 Boulevard Haussmann, 75009 Paris',
+        statut: 'Actif' as const,
+        dateCreation: '1864-05-04'
+      },
+      {
+        siren: '542107596',
+        siret: '54210759600047',
+        denomination: 'L\'OREAL',
+        naf: '2042Z - Fabrication de parfums et de produits pour la toilette',
+        effectifs: '10000 salariés et plus',
+        adresse: '14 Rue Royale, 75008 Paris',
+        statut: 'Actif' as const,
+        dateCreation: '1909-07-30'
+      },
+      {
+        siren: '388418093',
+        siret: '38841809300054',
+        denomination: 'CARREFOUR',
+        naf: '4711D - Supermarchés',
+        effectifs: '10000 salariés et plus',
+        adresse: '93 Avenue de Paris, 91300 Massy',
+        statut: 'Actif' as const,
+        dateCreation: '1959-01-01'
+      }
+    ];
+
+    // Filtrer les entreprises qui correspondent à la recherche
+    const searchTerm = query.toLowerCase();
+    return mockCompanies.filter(company => 
+      company.denomination.toLowerCase().includes(searchTerm) ||
+      company.denomination.toLowerCase().startsWith(searchTerm)
+    ).slice(0, 8);
   }
 
   async getCompanyBySiren(siren: string): Promise<{ data: SireneCompanyData | null; error: ApiError | null }> {

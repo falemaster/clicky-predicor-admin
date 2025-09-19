@@ -34,7 +34,8 @@ import {
   Wand2,
   Eye,
   Edit3,
-  Loader2
+  Loader2,
+  Award
 } from "lucide-react";
 
 const AdminAnalysis = () => {
@@ -911,7 +912,568 @@ const AdminAnalysis = () => {
           </TabsContent>
 
           <TabsContent value="study" className="space-y-6">
-            <AdvancedStudy />
+            {/* Étude Approfondie - Version Admin WYSIWYG */}
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <EditableField
+                    field="study-title"
+                    value="Étude Approfondie"
+                    onUpdate={() => {}}
+                  />
+                </CardTitle>
+                <CardDescription>
+                  <EditableField
+                    field="study-description"
+                    value="Analyse multidimensionnelle par volets spécialisés"
+                    onUpdate={() => {}}
+                  />
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-6 rounded-lg border border-primary/10">
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-primary/10 p-3 rounded-full">
+                      <Award className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-3 text-primary">
+                        <EditableField
+                          field="executive-summary-title"
+                          value="Synthèse Exécutive"
+                          onUpdate={() => {}}
+                        />
+                      </h3>
+                      <div className="prose prose-sm text-muted-foreground space-y-3">
+                        <EditableField
+                          field="executive-summary-p1"
+                          value="Profil d'excellence globale - L'entreprise présente un profil remarquablement équilibré avec une note moyenne de 8.4/10, plaçant l'organisation dans le quartile supérieur de son secteur."
+                          onUpdate={() => {}}
+                          className="block"
+                          multiline
+                        />
+                        <EditableField
+                          field="executive-summary-p2"
+                          value="Points forts critiques : La conformité légale (9.1/10) constitue un avantage concurrentiel majeur, témoignant d'une culture de rigueur et de transparence exceptionnelle. La performance économique (8.4/10) reflète une stratégie commerciale bien maîtrisée avec une croissance soutenue et un positionnement concurrentiel solide."
+                          onUpdate={() => {}}
+                          className="block"
+                          multiline
+                        />
+                        <EditableField
+                          field="executive-summary-p3"
+                          value="Axes d'optimisation : La solidité financière (7.8/10), bien que satisfaisante, présente un potentiel d'amélioration notable. L'optimisation de la structure de capital et l'amélioration des ratios de liquidité pourraient renforcer significativement la résilience financière."
+                          onUpdate={() => {}}
+                          className="block"
+                          multiline
+                        />
+                        <EditableField
+                          field="executive-summary-p4"
+                          value="Recommandation stratégique : Maintenir l'excellence opérationnelle actuelle tout en investissant dans le renforcement des fondamentaux financiers pour sécuriser la croissance à long terme."
+                          onUpdate={() => {}}
+                          className="block"
+                          multiline
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Sections détaillées éditables */}
+            <div className="space-y-4">
+              {/* Analyse économique et commerciale */}
+              <Card>
+                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">
+                          <EditableField
+                            field="economic-title"
+                            value="Analyse Économique et Commerciale"
+                            onUpdate={() => {}}
+                          />
+                        </CardTitle>
+                        <CardDescription>
+                          <EditableField
+                            field="economic-desc"
+                            value="Performance marché et positionnement concurrentiel"
+                            onUpdate={() => {}}
+                          />
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="default" className="bg-success text-success-foreground">
+                        <EditableField
+                          field="economic-badge"
+                          value="Excellent 8.4/10"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-6">
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary mb-2">
+                        <EditableField
+                          field="market-share"
+                          value="3.1"
+                          onUpdate={() => {}}
+                          type="number"
+                        />%
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="market-share-label"
+                          value="Part de marché"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="mt-2">
+                        <EditableField
+                          field="market-share-change"
+                          value="+0.3pts vs 2022"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-success mb-2">
+                        <EditableField
+                          field="growth-2023"
+                          value="6.7"
+                          onUpdate={() => {}}
+                          type="number"
+                        />%
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="growth-label"
+                          value="Croissance 2023"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="mt-2">
+                        <EditableField
+                          field="sector-growth"
+                          value="Secteur: 4.2%"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary mb-2">
+                        <EditableField
+                          field="satisfaction"
+                          value="85"
+                          onUpdate={() => {}}
+                          type="number"
+                        />%
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="satisfaction-label"
+                          value="Satisfaction client"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="mt-2">
+                        <EditableField
+                          field="nps-score"
+                          value="NPS +52"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Situation financière */}
+              <Card>
+                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">
+                          <EditableField
+                            field="financial-title"
+                            value="Situation Financière"
+                            onUpdate={() => {}}
+                          />
+                        </CardTitle>
+                        <CardDescription>
+                          <EditableField
+                            field="financial-desc"
+                            value="Santé financière et ratios de gestion"
+                            onUpdate={() => {}}
+                          />
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary" className="bg-primary-light text-primary">
+                        <EditableField
+                          field="financial-badge"
+                          value="Solide 7.8/10"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-6">
+                  <div className="grid md:grid-cols-4 gap-6">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary mb-2">
+                        <EditableField
+                          field="liquidity-ratio"
+                          value="1.85"
+                          onUpdate={() => {}}
+                          type="number"
+                        />
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="liquidity-label"
+                          value="Ratio liquidité"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="mt-2">
+                        <EditableField
+                          field="liquidity-threshold"
+                          value="Seuil: 1.5"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-success mb-2">
+                        <EditableField
+                          field="profitability"
+                          value="7.7"
+                          onUpdate={() => {}}
+                          type="number"
+                        />%
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="profitability-label"
+                          value="Rentabilité nette"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="mt-2">
+                        <EditableField
+                          field="sector-profitability"
+                          value="Secteur: 5.2%"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary mb-2">
+                        <EditableField
+                          field="debt-ratio"
+                          value="35"
+                          onUpdate={() => {}}
+                          type="number"
+                        />%
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="debt-label"
+                          value="Taux endettement"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="mt-2">
+                        <EditableField
+                          field="debt-limit"
+                          value="Limite: 60%"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-success mb-2">
+                        <EditableField
+                          field="cashflow"
+                          value="385K€"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="cashflow-label"
+                          value="Cash-flow 2023"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="mt-2">
+                        <EditableField
+                          field="cashflow-change"
+                          value="+22% vs 2022"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Conformités et obligations légales */}
+              <Card>
+                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Shield className="h-5 w-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">
+                          <EditableField
+                            field="compliance-title"
+                            value="Conformités et Obligations Légales"
+                            onUpdate={() => {}}
+                          />
+                        </CardTitle>
+                        <CardDescription>
+                          <EditableField
+                            field="compliance-desc"
+                            value="Respect des réglementations et audits de conformité"
+                            onUpdate={() => {}}
+                          />
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="default" className="bg-success text-success-foreground">
+                        <EditableField
+                          field="compliance-badge"
+                          value="Excellent 9.1/10"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-6">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {[
+                      { domain: 'Fiscal', status: 'excellent', score: 95, lastAudit: '2023-11' },
+                      { domain: 'Social', status: 'good', score: 88, lastAudit: '2023-09' },
+                      { domain: 'Environnemental', status: 'good', score: 92, lastAudit: '2023-10' },
+                      { domain: 'RGPD', status: 'excellent', score: 96, lastAudit: '2023-12' },
+                      { domain: 'Secteur spécifique', status: 'good', score: 89, lastAudit: '2023-08' }
+                    ].slice(0, 3).map((item, index) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            {item.status === 'excellent' ? 
+                              <CheckCircle className="h-4 w-4 text-success" /> : 
+                              <CheckCircle className="h-4 w-4 text-primary" />
+                            }
+                            <EditableField
+                              field={`compliance-domain-${index}`}
+                              value={item.domain}
+                              onUpdate={() => {}}
+                              className="font-medium"
+                            />
+                          </div>
+                          <Badge variant={item.status === 'excellent' ? 'default' : 'secondary'}>
+                            <EditableField
+                              field={`compliance-score-${index}`}
+                              value={item.score}
+                              onUpdate={() => {}}
+                              type="number"
+                            />/100
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Dernier audit: <EditableField
+                            field={`compliance-audit-${index}`}
+                            value={item.lastAudit}
+                            onUpdate={() => {}}
+                            className="inline"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Gouvernance & Management */}
+              <Card>
+                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <User className="h-5 w-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">
+                          <EditableField
+                            field="governance-title"
+                            value="Gouvernance & Management"
+                            onUpdate={() => {}}
+                          />
+                        </CardTitle>
+                        <CardDescription>
+                          <EditableField
+                            field="governance-desc"
+                            value="Structure organisationnelle et processus de décision"
+                            onUpdate={() => {}}
+                          />
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary" className="bg-primary-light text-primary">
+                        <EditableField
+                          field="governance-badge"
+                          value="Très bon 8.7/10"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-6">
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary mb-2">
+                        <EditableField
+                          field="board-members"
+                          value="7"
+                          onUpdate={() => {}}
+                          type="number"
+                        />
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="board-label"
+                          value="Conseil Administration"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-success mb-2">
+                        <EditableField
+                          field="management-team"
+                          value="3"
+                          onUpdate={() => {}}
+                          type="number"
+                        />
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="management-label"
+                          value="Direction Générale"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary mb-2">
+                        <EditableField
+                          field="committees"
+                          value="4"
+                          onUpdate={() => {}}
+                          type="number"
+                        />
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <EditableField
+                          field="committees-label"
+                          value="Comités spécialisés"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h4 className="font-semibold mb-3">
+                      <EditableField
+                        field="key-indicators-title"
+                        value="Indicateurs clés de gouvernance"
+                        onUpdate={() => {}}
+                      />
+                    </h4>
+                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                      <div className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                        <EditableField
+                          field="independence-label"
+                          value="Indépendance du conseil"
+                          onUpdate={() => {}}
+                        />
+                        <Badge variant="secondary" className="bg-success-light text-success">
+                          <EditableField
+                            field="independence-score"
+                            value="85%"
+                            onUpdate={() => {}}
+                          />
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                        <EditableField
+                          field="transparency-label"
+                          value="Transparence reporting"
+                          onUpdate={() => {}}
+                        />
+                        <Badge variant="secondary" className="bg-primary-light text-primary">
+                          <EditableField
+                            field="transparency-score"
+                            value="A+"
+                            onUpdate={() => {}}
+                          />
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                        <EditableField
+                          field="risk-management-label"
+                          value="Gestion des risques"
+                          onUpdate={() => {}}
+                        />
+                        <Badge variant="secondary" className="bg-success-light text-success">
+                          <EditableField
+                            field="risk-management-score"
+                            value="Robuste"
+                            onUpdate={() => {}}
+                          />
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                        <EditableField
+                          field="ethics-label"
+                          value="Code éthique"
+                          onUpdate={() => {}}
+                        />
+                        <Badge variant="secondary" className="bg-primary-light text-primary">
+                          <EditableField
+                            field="ethics-score"
+                            value="Formalisé"
+                            onUpdate={() => {}}
+                          />
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="predictive" className="space-y-6">

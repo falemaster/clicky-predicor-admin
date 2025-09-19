@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import AdvancedStudy from "@/components/study/AdvancedStudy";
 import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
+import { useAnalysisData } from "@/hooks/useAnalysisData";
+import { Link } from "react-router-dom";
 import { 
   Building2, 
   MapPin, 
@@ -27,30 +29,13 @@ import {
   CreditCard
 } from "lucide-react";
 
-const Index = () => {
+const Analysis = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const { data, generatedContent } = useAnalysisData();
 
-  const companyData = {
-    name: "TECH SOLUTIONS FRANCE",
-    siren: "123 456 789",
-    siret: "123 456 789 00012",
-    naf: "6202A - Conseil en systèmes et logiciels informatiques",
-    employees: "25-50",
-    address: "25 Rue de la Paix, 75002 Paris",
-    director: "Jean MARTIN",
-    phone: "01 42 96 12 34",
-    email: "contact@techsolutions.fr",
-    foundedYear: "2015",
-    status: "Actif"
-  };
-
-  const scores = {
-    global: 7.2,
-    financial: 6.8,
-    legal: 8.1,
-    fiscal: 7.5,
-    defaultRisk: "Faible"
-  };
+  // Utiliser les données depuis le hook ou fallback vers les données par défaut
+  const companyData = data.companyInfo;
+  const scores = data.scores;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -461,4 +446,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Analysis;

@@ -35,7 +35,14 @@ import {
   Eye,
   Edit3,
   Loader2,
-  Award
+  Award,
+  LineChart,
+  Activity,
+  Brain,
+  Settings,
+  ArrowRight,
+  Target,
+  Zap
 } from "lucide-react";
 
 const AdminAnalysis = () => {
@@ -1462,7 +1469,681 @@ Recommandation stratégique : Maintenir l'excellence opérationnelle actuelle to
           </TabsContent>
 
           <TabsContent value="predictive" className="space-y-6">
-            <PredictiveAnalysis />
+            <div className="space-y-6">
+              {/* Risk Summary Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-success mb-2">
+                        <EditableField
+                          field="risk-3months-value"
+                          value="2.1"
+                          onUpdate={() => {}}
+                          type="number"
+                        />%
+                      </div>
+                      <div className="text-sm font-medium mb-2">
+                        <EditableField
+                          field="risk-3months-label"
+                          value="Risque 3 mois"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="bg-success-light text-success">
+                        <EditableField
+                          field="risk-3months-level"
+                          value="Très faible"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-success mb-2">
+                        <EditableField
+                          field="risk-6months-value"
+                          value="3.8"
+                          onUpdate={() => {}}
+                          type="number"
+                        />%
+                      </div>
+                      <div className="text-sm font-medium mb-2">
+                        <EditableField
+                          field="risk-6months-label"
+                          value="Risque 6 mois"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="bg-success-light text-success">
+                        <EditableField
+                          field="risk-6months-level"
+                          value="Faible"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-warning mb-2">
+                        <EditableField
+                          field="risk-12months-value"
+                          value="4.9"
+                          onUpdate={() => {}}
+                          type="number"
+                        />%
+                      </div>
+                      <div className="text-sm font-medium mb-2">
+                        <EditableField
+                          field="risk-12months-label"
+                          value="Risque 12 mois"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="bg-warning-light text-warning">
+                        <EditableField
+                          field="risk-12months-level"
+                          value="Modéré"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary mb-2">
+                        <EditableField
+                          field="ai-confidence-value"
+                          value="85"
+                          onUpdate={() => {}}
+                          type="number"
+                        />%
+                      </div>
+                      <div className="text-sm font-medium mb-2">
+                        <EditableField
+                          field="ai-confidence-label"
+                          value="Confiance IA"
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                      <Badge variant="secondary" className="bg-primary-light text-primary">
+                        <EditableField
+                          field="ai-confidence-level"
+                          value="Élevée"
+                          onUpdate={() => {}}
+                        />
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Risk Evolution Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <LineChart className="h-5 w-5 mr-2" />
+                    <EditableField
+                      field="risk-evolution-title"
+                      value="Évolution du Risque Prédictif (12 mois)"
+                      onUpdate={() => {}}
+                    />
+                  </CardTitle>
+                  <CardDescription>
+                    <EditableField
+                      field="risk-evolution-desc"
+                      value="Projection mensuelle basée sur les algorithmes d'IA avancés"
+                      onUpdate={() => {}}
+                    />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px] bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center">
+                    <div className="text-center text-muted-foreground">
+                      <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-sm">Graphique d'évolution du risque</p>
+                      <p className="text-xs">Projection sur 12 mois</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Stress Tests */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Activity className="h-5 w-5 mr-2" />
+                      <EditableField
+                        field="stress-tests-title"
+                        value="Tests de Résistance"
+                        onUpdate={() => {}}
+                      />
+                    </CardTitle>
+                    <CardDescription>
+                      <EditableField
+                        field="stress-tests-desc"
+                        value="Simulation de scénarios de crise"
+                        onUpdate={() => {}}
+                      />
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[
+                        { scenario: 'Récession -10%', impact: 6.8, probability: 15 },
+                        { scenario: 'Perte client majeur', impact: 8.2, probability: 25 },
+                        { scenario: 'Crise secteur tech', impact: 5.4, probability: 20 },
+                        { scenario: 'Inflation +5%', impact: 4.1, probability: 40 },
+                        { scenario: 'Taux +3%', impact: 3.7, probability: 35 }
+                      ].map((scenario, index) => (
+                        <div key={index} className="border rounded-lg p-3">
+                          <div className="flex justify-between items-center mb-2">
+                            <EditableField
+                              field={`stress-scenario-${index}`}
+                              value={scenario.scenario}
+                              onUpdate={() => {}}
+                              className="text-sm font-medium"
+                            />
+                            <Badge variant="secondary" className="bg-warning-light text-warning">
+                              <EditableField
+                                field={`stress-impact-${index}`}
+                                value={scenario.impact}
+                                onUpdate={() => {}}
+                                type="number"
+                              />%
+                            </Badge>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="flex-1">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span>Impact</span>
+                                <span>
+                                  Probabilité: <EditableField
+                                    field={`stress-probability-${index}`}
+                                    value={scenario.probability}
+                                    onUpdate={() => {}}
+                                    type="number"
+                                    className="inline"
+                                  />%
+                                </span>
+                              </div>
+                              <div className="w-full bg-muted rounded-full h-2">
+                                <div className="bg-warning h-2 rounded-full" style={{ width: `${scenario.impact * 10}%` }}></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* AI Factors */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Brain className="h-5 w-5 mr-2" />
+                      <EditableField
+                        field="ai-factors-title"
+                        value="Facteurs Discriminants IA"
+                        onUpdate={() => {}}
+                      />
+                    </CardTitle>
+                    <CardDescription>
+                      <EditableField
+                        field="ai-factors-desc"
+                        value="Poids des variables dans le modèle prédictif"
+                        onUpdate={() => {}}
+                      />
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[
+                        { factor: 'Croissance CA', weight: 25, impact: 'positive', value: '+12%' },
+                        { factor: 'Trésorerie', weight: 20, impact: 'positive', value: 'Forte' },
+                        { factor: 'Retard URSSAF', weight: 15, impact: 'negative', value: 'Mineur' },
+                        { factor: 'Secteur porteur', weight: 18, impact: 'positive', value: 'Tech' },
+                        { factor: 'Dépendance clients', weight: 12, impact: 'negative', value: '45%' },
+                        { factor: 'Innovation R&D', weight: 10, impact: 'positive', value: '8% CA' }
+                      ].map((factor, index) => (
+                        <div key={index} className="flex items-center space-x-3">
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center mb-1">
+                              <EditableField
+                                field={`ai-factor-name-${index}`}
+                                value={factor.factor}
+                                onUpdate={() => {}}
+                                className="text-sm font-medium"
+                              />
+                              <div className="flex items-center space-x-2">
+                                {factor.impact === 'positive' ? 
+                                  <CheckCircle className="h-3 w-3 text-success" /> : 
+                                  <AlertTriangle className="h-3 w-3 text-warning" />
+                                }
+                                <EditableField
+                                  field={`ai-factor-value-${index}`}
+                                  value={factor.value}
+                                  onUpdate={() => {}}
+                                  className="text-xs text-muted-foreground"
+                                />
+                              </div>
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-2">
+                              <div className="bg-primary h-2 rounded-full" style={{ width: `${factor.weight * 4}%` }}></div>
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Poids: <EditableField
+                                field={`ai-factor-weight-${index}`}
+                                value={factor.weight}
+                                onUpdate={() => {}}
+                                type="number"
+                                className="inline"
+                              />%
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Machine Learning Insights */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Zap className="h-5 w-5 mr-2" />
+                    <EditableField
+                      field="ml-insights-title"
+                      value="Insights Machine Learning"
+                      onUpdate={() => {}}
+                    />
+                  </CardTitle>
+                  <CardDescription>
+                    <EditableField
+                      field="ml-insights-desc"
+                      value="Analyses avancées et recommandations automatisées"
+                      onUpdate={() => {}}
+                    />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-4">
+                      <div className="flex items-center mb-3">
+                        <Target className="h-5 w-5 text-primary mr-2" />
+                        <h4 className="font-semibold">
+                          <EditableField
+                            field="ml-model-title"
+                            value="Modèle de Score"
+                            onUpdate={() => {}}
+                          />
+                        </h4>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Algorithme</span>
+                          <EditableField
+                            field="ml-algorithm"
+                            value="XGBoost v2.1"
+                            onUpdate={() => {}}
+                            className="font-medium"
+                          />
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Précision</span>
+                          <EditableField
+                            field="ml-precision"
+                            value="94.2"
+                            onUpdate={() => {}}
+                            type="number"
+                            className="font-medium"
+                          />%
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Variables</span>
+                          <EditableField
+                            field="ml-variables"
+                            value="247"
+                            onUpdate={() => {}}
+                            type="number"
+                            className="font-medium"
+                          />
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Entraînement</span>
+                          <EditableField
+                            field="ml-training"
+                            value="450K entreprises"
+                            onUpdate={() => {}}
+                            className="font-medium"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-success/5 to-success/10 rounded-lg p-4">
+                      <div className="flex items-center mb-3">
+                        <Shield className="h-5 w-5 text-success mr-2" />
+                        <h4 className="font-semibold">
+                          <EditableField
+                            field="ml-signals-title"
+                            value="Signaux Faibles"
+                            onUpdate={() => {}}
+                          />
+                        </h4>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle className="h-3 w-3 text-success" />
+                          <EditableField
+                            field="ml-signal-1"
+                            value="Trend CA positif détecté"
+                            onUpdate={() => {}}
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle className="h-3 w-3 text-success" />
+                          <EditableField
+                            field="ml-signal-2"
+                            value="Recrutements récents (+5)"
+                            onUpdate={() => {}}
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <AlertTriangle className="h-3 w-3 text-warning" />
+                          <EditableField
+                            field="ml-signal-3"
+                            value="Délais paiement +2 jours"
+                            onUpdate={() => {}}
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle className="h-3 w-3 text-success" />
+                          <EditableField
+                            field="ml-signal-4"
+                            value="Innovation R&D maintenue"
+                            onUpdate={() => {}}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-warning/5 to-warning/10 rounded-lg p-4">
+                      <div className="flex items-center mb-3">
+                        <Settings className="h-5 w-5 text-warning mr-2" />
+                        <h4 className="font-semibold">
+                          <EditableField
+                            field="ml-recommendations-title"
+                            value="Recommandations"
+                            onUpdate={() => {}}
+                          />
+                        </h4>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-start space-x-2">
+                          <ArrowRight className="h-3 w-3 text-warning mt-0.5 flex-shrink-0" />
+                          <EditableField
+                            field="ml-recommendation-1"
+                            value="Surveiller URSSAF mensuel"
+                            onUpdate={() => {}}
+                          />
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <ArrowRight className="h-3 w-3 text-warning mt-0.5 flex-shrink-0" />
+                          <EditableField
+                            field="ml-recommendation-2"
+                            value="Diversifier top 3 clients"
+                            onUpdate={() => {}}
+                          />
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <ArrowRight className="h-3 w-3 text-warning mt-0.5 flex-shrink-0" />
+                          <EditableField
+                            field="ml-recommendation-3"
+                            value="Renforcer trésorerie Q4"
+                            onUpdate={() => {}}
+                          />
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <ArrowRight className="h-3 w-3 text-warning mt-0.5 flex-shrink-0" />
+                          <EditableField
+                            field="ml-recommendation-4"
+                            value="Monitoring hebdomadaire"
+                            onUpdate={() => {}}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Conformité et Santé Fiscale */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Shield className="h-5 w-5 mr-2" />
+                    <EditableField
+                      field="fiscal-compliance-title"
+                      value="Conformité et Santé Fiscale"
+                      onUpdate={() => {}}
+                    />
+                  </CardTitle>
+                  <CardDescription>
+                    <EditableField
+                      field="fiscal-compliance-desc"
+                      value="Évaluation prédictive du risque de vérification fiscale"
+                      onUpdate={() => {}}
+                    />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Score de Risque Fiscal Global */}
+                    <div className="bg-gradient-to-r from-success/5 to-primary/5 p-6 rounded-lg border border-success/10">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-lg font-semibold text-success mb-2">
+                            <EditableField
+                              field="fiscal-risk-title"
+                              value="Score de Risque Fiscal"
+                              onUpdate={() => {}}
+                            />
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            <EditableField
+                              field="fiscal-risk-desc"
+                              value="Probabilité de contrôle fiscal dans les 36 prochains mois"
+                              onUpdate={() => {}}
+                            />
+                          </p>
+                          <div className="flex items-center space-x-4">
+                            <div className="text-3xl font-bold text-success">
+                              <EditableField
+                                field="fiscal-risk-score"
+                                value="12"
+                                onUpdate={() => {}}
+                                type="number"
+                              />%
+                            </div>
+                            <Badge variant="secondary" className="bg-success-light text-success">
+                              <EditableField
+                                field="fiscal-risk-level"
+                                value="Risque Faible"
+                                onUpdate={() => {}}
+                              />
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-muted-foreground mb-2">
+                            <EditableField
+                              field="fiscal-sector-label"
+                              value="Secteur médian"
+                              onUpdate={() => {}}
+                            />
+                          </div>
+                          <div className="text-xl font-semibold text-muted-foreground">
+                            <EditableField
+                              field="fiscal-sector-score"
+                              value="18"
+                              onUpdate={() => {}}
+                              type="number"
+                            />%
+                          </div>
+                          <Badge variant="outline" className="mt-2">
+                            <EditableField
+                              field="fiscal-difference"
+                              value="-6 pts"
+                              onUpdate={() => {}}
+                            />
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {/* Facteurs de Risque Identifiés */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center">
+                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            <EditableField
+                              field="fiscal-factors-title"
+                              value="Facteurs de Risque Détectés"
+                              onUpdate={() => {}}
+                            />
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center space-x-2">
+                                <CheckCircle className="h-4 w-4 text-success" />
+                                <EditableField
+                                  field="fiscal-factor-1"
+                                  value="Cohérence TVA/CA"
+                                  onUpdate={() => {}}
+                                  className="text-sm"
+                                />
+                              </div>
+                              <Badge variant="secondary" className="bg-success-light text-success text-xs">
+                                <EditableField
+                                  field="fiscal-factor-1-status"
+                                  value="Conforme"
+                                  onUpdate={() => {}}
+                                />
+                              </Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center space-x-2">
+                                <AlertTriangle className="h-4 w-4 text-warning" />
+                                <EditableField
+                                  field="fiscal-factor-2"
+                                  value="Croissance CA rapide"
+                                  onUpdate={() => {}}
+                                  className="text-sm"
+                                />
+                              </div>
+                              <Badge variant="secondary" className="bg-warning-light text-warning text-xs">
+                                <EditableField
+                                  field="fiscal-factor-2-status"
+                                  value="Attention"
+                                  onUpdate={() => {}}
+                                />
+                              </Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center space-x-2">
+                                <CheckCircle className="h-4 w-4 text-success" />
+                                <EditableField
+                                  field="fiscal-factor-3"
+                                  value="Ratios sectoriels"
+                                  onUpdate={() => {}}
+                                  className="text-sm"
+                                />
+                              </div>
+                              <Badge variant="secondary" className="bg-success-light text-success text-xs">
+                                <EditableField
+                                  field="fiscal-factor-3-status"
+                                  value="Normaux"
+                                  onUpdate={() => {}}
+                                />
+                              </Badge>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Recommandations Préventives */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center">
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            <EditableField
+                              field="fiscal-recommendations-title"
+                              value="Recommandations Préventives"
+                              onUpdate={() => {}}
+                            />
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-start space-x-2 p-3 border rounded-lg">
+                              <ArrowRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <div>
+                                <EditableField
+                                  field="fiscal-rec-1"
+                                  value="Maintenir documentation TVA complète"
+                                  onUpdate={() => {}}
+                                  className="text-sm font-medium"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-start space-x-2 p-3 border rounded-lg">
+                              <ArrowRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <div>
+                                <EditableField
+                                  field="fiscal-rec-2"
+                                  value="Auditer conformité R&D / CIR"
+                                  onUpdate={() => {}}
+                                  className="text-sm font-medium"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-start space-x-2 p-3 border rounded-lg">
+                              <ArrowRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <div>
+                                <EditableField
+                                  field="fiscal-rec-3"
+                                  value="Justifier croissance par segments"
+                                  onUpdate={() => {}}
+                                  className="text-sm font-medium"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="reports" className="space-y-6">

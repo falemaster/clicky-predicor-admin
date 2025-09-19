@@ -11,6 +11,7 @@ import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
 import { useAnalysisData } from "@/hooks/useAnalysisData";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Building2, 
   MapPin, 
@@ -50,7 +51,7 @@ const AdminAnalysis = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [editMode, setEditMode] = useState<Record<string, boolean>>({});
   
-  const { data, setData, saveData } = useAnalysisData();
+  const { data, setData, saveData, generatedContent, saveGeneratedContent } = useAnalysisData();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -212,33 +213,83 @@ const AdminAnalysis = () => {
   const handleExtrapolateAI = async () => {
     setIsGenerating(true);
     
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    const globalScore = tempData.scores.global;
-    let updatedData = { ...tempData };
-    
-    if (globalScore >= 8) {
-      updatedData.scores.defaultRisk = 'Très faible';
-      updatedData.riskProfile = 'faible';
-    } else if (globalScore >= 6) {
-      updatedData.scores.defaultRisk = 'Faible';
-      updatedData.riskProfile = 'modere';
-    } else if (globalScore >= 4) {
-      updatedData.scores.defaultRisk = 'Modéré';
-      updatedData.riskProfile = 'modere';
-    } else {
-      updatedData.scores.defaultRisk = 'Élevé';
-      updatedData.riskProfile = 'eleve';
-    }
+    try {
+      console.log('Starting AI extrapolation with data:', tempData);
+      
+      // Call our Supabase edge function with ChatGPT
+      const { data: result, error } = await supabase.functions.invoke('extrapolate-analysis', {
+        body: {
+          companyData: tempData.companyInfo,
+          scores: tempData.scores
+        }
+      });
 
-    setTempData(updatedData);
-    generateDescriptionsFromScores();
-    setIsGenerating(false);
-    
-    toast({
-      title: "Extrapolation IA terminée",
-      description: "Le contenu a été adapté selon les nouvelles données"
-    });
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      if (!result?.success) {
+        throw new Error(result?.error || 'Échec de l\'extrapolation IA');
+      }
+
+      const analysis = result.analysis;
+      console.log('Received AI analysis:', analysis);
+
+      // Update the temp data with AI-generated content
+      let updatedData = { ...tempData };
+      updatedData.riskProfile = analysis.riskProfile;
+      updatedData.scores.defaultRisk = analysis.defaultRisk;
+
+      // Save the generated content using the hook
+      const generatedContent = {
+        sections: analysis.sections,
+        syntheseExecutive: analysis.syntheseExecutive,
+        recommandations: analysis.recommandations,
+        commentairesPredictifs: analysis.commentairesPredictifs,
+        timestamp: new Date().toISOString()
+      };
+
+      saveGeneratedContent(generatedContent);
+      setTempData(updatedData);
+      
+      toast({
+        title: "Extrapolation IA terminée",
+        description: "Le contenu a été généré par ChatGPT et adapté à votre entreprise"
+      });
+
+    } catch (error) {
+      console.error('Error during AI extrapolation:', error);
+      
+      // Fallback to basic logic if AI fails
+      const globalScore = tempData.scores.global;
+      let updatedData = { ...tempData };
+      
+      if (globalScore >= 8) {
+        updatedData.scores.defaultRisk = 'Très faible';
+        updatedData.riskProfile = 'faible';
+      } else if (globalScore >= 6) {
+        updatedData.scores.defaultRisk = 'Faible';
+        updatedData.riskProfile = 'modere';
+      } else if (globalScore >= 4) {
+        updatedData.scores.defaultRisk = 'Modéré';
+        updatedData.riskProfile = 'modere';
+      } else {
+        updatedData.scores.defaultRisk = 'Élevé';
+        updatedData.riskProfile = 'eleve';
+      }
+
+      generateDescriptionsFromScores();
+      setTempData(updatedData);
+      
+      toast({
+        title: "Extrapolation terminée (mode de base)",
+        description: error instanceof Error ? error.message : "L'IA n'était pas disponible, utilisation des règles de base",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const EditableField = ({ 

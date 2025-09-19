@@ -1,1 +1,4 @@
 project_id = "vwnkziovsjhrsqokmfzi"
+
+[functions.extrapolate-analysis]
+verify_jwt = false

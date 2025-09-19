@@ -12,6 +12,74 @@ export class SireneApiService {
     return SireneApiService.instance;
   }
 
+  async searchCompaniesByName(query: string, limit: number = 10): Promise<{ data: SireneCompanyData[] | null; error: ApiError | null }> {
+    try {
+      // Nettoyer et encoder la requête
+      const cleanQuery = query.trim().replace(/[^\w\s]/gi, '').substring(0, 50);
+      if (cleanQuery.length < 2) {
+        return { data: [], error: null };
+      }
+
+      const searchQuery = `denominationUniteLegale:"${cleanQuery}"*`;
+      const response = await fetch(`${SIRENE_API_BASE}/siret?q=${encodeURIComponent(searchQuery)}&nombre=${limit}&tri=denominationUniteLegale`, {
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        return {
+          data: null,
+          error: {
+            code: `SIRENE_SEARCH_${response.status}`,
+            message: `Erreur API SIRENE recherche: ${response.statusText}`,
+            source: 'SIRENE'
+          }
+        };
+      }
+
+      const result = await response.json();
+      
+      if (!result.etablissements || result.etablissements.length === 0) {
+        return { data: [], error: null };
+      }
+
+      // Transformer les résultats et dédupliquer par SIREN
+      const seenSirens = new Set();
+      const companies: SireneCompanyData[] = result.etablissements
+        .filter((etablissement: any) => {
+          const siren = etablissement.uniteLegale.siren;
+          if (seenSirens.has(siren)) return false;
+          seenSirens.add(siren);
+          return true;
+        })
+        .map((etablissement: any) => {
+          const uniteLegale = etablissement.uniteLegale;
+          return {
+            siren: uniteLegale.siren,
+            siret: etablissement.siret,
+            denomination: uniteLegale.denominationUniteLegale || `${uniteLegale.prenom1UniteLegale} ${uniteLegale.nomUniteLegale}`,
+            naf: etablissement.activitePrincipaleEtablissement,
+            effectifs: this.mapEffectifs(uniteLegale.trancheEffectifsUniteLegale),
+            adresse: this.formatAdresse(etablissement.adresseEtablissement),
+            statut: etablissement.etatAdministratifEtablissement === 'A' ? 'Actif' : 'Cessé',
+            dateCreation: uniteLegale.dateCreationUniteLegale
+          };
+        });
+
+      return { data: companies, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          code: 'SIRENE_SEARCH_NETWORK_ERROR',
+          message: `Erreur réseau SIRENE recherche: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+          source: 'SIRENE'
+        }
+      };
+    }
+  }
+
   async getCompanyBySiren(siren: string): Promise<{ data: SireneCompanyData | null; error: ApiError | null }> {
     try {
       const response = await fetch(`${SIRENE_API_BASE}/siret?q=siren:${siren}&nombre=1`, {

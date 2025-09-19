@@ -29,7 +29,13 @@ import {
   Loader2,
   Brain,
   Activity,
-  LineChart as LineChartIcon
+  LineChart as LineChartIcon,
+  Download,
+  Bell,
+  Share,
+  TrendingDown,
+  CreditCard,
+  Award
 } from 'lucide-react';
 
 const AdminAnalysis = () => {
@@ -47,6 +53,36 @@ const AdminAnalysis = () => {
     legal: "Excellent respect des obligations légales et réglementaires.",
     risk: "Probabilité de défaillance inférieure à 5% sur 12 mois.",
     aiAnalysis: "Tech Solutions France présente un profil d'entreprise solide avec une croissance soutenue et une gestion financière équilibrée. L'entreprise respecte ses obligations légales et fiscales, avec un historique de paiement exemplaire. Le léger retard URSSAF identifié reste mineur et ne constitue pas un facteur de risque significatif. Le secteur d'activité est porteur et l'entreprise bénéficie d'une position concurrentielle favorable."
+  });
+
+  // Additional data for missing elements
+  const [additionalData, setAdditionalData] = useState({
+    badges: [
+      { text: "Bon payeur RubyPayeur", type: "success" },
+      { text: "Conformité fiscale", type: "success" },
+      { text: "Comptes à jour", type: "success" },
+      { text: "Retard URSSAF mineur", type: "warning" }
+    ],
+    legalInfo: {
+      formeJuridique: "SAS, société par actions simplifiée",
+      numeroTVA: `FR${data.companyInfo.siren.replace(/\s/g, '')}`,
+      inscriptionRCS: "INSCRIT (au greffe de PARIS, le 15/03/2015)",
+      inscriptionRNE: "INSCRIT (le 15/03/2015)",
+      numeroRCS: `${data.companyInfo.siren} R.C.S. Paris`,
+      capitalSocial: "150 000,00 €"
+    },
+    activity: {
+      activitePrincipale: "Conseil en systèmes et logiciels informatiques, développement de solutions digitales sur mesure",
+      domaineActivite: "Services aux entreprises",
+      formeExercice: "Commerciale",
+      conventionCollective: "Syntec - IDCC 1486",
+      dateCloture: "31/12/2024",
+      dureeExercice: "12 mois",
+      activitesSecondaires: [
+        { nom: "Formation professionnelle", code: "8559A" },
+        { nom: "Maintenance informatique", code: "9511Z" }
+      ]
+    }
   });
 
   const toggleEdit = (field: string) => {
@@ -70,10 +106,22 @@ const AdminAnalysis = () => {
     setDescriptions(prev => ({ ...prev, [key]: value }));
   };
 
+  const updateAdditionalData = (path: string, value: any) => {
+    const keys = path.split('.');
+    setAdditionalData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      for (let i = 0; i < keys.length - 1; i++) {
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+      return newData;
+    });
+  };
+
   const generateDescriptionsFromScores = () => {
     const { financial, legal, global } = tempData.scores;
     
-    // Description financière basée sur le score
     let financialDesc = "";
     if (financial >= 8) {
       financialDesc = "Excellente santé financière avec une croissance soutenue et une rentabilité exceptionnelle.";
@@ -85,7 +133,6 @@ const AdminAnalysis = () => {
       financialDesc = "Difficultés financières importantes avec des risques sur la continuité d'exploitation.";
     }
 
-    // Description légale basée sur le score
     let legalDesc = "";
     if (legal >= 8) {
       legalDesc = "Excellent respect des obligations légales et réglementaires.";
@@ -97,7 +144,6 @@ const AdminAnalysis = () => {
       legalDesc = "Problèmes de conformité significatifs nécessitant une action immédiate.";
     }
 
-    // Description du risque basée sur le score global
     let riskDesc = "";
     if (global >= 8) {
       riskDesc = "Probabilité de défaillance très faible, inférieure à 2% sur 12 mois.";
@@ -109,7 +155,6 @@ const AdminAnalysis = () => {
       riskDesc = "Risque élevé avec une probabilité de défaillance supérieure à 15% sur 12 mois.";
     }
 
-    // Analyse IA globale adaptée
     let aiAnalysisDesc = "";
     if (global >= 7) {
       aiAnalysisDesc = `${tempData.companyInfo.name} présente un profil d'entreprise solide avec une croissance soutenue et une gestion financière équilibrée. L'entreprise respecte ses obligations légales et fiscales, avec un historique de paiement exemplaire. Le secteur d'activité est porteur et l'entreprise bénéficie d'une position concurrentielle favorable.`;
@@ -142,14 +187,11 @@ const AdminAnalysis = () => {
   const handleExtrapolateAI = async () => {
     setIsGenerating(true);
     
-    // Simulation de génération IA basée sur les scores
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Logique d'extrapolation basée sur les scores
     const globalScore = tempData.scores.global;
     let updatedData = { ...tempData };
     
-    // Adapter le contenu selon le score global
     if (globalScore >= 8) {
       updatedData.scores.defaultRisk = 'Très faible';
       updatedData.riskProfile = 'faible';
@@ -426,6 +468,38 @@ const AdminAnalysis = () => {
               </CardContent>
             </Card>
 
+            {/* Badges and Status - Éditables */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Statuts et certifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  {additionalData.badges.map((badge, index) => (
+                    <Badge 
+                      key={index}
+                      variant="secondary" 
+                      className={badge.type === 'success' ? 'bg-success-light text-success' : 'bg-warning-light text-warning'}
+                    >
+                      {badge.type === 'success' ? 
+                        <CheckCircle className="h-3 w-3 mr-1" /> : 
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                      }
+                      <EditableField
+                        field={`badge-${index}`}
+                        value={badge.text}
+                        onUpdate={(value) => {
+                          const newBadges = [...additionalData.badges];
+                          newBadges[index].text = value;
+                          setAdditionalData(prev => ({ ...prev, badges: newBadges }));
+                        }}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Scores - Éditables */}
             <div className="grid md:grid-cols-3 gap-6">
               <Card>
@@ -529,6 +603,159 @@ const AdminAnalysis = () => {
               </CardContent>
             </Card>
 
+            {/* Informations juridiques détaillées - Éditables */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Informations juridiques
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">SIREN :</span>
+                      <EditableField
+                        field="legal-siren"
+                        value={tempData.companyInfo.siren}
+                        onUpdate={(value) => updateField('companyInfo.siren', value)}
+                        className="font-medium block mt-1"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">SIRET (siège) :</span>
+                      <EditableField
+                        field="legal-siret"
+                        value={tempData.companyInfo.siret}
+                        onUpdate={(value) => updateField('companyInfo.siret', value)}
+                        className="font-medium block mt-1"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Forme juridique :</span>
+                      <EditableField
+                        field="forme-juridique"
+                        value={additionalData.legalInfo.formeJuridique}
+                        onUpdate={(value) => updateAdditionalData('legalInfo.formeJuridique', value)}
+                        className="font-medium block mt-1"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Numéro de TVA :</span>
+                      <EditableField
+                        field="numero-tva"
+                        value={additionalData.legalInfo.numeroTVA}
+                        onUpdate={(value) => updateAdditionalData('legalInfo.numeroTVA', value)}
+                        className="font-medium block mt-1"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Capital social :</span>
+                      <EditableField
+                        field="capital-social"
+                        value={additionalData.legalInfo.capitalSocial}
+                        onUpdate={(value) => updateAdditionalData('legalInfo.capitalSocial', value)}
+                        className="font-medium block mt-1"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Building2 className="h-5 w-5 mr-2" />
+                    Activité
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <span className="text-sm text-muted-foreground">Activité principale déclarée :</span>
+                    <EditableField
+                      field="activite-principale"
+                      value={additionalData.activity.activitePrincipale}
+                      onUpdate={(value) => updateAdditionalData('activity.activitePrincipale', value)}
+                      className="font-medium mt-1 block"
+                      multiline
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Domaine d'activité :</span>
+                      <EditableField
+                        field="domaine-activite"
+                        value={additionalData.activity.domaineActivite}
+                        onUpdate={(value) => updateAdditionalData('activity.domaineActivite', value)}
+                        className="font-medium block mt-1"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Convention collective :</span>
+                      <EditableField
+                        field="convention-collective"
+                        value={additionalData.activity.conventionCollective}
+                        onUpdate={(value) => updateAdditionalData('activity.conventionCollective', value)}
+                        className="font-medium block mt-1"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Date de clôture exercice :</span>
+                      <EditableField
+                        field="date-cloture"
+                        value={additionalData.activity.dateCloture}
+                        onUpdate={(value) => updateAdditionalData('activity.dateCloture', value)}
+                        className="font-medium block mt-1"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Durée exercice :</span>
+                      <EditableField
+                        field="duree-exercice"
+                        value={additionalData.activity.dureeExercice}
+                        onUpdate={(value) => updateAdditionalData('activity.dureeExercice', value)}
+                        className="font-medium block mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h4 className="font-semibold mb-2">Activités secondaires</h4>
+                    <div className="space-y-2 text-sm">
+                      {additionalData.activity.activitesSecondaires.map((activite, index) => (
+                        <div key={index} className="flex justify-between items-center">
+                          <EditableField
+                            field={`activite-sec-${index}`}
+                            value={activite.nom}
+                            onUpdate={(value) => {
+                              const newActivites = [...additionalData.activity.activitesSecondaires];
+                              newActivites[index].nom = value;
+                              updateAdditionalData('activity.activitesSecondaires', newActivites);
+                            }}
+                          />
+                          <Badge variant="outline" className="text-xs">
+                            <EditableField
+                              field={`code-sec-${index}`}
+                              value={activite.code}
+                              onUpdate={(value) => {
+                                const newActivites = [...additionalData.activity.activitesSecondaires];
+                                newActivites[index].code = value;
+                                updateAdditionalData('activity.activitesSecondaires', newActivites);
+                              }}
+                            />
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Instructions pour l'admin */}
             <Card className="bg-blue-50 border-blue-200">
               <CardContent className="pt-6">
@@ -549,22 +776,22 @@ const AdminAnalysis = () => {
           </TabsContent>
 
           <TabsContent value="study" className="space-y-6">
-            {/* Étude approfondie - Version admin éditable */}
+            {/* Étude approfondie complète - Version admin */}
             <Card>
               <CardHeader>
-                <CardTitle>Étude Approfondie - Admin</CardTitle>
+                <CardTitle>Étude Approfondie - Version Admin Complète</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-6 rounded-lg border border-primary/10">
                   <div className="flex items-start space-x-4">
                     <div className="bg-primary/10 p-3 rounded-full">
-                      <Brain className="h-6 w-6 text-primary" />
+                      <Award className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-3 text-primary">Synthèse Exécutive - Éditable</h3>
+                      <h3 className="text-lg font-semibold mb-3 text-primary">Synthèse Exécutive</h3>
                       <EditableField
                         field="executive-summary"
-                        value="L'entreprise présente un profil remarquablement équilibré avec une note moyenne de 8.4/10, plaçant l'organisation dans le quartile supérieur de son secteur. La conformité légale constitue un avantage concurrentiel majeur, témoignant d'une culture de rigueur exceptionnelle."
+                        value="Profil d'excellence globale - L'entreprise présente un profil remarquablement équilibré avec une note moyenne de 8.4/10, plaçant l'organisation dans le quartile supérieur de son secteur. La conformité légale (9.1/10) constitue un avantage concurrentiel majeur, témoignant d'une culture de rigueur et de transparence exceptionnelle."
                         onUpdate={() => {}}
                         className="text-sm leading-relaxed text-muted-foreground"
                         multiline
@@ -575,12 +802,13 @@ const AdminAnalysis = () => {
               </CardContent>
             </Card>
 
+            {/* Sections détaillées */}
             <div className="grid md:grid-cols-3 gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center">
                     <TrendingUp className="h-4 w-4 mr-2" />
-                    Performance Économique
+                    Analyse Économique
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -593,13 +821,37 @@ const AdminAnalysis = () => {
                     />
                     /10
                   </div>
-                  <EditableField
-                    field="economic-desc"
-                    value="Croissance soutenue et positionnement concurrentiel favorable dans le secteur technologique."
-                    onUpdate={() => {}}
-                    className="text-sm text-muted-foreground"
-                    multiline
-                  />
+                  <div className="space-y-2 text-sm">
+                    <div>Part de marché: <EditableField field="part-marche" value="3.1%" onUpdate={() => {}} className="font-semibold inline" /></div>
+                    <div>Croissance 2023: <EditableField field="croissance-2023" value="6.7%" onUpdate={() => {}} className="font-semibold inline" /></div>
+                    <div>Satisfaction client: <EditableField field="satisfaction-client" value="85%" onUpdate={() => {}} className="font-semibold inline" /></div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Situation Financière
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-primary mb-2">
+                    <EditableField
+                      field="financial-situation-score"
+                      value="7.8"
+                      onUpdate={() => {}}
+                      type="number"
+                    />
+                    /10
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div>Ratio liquidité: <EditableField field="ratio-liquidite" value="1.85" onUpdate={() => {}} className="font-semibold inline" /></div>
+                    <div>Rentabilité nette: <EditableField field="rentabilite-nette" value="7.7%" onUpdate={() => {}} className="font-semibold inline" /></div>
+                    <div>Taux endettement: <EditableField field="taux-endettement" value="35%" onUpdate={() => {}} className="font-semibold inline" /></div>
+                    <div>Cash-flow 2023: <EditableField field="cashflow-2023" value="385K€" onUpdate={() => {}} className="font-semibold inline" /></div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -607,11 +859,11 @@ const AdminAnalysis = () => {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center">
                     <Shield className="h-4 w-4 mr-2" />
-                    Conformité Légale
+                    Conformité & Gouvernance
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-primary mb-2">
+                  <div className="text-2xl font-bold text-success mb-2">
                     <EditableField
                       field="compliance-score"
                       value="9.1"
@@ -620,67 +872,28 @@ const AdminAnalysis = () => {
                     />
                     /10
                   </div>
-                  <EditableField
-                    field="compliance-desc"
-                    value="Excellence dans le respect des réglementations et audits de conformité."
-                    onUpdate={() => {}}
-                    className="text-sm text-muted-foreground"
-                    multiline
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Solidité Financière
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-warning mb-2">
-                    <EditableField
-                      field="financial-solidity-score"
-                      value="7.8"
-                      onUpdate={() => {}}
-                      type="number"
-                    />
-                    /10
+                  <div className="space-y-2 text-sm">
+                    <div>Audit fiscal: <EditableField field="audit-fiscal" value="95/100" onUpdate={() => {}} className="font-semibold inline" /></div>
+                    <div>Conformité RGPD: <EditableField field="conformite-rgpd" value="96/100" onUpdate={() => {}} className="font-semibold inline" /></div>
+                    <div>Gouvernance: <EditableField field="gouvernance" value="8.7/10" onUpdate={() => {}} className="font-semibold inline" /></div>
                   </div>
-                  <EditableField
-                    field="financial-solidity-desc"
-                    value="Santé financière satisfaisante avec un potentiel d'optimisation des ratios."
-                    onUpdate={() => {}}
-                    className="text-sm text-muted-foreground"
-                    multiline
-                  />
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
           <TabsContent value="predictive" className="space-y-6">
-            {/* Analyse prédictive - Version admin éditable */}
+            {/* Analyse prédictive complète */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-success mb-2">
-                      <EditableField
-                        field="risk-3m"
-                        value="2.1"
-                        onUpdate={() => {}}
-                        type="number"
-                      />
-                      %
+                      <EditableField field="risk-3m" value="2.1" onUpdate={() => {}} type="number" />%
                     </div>
                     <div className="text-sm font-medium mb-2">Risque 3 mois</div>
                     <Badge variant="secondary" className="bg-success-light text-success">
-                      <EditableField
-                        field="risk-3m-level"
-                        value="Très faible"
-                        onUpdate={() => {}}
-                      />
+                      <EditableField field="risk-3m-level" value="Très faible" onUpdate={() => {}} />
                     </Badge>
                   </div>
                 </CardContent>
@@ -690,21 +903,11 @@ const AdminAnalysis = () => {
                 <CardContent className="pt-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-success mb-2">
-                      <EditableField
-                        field="risk-6m"
-                        value="3.8"
-                        onUpdate={() => {}}
-                        type="number"
-                      />
-                      %
+                      <EditableField field="risk-6m" value="3.8" onUpdate={() => {}} type="number" />%
                     </div>
                     <div className="text-sm font-medium mb-2">Risque 6 mois</div>
                     <Badge variant="secondary" className="bg-success-light text-success">
-                      <EditableField
-                        field="risk-6m-level"
-                        value="Faible"
-                        onUpdate={() => {}}
-                      />
+                      <EditableField field="risk-6m-level" value="Faible" onUpdate={() => {}} />
                     </Badge>
                   </div>
                 </CardContent>
@@ -714,21 +917,11 @@ const AdminAnalysis = () => {
                 <CardContent className="pt-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-warning mb-2">
-                      <EditableField
-                        field="risk-12m"
-                        value="4.9"
-                        onUpdate={() => {}}
-                        type="number"
-                      />
-                      %
+                      <EditableField field="risk-12m" value="4.9" onUpdate={() => {}} type="number" />%
                     </div>
                     <div className="text-sm font-medium mb-2">Risque 12 mois</div>
                     <Badge variant="secondary" className="bg-warning-light text-warning">
-                      <EditableField
-                        field="risk-12m-level"
-                        value="Modéré"
-                        onUpdate={() => {}}
-                      />
+                      <EditableField field="risk-12m-level" value="Modéré" onUpdate={() => {}} />
                     </Badge>
                   </div>
                 </CardContent>
@@ -738,100 +931,244 @@ const AdminAnalysis = () => {
                 <CardContent className="pt-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary mb-2">
-                      <EditableField
-                        field="ai-confidence"
-                        value="85"
-                        onUpdate={() => {}}
-                        type="number"
-                      />
-                      %
+                      <EditableField field="ai-confidence" value="85" onUpdate={() => {}} type="number" />%
                     </div>
                     <div className="text-sm font-medium mb-2">Confiance IA</div>
-                    <Badge variant="secondary" className="bg-primary-light text-primary">
-                      Élevée
-                    </Badge>
+                    <Badge variant="secondary" className="bg-primary-light text-primary">Élevée</Badge>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
+            {/* Tests de résistance et facteurs IA */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Activity className="h-5 w-5 mr-2" />
+                    Tests de Résistance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {['Récession -10%', 'Perte client majeur', 'Crise secteur tech', 'Inflation +5%', 'Taux +3%'].map((scenario, index) => (
+                      <div key={index} className="border rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <EditableField
+                            field={`scenario-${index}`}
+                            value={scenario}
+                            onUpdate={() => {}}
+                            className="text-sm font-medium"
+                          />
+                          <Badge variant="secondary" className="bg-warning-light text-warning">
+                            <EditableField
+                              field={`scenario-impact-${index}`}
+                              value={6.8 + index * 0.5}
+                              onUpdate={() => {}}
+                              type="number"
+                            />%
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Probabilité: <EditableField field={`scenario-prob-${index}`} value={15 + index * 5} onUpdate={() => {}} type="number" className="inline" />%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Brain className="h-5 w-5 mr-2" />
+                    Facteurs Discriminants IA
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { factor: 'Croissance CA', weight: 25, impact: 'positive', value: '+12%' },
+                      { factor: 'Trésorerie', weight: 20, impact: 'positive', value: 'Forte' },
+                      { factor: 'Retard URSSAF', weight: 15, impact: 'negative', value: 'Mineur' },
+                      { factor: 'Secteur porteur', weight: 18, impact: 'positive', value: 'Tech' },
+                      { factor: 'Dépendance clients', weight: 12, impact: 'negative', value: '45%' }
+                    ].map((factor, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <EditableField
+                            field={`factor-name-${index}`}
+                            value={factor.factor}
+                            onUpdate={() => {}}
+                            className="text-sm font-medium"
+                          />
+                          <div className="flex items-center space-x-2">
+                            {factor.impact === 'positive' ? 
+                              <CheckCircle className="h-3 w-3 text-success" /> : 
+                              <AlertTriangle className="h-3 w-3 text-warning" />
+                            }
+                            <EditableField
+                              field={`factor-value-${index}`}
+                              value={factor.value}
+                              onUpdate={() => {}}
+                              className="text-xs text-muted-foreground"
+                            />
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Poids: <EditableField field={`factor-weight-${index}`} value={factor.weight} onUpdate={() => {}} type="number" className="inline" />%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Analyse du risque fiscal */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Activity className="h-5 w-5 mr-2" />
-                  Tests de Résistance - Éditable
+                  <Shield className="h-5 w-5 mr-2" />
+                  Conformité et Santé Fiscale
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {['Récession -10%', 'Perte client majeur', 'Crise secteur tech'].map((scenario, index) => (
-                    <div key={index} className="border rounded-lg p-3">
-                      <div className="flex justify-between items-center mb-2">
-                        <EditableField
-                          field={`scenario-${index}`}
-                          value={scenario}
-                          onUpdate={() => {}}
-                          className="text-sm font-medium"
-                        />
-                        <Badge variant="secondary" className="bg-warning-light text-warning">
-                          <EditableField
-                            field={`scenario-impact-${index}`}
-                            value={6.8 + index}
-                            onUpdate={() => {}}
-                            type="number"
-                          />
-                          %
+                <div className="bg-gradient-to-r from-success/5 to-primary/5 p-6 rounded-lg border border-success/10">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-lg font-semibold text-success mb-2">Score de Risque Fiscal</h4>
+                      <div className="flex items-center space-x-4">
+                        <div className="text-3xl font-bold text-success">
+                          <EditableField field="fiscal-risk-score" value="12" onUpdate={() => {}} type="number" />%
+                        </div>
+                        <Badge variant="secondary" className="bg-success-light text-success">
+                          <EditableField field="fiscal-risk-level" value="Risque Faible" onUpdate={() => {}} />
                         </Badge>
                       </div>
                     </div>
-                  ))}
+                    <div className="text-right">
+                      <div className="text-sm text-muted-foreground mb-2">Secteur médian</div>
+                      <div className="text-xl font-semibold text-muted-foreground">
+                        <EditableField field="sector-median" value="18" onUpdate={() => {}} type="number" />%
+                      </div>
+                      <Badge variant="outline" className="mt-2">-6 pts</Badge>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="reports" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Rapports & Actions - Éditable
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-3">Recommandations prioritaires</h4>
-                    <div className="space-y-2">
-                      {['Surveiller URSSAF mensuel', 'Diversifier top 3 clients', 'Renforcer trésorerie Q4'].map((rec, index) => (
-                        <EditableField
-                          key={index}
-                          field={`recommendation-${index}`}
-                          value={rec}
-                          onUpdate={() => {}}
-                          className="block text-sm p-2 border rounded"
-                        />
-                      ))}
-                    </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Download className="h-5 w-5 mr-2" />
+                    Rapports Disponibles
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    'Télécharger rapport complet PDF',
+                    'Rapport exécutif (2 pages)',
+                    'Analyse prédictive détaillée',
+                    'Rapport de conformité',
+                    'Synthèse pour comité de crédit'
+                  ].map((report, index) => (
+                    <EditableField
+                      key={index}
+                      field={`report-${index}`}
+                      value={report}
+                      onUpdate={() => {}}
+                      className="w-full p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    />
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Bell className="h-5 w-5 mr-2" />
+                    Alertes & Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    'Configurer les alertes de monitoring',
+                    'Partager l\'analyse avec équipe',
+                    'Programmer suivi mensuel',
+                    'Ajouter commentaire admin',
+                    'Exporter vers système CRM'
+                  ].map((action, index) => (
+                    <EditableField
+                      key={index}
+                      field={`action-${index}`}
+                      value={action}
+                      onUpdate={() => {}}
+                      className="w-full p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    />
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Section recommandations et monitoring */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recommandations Prioritaires</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      'Surveiller URSSAF mensuel - Délais critiques',
+                      'Diversifier top 3 clients - Concentration 65%',
+                      'Renforcer trésorerie Q4 - Saisonnalité détectée',
+                      'Optimiser ratios financiers - Marge progression',
+                      'Maintenir excellence conformité - Avantage concurrentiel'
+                    ].map((rec, index) => (
+                      <EditableField
+                        key={index}
+                        field={`recommendation-${index}`}
+                        value={rec}
+                        onUpdate={() => {}}
+                        className="block text-sm p-3 border rounded-lg"
+                        multiline
+                      />
+                    ))}
                   </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-3">Actions de monitoring</h4>
-                    <div className="space-y-2">
-                      {['Surveillance mensuelle URSSAF', 'Contrôle qualité trimestriel', 'Audit financier semestriel'].map((action, index) => (
-                        <EditableField
-                          key={index}
-                          field={`action-${index}`}
-                          value={action}
-                          onUpdate={() => {}}
-                          className="block text-sm p-2 border rounded"
-                        />
-                      ))}
-                    </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Actions de Monitoring</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      'Surveillance mensuelle URSSAF et charges sociales',
+                      'Contrôle qualité client trimestriel - NPS tracking',
+                      'Audit financier semestriel - Ratios et tendances',
+                      'Veille réglementaire continue - Secteur tech',
+                      'Review gouvernance annuelle - Politique risques'
+                    ].map((monitoring, index) => (
+                      <EditableField
+                        key={index}
+                        field={`monitoring-${index}`}
+                        value={monitoring}
+                        onUpdate={() => {}}
+                        className="block text-sm p-3 border rounded-lg"
+                        multiline
+                      />
+                    ))}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

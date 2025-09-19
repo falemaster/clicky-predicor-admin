@@ -7,6 +7,8 @@ import { Separator } from "@/components/ui/separator";
 import AdvancedStudy from "@/components/study/AdvancedStudy";
 import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
 import { useAnalysisData } from "@/hooks/useAnalysisData";
+import { useCompanyData } from "@/hooks/useCompanyData";
+import { CompanySearch } from "@/components/search/CompanySearch";
 import { Link } from "react-router-dom";
 import { 
   Building2, 
@@ -26,16 +28,121 @@ import {
   FileText,
   BarChart3,
   Shield,
-  CreditCard
+  CreditCard,
+  Search,
+  Loader2
 } from "lucide-react";
 
 const Analysis = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const { data, generatedContent } = useAnalysisData();
+  const [selectedSiren, setSelectedSiren] = useState<string>("");
+  const [showSearch, setShowSearch] = useState(true);
+  
+  // Hook pour les données mockées (fallback)
+  const { data: mockData } = useAnalysisData();
+  
+  // Hook pour les vraies données API
+  const { data: realData, loading, errors, fetchCompanyData } = useCompanyData();
 
-  // Utiliser les données depuis le hook ou fallback vers les données par défaut
-  const companyData = data.companyInfo;
-  const scores = data.scores;
+  // Déterminer quelle source de données utiliser
+  const hasRealData = realData && realData.sirene;
+  const data = hasRealData ? realData : null;
+  
+  // Construire les données d'affichage
+  const companyData = hasRealData ? {
+    name: realData.sirene.denomination,
+    siren: realData.sirene.siren,
+    siret: realData.sirene.siret,
+    naf: realData.sirene.naf,
+    employees: realData.sirene.effectifs,
+    address: realData.sirene.adresse,
+    director: realData.pappers?.dirigeants?.[0] ? `${realData.pappers.dirigeants[0].prenom} ${realData.pappers.dirigeants[0].nom}` : 'Non renseigné',
+    phone: 'Non renseigné', // À récupérer depuis les APIs complémentaires
+    email: 'Non renseigné', // À récupérer depuis les APIs complémentaires
+    foundedYear: new Date(realData.sirene.dateCreation).getFullYear().toString(),
+    status: realData.sirene.statut
+  } : mockData.companyInfo;
+
+  const scores = hasRealData ? {
+    global: realData.predictor?.scores?.global || 5.0,
+    financial: realData.predictor?.scores?.financier || 5.0,
+    legal: realData.predictor?.scores?.legal || 5.0,
+    fiscal: realData.predictor?.scores?.fiscal || 5.0,
+    defaultRisk: realData.predictor?.probabiliteDefaut ? 
+      `${(realData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1)}%` : 
+      'Faible'
+  } : mockData.scores;
+
+  const handleCompanySelected = async (siren: string) => {
+    setSelectedSiren(siren);
+    setShowSearch(false);
+    await fetchCompanyData(siren, 'siren');
+    setActiveTab("overview");
+  };
+
+  const handleShowSearch = () => {
+    setShowSearch(true);
+    setActiveTab("overview");
+  };
+
+  // Si pas de données et pas de recherche en cours, afficher la recherche
+  if (!hasRealData && !loading && showSearch) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        {/* Header */}
+        <header className="bg-background border-b shadow-sm">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center space-x-4">
+                <div className="h-8 w-8 rounded bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
+                  <span className="text-primary-foreground font-bold text-sm">P</span>
+                </div>
+                <h1 className="text-xl font-semibold text-foreground">Predicor</h1>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Link to="/admin-analysis">
+                  <Badge variant="outline" className="text-success border-success hover:bg-success/10 cursor-pointer transition-colors">Admin</Badge>
+                </Link>
+                <Button variant="outline" size="sm">
+                  <User className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">J. Martin</span>
+                  <span className="sm:hidden">JM</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Search Interface */}
+        <div className="container mx-auto px-6 py-12">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-4">
+                Analyse prédictive d'entreprise
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Recherchez une entreprise pour obtenir une analyse complète de ses risques et opportunités
+              </p>
+            </div>
+            
+            <CompanySearch onCompanySelected={handleCompanySelected} />
+
+            {errors.length > 0 && (
+              <div className="mt-6 space-y-2">
+                {errors.map((error, index) => (
+                  <div key={index} className="p-4 border border-destructive/20 bg-destructive/10 rounded-lg">
+                    <p className="text-sm text-destructive">
+                      <strong>{error.source}:</strong> {error.message}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -48,8 +155,19 @@ const Analysis = () => {
                 <span className="text-primary-foreground font-bold text-sm">P</span>
               </div>
               <h1 className="text-xl font-semibold text-foreground">Predicor</h1>
+              {loading && (
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Analyse en cours...</span>
+                </div>
+              )}
             </div>
             <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm" onClick={handleShowSearch}>
+                <Search className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Nouvelle recherche</span>
+                <span className="sm:hidden">Recherche</span>
+              </Button>
               <Link to="/admin-analysis">
                 <Badge variant="outline" className="text-success border-success hover:bg-success/10 cursor-pointer transition-colors">Admin</Badge>
               </Link>
@@ -154,22 +272,80 @@ const Analysis = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-3">
-                  <Badge variant="secondary" className="bg-success-light text-success">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Bon payeur RubyPayeur
+                  {/* Badge statut entreprise */}
+                  <Badge variant="secondary" className={
+                    companyData.status === 'Actif' 
+                      ? "bg-success-light text-success" 
+                      : "bg-destructive-light text-destructive"
+                  }>
+                    {companyData.status === 'Actif' ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                    Entreprise {companyData.status}
                   </Badge>
-                  <Badge variant="secondary" className="bg-success-light text-success">
-                    <Shield className="h-3 w-3 mr-1" />
-                    Conformité fiscale
-                  </Badge>
-                  <Badge variant="secondary" className="bg-success-light text-success">
-                    <FileText className="h-3 w-3 mr-1" />
-                    Comptes à jour
-                  </Badge>
-                  <Badge variant="secondary" className="bg-warning-light text-warning">
-                    <AlertTriangle className="h-3 w-3 mr-1" />
-                    Retard URSSAF mineur
-                  </Badge>
+
+                  {/* Badge RubyPayeur si disponible */}
+                  {hasRealData && realData.rubyPayeur && (
+                    <Badge variant="secondary" className={
+                      realData.rubyPayeur.scoreGlobal >= 7 
+                        ? "bg-success-light text-success" 
+                        : realData.rubyPayeur.scoreGlobal >= 5 
+                        ? "bg-warning-light text-warning"
+                        : "bg-destructive-light text-destructive"
+                    }>
+                      {realData.rubyPayeur.scoreGlobal >= 7 ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
+                      Score RubyPayeur: {realData.rubyPayeur.scoreGlobal}/10
+                    </Badge>
+                  )}
+
+                  {/* Badge dépôt de comptes */}
+                  {hasRealData && realData.pappers?.depotComptes && (
+                    <Badge variant="secondary" className="bg-success-light text-success">
+                      <FileText className="h-3 w-3 mr-1" />
+                      Comptes à jour
+                    </Badge>
+                  )}
+
+                  {/* Badge procédures collectives */}
+                  {hasRealData && realData.bodacc?.annonces && (
+                    <>
+                      {realData.bodacc.annonces.some(a => a.type === 'Procédure collective') ? (
+                        <Badge variant="secondary" className="bg-destructive-light text-destructive">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Procédure collective
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-success-light text-success">
+                          <Shield className="h-3 w-3 mr-1" />
+                          Aucune procédure
+                        </Badge>
+                      )}
+                    </>
+                  )}
+
+                  {/* Alertes Predictor */}
+                  {hasRealData && realData.predictor?.alertes?.map((alerte, index) => (
+                    <Badge key={index} variant="secondary" className={
+                      alerte.niveau === 'Critique' ? "bg-destructive-light text-destructive" :
+                      alerte.niveau === 'Élevé' ? "bg-warning-light text-warning" :
+                      "bg-info-light text-info"
+                    }>
+                      <AlertTriangle className="h-3 w-3 mr-1" />
+                      {alerte.message.length > 30 ? `${alerte.message.substring(0, 30)}...` : alerte.message}
+                    </Badge>
+                  ))}
+
+                  {/* Badge par défaut si pas de données réelles */}
+                  {!hasRealData && (
+                    <>
+                      <Badge variant="secondary" className="bg-success-light text-success">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Données simulées
+                      </Badge>
+                      <Badge variant="secondary" className="bg-info-light text-info">
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        Recherchez une vraie entreprise
+                      </Badge>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -228,17 +404,49 @@ const Analysis = () => {
                 <CardTitle className="flex items-center">
                   <BarChart3 className="h-5 w-5 mr-2" />
                   Analyse IA globale
+                  {loading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="bg-slate-100 rounded-lg p-4">
-                  <p className="text-sm leading-relaxed">
-                    <strong>Tech Solutions France</strong> présente un profil d'entreprise solide avec une croissance soutenue 
-                    et une gestion financière équilibrée. L'entreprise respecte ses obligations légales et fiscales, 
-                    avec un historique de paiement exemplaire. Le léger retard URSSAF identifié reste mineur et ne 
-                    constitue pas un facteur de risque significatif. Le secteur d'activité est porteur et l'entreprise 
-                    bénéficie d'une position concurrentielle favorable.
-                  </p>
+                  {hasRealData && realData.predictor?.recommandations ? (
+                    <div className="space-y-3">
+                      <p className="text-sm leading-relaxed">
+                        <strong>{companyData.name}</strong> - Analyse basée sur les données réelles :
+                      </p>
+                      <ul className="text-sm space-y-2">
+                        {realData.predictor.recommandations.slice(0, 4).map((rec, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
+                            <span>{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      {/* Facteurs de risque principaux */}
+                      {realData.predictor.facteursExplicatifs && realData.predictor.facteursExplicatifs.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-slate-200">
+                          <p className="text-sm font-medium mb-2">Facteurs clés identifiés :</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {realData.predictor.facteursExplicatifs.slice(0, 4).map((facteur, index) => (
+                              <div key={index} className="flex items-center justify-between text-xs">
+                                <span>{facteur.nom}</span>
+                                <Badge variant={facteur.impact > 0 ? "default" : "destructive"} className="text-xs">
+                                  {facteur.impact > 0 ? '+' : ''}{(facteur.impact * 100).toFixed(0)}%
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm leading-relaxed">
+                      <strong>{companyData.name}</strong> - Analyse basée sur des données simulées. 
+                      Recherchez une entreprise réelle pour obtenir une analyse prédictive complète 
+                      basée sur les dernières données SIRENE, BODACC, et les scores de paiement RubyPayeur.
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

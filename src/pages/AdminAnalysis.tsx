@@ -186,6 +186,10 @@ const AdminAnalysis = () => {
             <p className="text-muted-foreground">Configurez les données d'analyse et générez le contenu automatiquement</p>
           </div>
           <div className="flex gap-2">
+            <Button onClick={saveData} variant="default">
+              <Save className="w-4 h-4 mr-2" />
+              Sauvegarder les modifications
+            </Button>
             <Button variant="outline" onClick={() => navigate('/analysis')}>
               <Eye className="w-4 h-4 mr-2" />
               Voir l'analyse

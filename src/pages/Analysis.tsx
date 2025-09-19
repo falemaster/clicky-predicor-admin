@@ -50,7 +50,9 @@ const Analysis = () => {
               <h1 className="text-xl font-semibold text-foreground">Predicor</h1>
             </div>
             <div className="flex items-center space-x-3">
-              <Badge variant="outline" className="text-success border-success">Admin</Badge>
+              <Link to="/admin-analysis">
+                <Badge variant="outline" className="text-success border-success hover:bg-success/10 cursor-pointer transition-colors">Admin</Badge>
+              </Link>
               <Button variant="outline" size="sm">
                 <User className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">J. Martin</span>

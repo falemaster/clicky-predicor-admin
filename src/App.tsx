@@ -2,8 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Admin from "./pages/Admin";
 import AdminAnalysis from "./pages/AdminAnalysis";
 import Analysis from "./pages/Analysis";
@@ -18,7 +17,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Navigate to="/analysis" replace />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin-analysis" element={<AdminAnalysis />} />
           <Route path="/analysis" element={<Analysis />} />

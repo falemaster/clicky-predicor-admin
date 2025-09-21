@@ -162,16 +162,16 @@ serve(async (req) => {
         // Recherche multi-champs (dénomination, sigle, enseigne) avec wildcard suffixe
         const term = String(query).trim();
         const sanitized = term.replace(/[^\p{L}\p{N}\s\-']/gu, ' ').replace(/\s+/g, ' ').trim();
-        const token = sanitized.replace(/\s+/g, ' ');
+        const searchToken = sanitized.replace(/\s+/g, ' ');
         const q = `(
-          denominationUniteLegale:${token}* 
-          OR denominationUsuelle1UniteLegale:${token}* 
-          OR denominationUsuelle2UniteLegale:${token}* 
-          OR denominationUsuelle3UniteLegale:${token}* 
-          OR sigleUniteLegale:${token}* 
-          OR enseigne1Etablissement:${token}* 
-          OR enseigne2Etablissement:${token}* 
-          OR enseigne3Etablissement:${token}*
+          denominationUniteLegale:${searchToken}* 
+          OR denominationUsuelle1UniteLegale:${searchToken}* 
+          OR denominationUsuelle2UniteLegale:${searchToken}* 
+          OR denominationUsuelle3UniteLegale:${searchToken}* 
+          OR sigleUniteLegale:${searchToken}* 
+          OR enseigne1Etablissement:${searchToken}* 
+          OR enseigne2Etablissement:${searchToken}* 
+          OR enseigne3Etablissement:${searchToken}*
         )`;
         url = `${baseUrl}/siret?q=${encodeURIComponent(q)}&nombre=10`;
         break;

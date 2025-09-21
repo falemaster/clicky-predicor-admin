@@ -32,6 +32,9 @@ async function getAccessToken(): Promise<string> {
     'https://api.insee.fr/token',
     'https://api.insee.fr/oauth2/token',
     'https://api.insee.fr/catalogue/oauth2/token',
+    // Nouveaux endpoints portail
+    'https://portail-api.insee.fr/oauth2/token',
+    'https://portail-api.insee.fr/token',
   ];
 
   let lastErrorText = '';

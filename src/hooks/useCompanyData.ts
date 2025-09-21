@@ -19,6 +19,7 @@ interface UseCompanyDataReturn {
   fetchCompanyData: (identifier: string, type: 'siren' | 'siret') => Promise<void>;
   refetch: () => Promise<void>;
   clearData: () => void;
+  isInitialLoad: boolean;
 }
 
 export const useCompanyData = ({
@@ -30,6 +31,7 @@ export const useCompanyData = ({
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<ApiError[]>([]);
   const [currentIdentifier, setCurrentIdentifier] = useState<{ value: string; type: 'siren' | 'siret' } | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     const sireneService = SireneApiService.getInstance();
     const pappersService = PappersApiService.getInstance();
@@ -40,6 +42,7 @@ export const useCompanyData = ({
     setLoading(true);
     setErrors([]);
     setCurrentIdentifier({ value: identifier, type });
+    setIsInitialLoad(false); // Marquer qu'on charge de vraies données
 
     const allErrors: ApiError[] = [];
 
@@ -285,6 +288,7 @@ export const useCompanyData = ({
     errors,
     fetchCompanyData,
     refetch,
-    clearData
+    clearData,
+    isInitialLoad
   };
 };

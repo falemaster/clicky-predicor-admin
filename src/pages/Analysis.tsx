@@ -11,6 +11,8 @@ import { useCompanyData } from "@/hooks/useCompanyData";
 import { CompanySearch } from "@/components/search/CompanySearch";
 import { Link } from "react-router-dom";
 import EnrichedDataDisplayAI from "@/components/analysis/EnrichedDataDisplayAI";
+import LoadingProgress from "@/components/analysis/LoadingProgress";
+import AnalysisSkeleton from "@/components/analysis/AnalysisSkeleton";
 import { 
   Building2, 
   MapPin, 
@@ -48,13 +50,16 @@ const Analysis = () => {
   const { data: mockData } = useAnalysisData();
   
   // Hook pour les vraies données API
-  const { data: realData, loading, errors, fetchCompanyData } = useCompanyData();
+  const { data: realData, loading, errors, fetchCompanyData, isInitialLoad } = useCompanyData();
 
-  // Déterminer quelle source de données utiliser
+  // Déterminer l'état de l'application
   const hasRealData = realData && realData.sirene;
-  const data = hasRealData ? realData : null;
+  const isLoadingRealData = loading && !isInitialLoad;
   
-  // Construire les données d'affichage
+  // États: idle (recherche) | loading (chargement) | loaded (données chargées)
+  const appState = hasRealData ? 'loaded' : (isLoadingRealData ? 'loading' : 'idle');
+  
+  // Construire les données d'affichage (seulement si on a des vraies données)
   const companyData = hasRealData ? {
     name: realData.sirene.denomination,
     siren: realData.sirene.siren,
@@ -67,7 +72,7 @@ const Analysis = () => {
     email: realData.enriched?.contactInfo?.email || 'Non renseigné',
     foundedYear: new Date(realData.sirene.dateCreation).getFullYear().toString(),
     status: realData.sirene.statut
-  } : mockData.companyInfo;
+  } : null;
 
   const scores = hasRealData ? {
     global: realData.predictor?.scores?.global || 5.5,
@@ -77,7 +82,7 @@ const Analysis = () => {
     defaultRisk: realData.predictor?.probabiliteDefaut ? 
       `${(realData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1)}%` : 
       'Faible'
-  } : mockData.scores;
+  } : null;
 
   // Données enrichies pour les composants enfants
   const enrichedData = hasRealData ? {
@@ -118,8 +123,9 @@ const Analysis = () => {
     setActiveTab("overview");
   };
 
-  // Si pas de données et pas de recherche en cours, afficher la recherche
-  if (!hasRealData && !loading && showSearch) {
+  // États de l'application
+  // État 1: Interface de recherche (idle)
+  if (appState === 'idle' && showSearch) {
     return (
       <div className="min-h-screen bg-slate-50">
         {/* Header */}
@@ -217,6 +223,26 @@ const Analysis = () => {
         </div>
       </div>
     );
+  }
+
+  // État 2: Chargement des données (loading)
+  if (appState === 'loading') {
+    return (
+      <LoadingProgress 
+        companyName={selectedSiren ? `Entreprise ${selectedSiren}` : undefined}
+        siren={selectedSiren}
+      />
+    );
+  }
+
+  // État 3: Données chargées mais pas encore prêtes pour affichage complet
+  if (appState === 'loaded' && (!companyData || !scores)) {
+    return <AnalysisSkeleton />;
+  }
+
+  // État 4: Affichage complet des données (loaded)
+  if (appState !== 'loaded' || !companyData || !scores) {
+    return <AnalysisSkeleton />;
   }
 
   return (

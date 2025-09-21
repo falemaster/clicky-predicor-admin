@@ -63,8 +63,8 @@ const Analysis = () => {
     employees: realData.sirene.effectifs,
     address: realData.sirene.adresse,
     director: realData.pappers?.dirigeants?.[0] ? `${realData.pappers.dirigeants[0].prenom} ${realData.pappers.dirigeants[0].nom}` : 'Non renseigné',
-    phone: 'Non renseigné', // À récupérer depuis les APIs complémentaires
-    email: 'Non renseigné', // À récupérer depuis les APIs complémentaires
+    phone: realData.enriched?.contactInfo?.phone || 'Non renseigné',
+    email: realData.enriched?.contactInfo?.email || 'Non renseigné',
     foundedYear: new Date(realData.sirene.dateCreation).getFullYear().toString(),
     status: realData.sirene.statut
   } : mockData.companyInfo;

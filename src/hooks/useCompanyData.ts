@@ -44,10 +44,31 @@ export const useCompanyData = ({
     const allErrors: ApiError[] = [];
 
     try {
-      // 1. Données SIRENE (obligatoires)
-      const sireneResult = type === 'siren' 
-        ? await sireneService.getCompanyBySiren(identifier)
-        : await sireneService.getCompanyBySiret(identifier);
+      // 1. D'abord essayer avec l'API de recherche (recherche-entreprises)
+      let sireneResult;
+      try {
+        const searchResult = await sireneService.searchCompaniesByName(identifier, 1);
+        if (searchResult.data && searchResult.data.length > 0) {
+          // Utiliser le premier résultat de la recherche si on trouve une correspondance exacte
+          const exactMatch = searchResult.data.find(company => 
+            company.siren === identifier || 
+            company.siret === identifier ||
+            company.denomination.toLowerCase().includes(identifier.toLowerCase())
+          );
+          if (exactMatch) {
+            sireneResult = { data: exactMatch, error: null };
+          }
+        }
+      } catch (error) {
+        console.log('Recherche par nom échouée, essai avec API INSEE classique');
+      }
+
+      // 2. Si pas trouvé par recherche, utiliser l'API INSEE classique
+      if (!sireneResult?.data) {
+        sireneResult = type === 'siren' 
+          ? await sireneService.getCompanyBySiren(identifier)
+          : await sireneService.getCompanyBySiret(identifier);
+      }
 
       if (sireneResult.error || !sireneResult.data) {
         if (sireneResult.error) allErrors.push(sireneResult.error);

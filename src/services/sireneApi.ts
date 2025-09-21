@@ -13,7 +13,7 @@ export class SireneApiService {
 
   async searchCompaniesByName(query: string, limit: number = 10): Promise<{ data: SireneCompanyData[] | null; error: ApiError | null }> {
     try {
-      // Utiliser l'API INSEE via Supabase Edge Function
+      // Utiliser l'API INSEE via Supabase Edge Function (pas de fallback démo)
       const { data: apiResponse, error: functionError } = await supabase.functions.invoke('insee-api', {
         body: {
           endpoint: 'search',
@@ -23,16 +23,26 @@ export class SireneApiService {
 
       if (functionError) {
         console.error('Erreur Edge Function INSEE:', functionError);
-        // Fallback vers les données mock en cas d'erreur
-        const mockResults = this.generateMockSearchResults(query);
-        return { data: mockResults, error: null };
+        return { 
+          data: null, 
+          error: {
+            code: 'SIRENE_FUNCTION_ERROR',
+            message: `Erreur Edge Function: ${functionError.message}`,
+            source: 'SIRENE'
+          }
+        };
       }
 
       if (apiResponse?.error) {
         console.error('Erreur API INSEE:', apiResponse.error);
-        // Fallback vers les données mock en cas d'erreur API
-        const mockResults = this.generateMockSearchResults(query);
-        return { data: mockResults, error: null };
+        return { 
+          data: [], 
+          error: {
+            code: 'SIRENE_API_ERROR',
+            message: String(apiResponse.error),
+            source: 'SIRENE'
+          }
+        };
       }
 
       if (!apiResponse?.etablissements || apiResponse.etablissements.length === 0) {
@@ -60,10 +70,8 @@ export class SireneApiService {
       return { data: companies, error: null };
     } catch (error) {
       console.error('Erreur dans searchCompaniesByName:', error);
-      // Fallback vers les données mock en cas d'erreur
-      const mockResults = this.generateMockSearchResults(query);
       return { 
-        data: mockResults, 
+        data: null, 
         error: {
           code: 'SIRENE_SEARCH_ERROR',
           message: `Erreur lors de la recherche: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,

@@ -27,27 +27,44 @@ async function getAccessToken(): Promise<string> {
 
   console.log('Demande d\'un nouveau token OAuth2 INSEE...');
 
-  const tokenResponse = await fetch('https://api.insee.fr/catalogue/oauth2/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${btoa(`${clientId}:${clientSecret}`)}`
-    },
-    body: 'grant_type=client_credentials'
-  });
+  // Essayer plusieurs endpoints connus (INSEE a migré plusieurs fois)
+  const tokenEndpoints = [
+    'https://api.insee.fr/token',
+    'https://api.insee.fr/oauth2/token',
+    'https://api.insee.fr/catalogue/oauth2/token',
+  ];
 
-  if (!tokenResponse.ok) {
-    const errorText = await tokenResponse.text();
-    console.error(`Erreur OAuth2 INSEE: ${tokenResponse.status} - ${errorText}`);
-    throw new Error(`Erreur authentification INSEE: ${tokenResponse.status}`);
+  let lastErrorText = '';
+  for (const endpoint of tokenEndpoints) {
+    try {
+      const tokenResponse = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          'Authorization': `Basic ${btoa(`${clientId}:${clientSecret}`)}`
+        },
+        body: 'grant_type=client_credentials'
+      });
+
+      if (!tokenResponse.ok) {
+        lastErrorText = await tokenResponse.text();
+        console.warn(`Echec token sur ${endpoint}: ${tokenResponse.status} - ${lastErrorText}`);
+        continue;
+      }
+
+      const tokenData = await tokenResponse.json();
+      accessToken = tokenData.access_token;
+      tokenExpiry = now + (tokenData.expires_in * 1000); // Convertir en ms
+      console.log(`Token OAuth2 obtenu via ${endpoint}, expire dans ${tokenData.expires_in} secondes`);
+      return accessToken;
+    } catch (e) {
+      console.warn(`Erreur réseau sur ${endpoint}: ${e instanceof Error ? e.message : String(e)}`);
+      continue;
+    }
   }
 
-  const tokenData = await tokenResponse.json();
-  accessToken = tokenData.access_token;
-  tokenExpiry = now + (tokenData.expires_in * 1000); // Convertir en ms
-  
-  console.log(`Token OAuth2 obtenu, expire dans ${tokenData.expires_in} secondes`);
-  return accessToken;
+  console.error(`Tous les endpoints OAuth2 ont échoué. Dernière erreur: ${lastErrorText}`);
+  throw new Error('Impossible d\'obtenir un token OAuth2 INSEE');
 }
 
 serve(async (req) => {
@@ -103,8 +120,9 @@ serve(async (req) => {
             }
           );
         }
-        // Recherche par dénomination
-        url = `${baseUrl}/siret?q=denominationUniteLegale:"*${query}*"&nombre=10`;
+        // Recherche multi-champs (dénomination, sigle, enseigne)
+        const q = `(denominationUniteLegale:"*${query}*" OR denominationUsuelleEtablissement:"*${query}*" OR enseigne1Etablissement:"*${query}*" OR sigleUniteLegale:"*${query}*")`;
+        url = `${baseUrl}/siret?q=${encodeURIComponent(q)}&nombre=10`;
         break;
       
       default:

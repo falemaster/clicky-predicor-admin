@@ -175,17 +175,6 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
 
             <TabsContent value="name">
               <div className="relative" ref={dropdownRef}>
-                <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <p className="font-medium text-blue-900">Mode démonstration</p>
-                      <p className="text-blue-700 mt-1">
-                        Entreprises disponibles : <strong>Apple</strong>, <strong>Microsoft</strong>, <strong>Total</strong>, <strong>L'Oreal</strong>, <strong>Carrefour</strong>, <strong>Société Générale</strong>
-                      </p>
-                    </div>
-                  </div>
-                </div>
                 
                 <div className="flex gap-2">
                   <div className="flex-1 relative">
@@ -250,12 +239,6 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
                   </div>
                 )}
 
-                <p className="text-xs text-muted-foreground mt-2">
-                  <span className="inline-flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    Données de démonstration - Essayez: Apple, Microsoft, Total, L'Oreal, Carrefour
-                  </span>
-                </p>
               </div>
             </TabsContent>
           </Tabs>

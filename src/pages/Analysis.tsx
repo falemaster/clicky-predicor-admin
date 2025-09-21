@@ -31,7 +31,12 @@ import {
   Shield,
   CreditCard,
   Search,
-  Loader2
+  Loader2,
+  RotateCw,
+  Scale,
+  Bot,
+  Zap,
+  Info
 } from "lucide-react";
 
 const Analysis = () => {
@@ -155,11 +160,26 @@ const Analysis = () => {
                 Recherchez une entreprise pour obtenir une analyse complète de ses risques et opportunités
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-6">
-                <Badge variant="outline" className="bg-blue-50 text-blue-700">🔄 INSEE/SIRENE</Badge>
-                <Badge variant="outline" className="bg-purple-50 text-purple-700">📊 Pappers</Badge>
-                <Badge variant="outline" className="bg-orange-50 text-orange-700">💳 RubyPayeur</Badge>
-                <Badge variant="outline" className="bg-red-50 text-red-700">⚖️ Infogreffe</Badge>
-                <Badge variant="outline" className="bg-green-50 text-green-700">🤖 IA GPT-5</Badge>
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 flex items-center gap-1">
+                  <RotateCw className="h-3 w-3" />
+                  INSEE/SIRENE
+                </Badge>
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 flex items-center gap-1">
+                  <BarChart3 className="h-3 w-3" />
+                  Pappers
+                </Badge>
+                <Badge variant="outline" className="bg-orange-50 text-orange-700 flex items-center gap-1">
+                  <CreditCard className="h-3 w-3" />
+                  RubyPayeur
+                </Badge>
+                <Badge variant="outline" className="bg-red-50 text-red-700 flex items-center gap-1">
+                  <Scale className="h-3 w-3" />
+                  Infogreffe
+                </Badge>
+                <Badge variant="outline" className="bg-green-50 text-green-700 flex items-center gap-1">
+                  <Bot className="h-3 w-3" />
+                  IA GPT-5
+                </Badge>
               </div>
             </div>
             
@@ -179,13 +199,19 @@ const Analysis = () => {
 
             {/* Indicateur de disponibilité des APIs */}
             <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <h3 className="font-semibold text-green-800 mb-2">🚀 Système fonctionnel</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="h-4 w-4 text-green-600" />
+                <h3 className="font-semibold text-green-800">Système fonctionnel</h3>
+              </div>
               <p className="text-sm text-green-700">
                 Toutes les APIs sont intégrées et fonctionnelles. Recherchez une vraie entreprise française pour voir l'analyse complète.
               </p>
-              <p className="text-xs text-green-600 mt-1">
-                💡 Suggéré: Recherchez "Microsoft", "L'Oreal" ou "Total" pour des exemples complets
-              </p>
+              <div className="flex items-start gap-2 mt-2">
+                <Info className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-green-600">
+                  Suggéré: Recherchez "Microsoft", "L'Oreal" ou "Total" pour des exemples complets
+                </p>
+              </div>
             </div>
           </div>
         </div>

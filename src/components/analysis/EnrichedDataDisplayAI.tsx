@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Phone, Mail, Globe, Building, CreditCard, Users, TrendingUp, AlertTriangle, Bot, Sparkles } from "lucide-react";
+import { Phone, Mail, Globe, Building, CreditCard, Users, TrendingUp, AlertTriangle, Bot, Sparkles, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
@@ -381,10 +381,13 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
               </div>
             </div>
             <div className="mt-4 text-xs text-muted-foreground">
-              <p>
-                💡 Les données marquées "IA" ont été générées automatiquement par intelligence artificielle 
-                basée sur les informations disponibles et les tendances sectorielles.
-              </p>
+              <div className="flex items-start gap-2">
+                <Info className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+                <p>
+                  Les données marquées "IA" ont été générées automatiquement par intelligence artificielle 
+                  basée sur les informations disponibles et les tendances sectorielles.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

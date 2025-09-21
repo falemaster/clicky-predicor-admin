@@ -6,6 +6,50 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Cache pour le token OAuth2
+let accessToken: string | null = null;
+let tokenExpiry: number = 0;
+
+async function getAccessToken(): Promise<string> {
+  const now = Date.now();
+  
+  // Réutiliser le token s'il est encore valide (avec marge de 5 minutes)
+  if (accessToken && tokenExpiry > now + 300000) {
+    return accessToken;
+  }
+
+  const clientId = Deno.env.get('INSEE_CLIENT_ID');
+  const clientSecret = Deno.env.get('INSEE_CLIENT_SECRET');
+
+  if (!clientId || !clientSecret) {
+    throw new Error('Credentials INSEE non configurés');
+  }
+
+  console.log('Demande d\'un nouveau token OAuth2 INSEE...');
+
+  const tokenResponse = await fetch('https://api.insee.fr/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${btoa(`${clientId}:${clientSecret}`)}`
+    },
+    body: 'grant_type=client_credentials'
+  });
+
+  if (!tokenResponse.ok) {
+    const errorText = await tokenResponse.text();
+    console.error(`Erreur OAuth2 INSEE: ${tokenResponse.status} - ${errorText}`);
+    throw new Error(`Erreur authentification INSEE: ${tokenResponse.status}`);
+  }
+
+  const tokenData = await tokenResponse.json();
+  accessToken = tokenData.access_token;
+  tokenExpiry = now + (tokenData.expires_in * 1000); // Convertir en ms
+  
+  console.log(`Token OAuth2 obtenu, expire dans ${tokenData.expires_in} secondes`);
+  return accessToken;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -14,17 +58,9 @@ serve(async (req) => {
 
   try {
     const { endpoint, siren, siret, query } = await req.json();
-    const inseeApiKey = Deno.env.get('INSEE_API_KEY');
 
-    if (!inseeApiKey) {
-      return new Response(
-        JSON.stringify({ error: 'Clé API INSEE non configurée' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
+    // Obtenir le token OAuth2
+    const token = await getAccessToken();
 
     let url: string;
     const baseUrl = 'https://api.insee.fr/entreprises/sirene/V3.11';
@@ -86,7 +122,7 @@ serve(async (req) => {
     const response = await fetch(url, {
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${inseeApiKey}`,
+        'Authorization': `Bearer ${token}`,
       },
     });
 

@@ -36,30 +36,61 @@ async function getAccessToken(): Promise<string> {
 
   let lastErrorText = '';
   for (const endpoint of tokenEndpoints) {
+    // 1) Tentative avec Authorization: Basic
     try {
       const tokenResponse = await fetch(endpoint, {
         method: 'POST',
         headers: {
+          'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
           'Authorization': `Basic ${btoa(`${clientId}:${clientSecret}`)}`
         },
         body: 'grant_type=client_credentials'
       });
 
-      if (!tokenResponse.ok) {
+      if (tokenResponse.ok) {
+        const tokenData = await tokenResponse.json();
+        accessToken = tokenData.access_token;
+        tokenExpiry = now + (tokenData.expires_in * 1000);
+        console.log(`Token OAuth2 obtenu via ${endpoint} (Basic).`);
+        return accessToken;
+      } else {
         lastErrorText = await tokenResponse.text();
-        console.warn(`Echec token sur ${endpoint}: ${tokenResponse.status} - ${lastErrorText}`);
-        continue;
+        console.warn(`Échec token (Basic) sur ${endpoint}: ${tokenResponse.status} - ${lastErrorText}`);
       }
-
-      const tokenData = await tokenResponse.json();
-      accessToken = tokenData.access_token;
-      tokenExpiry = now + (tokenData.expires_in * 1000); // Convertir en ms
-      console.log(`Token OAuth2 obtenu via ${endpoint}, expire dans ${tokenData.expires_in} secondes`);
-      return accessToken;
     } catch (e) {
-      console.warn(`Erreur réseau sur ${endpoint}: ${e instanceof Error ? e.message : String(e)}`);
-      continue;
+      console.warn(`Erreur réseau (Basic) sur ${endpoint}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
+    // 2) Tentative avec credentials dans le corps (sans Authorization)
+    try {
+      const body = new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: clientId,
+        client_secret: clientSecret,
+      });
+
+      const tokenResponse2 = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: body.toString(),
+      });
+
+      if (tokenResponse2.ok) {
+        const tokenData = await tokenResponse2.json();
+        accessToken = tokenData.access_token;
+        tokenExpiry = now + (tokenData.expires_in * 1000);
+        console.log(`Token OAuth2 obtenu via ${endpoint} (body credentials).`);
+        return accessToken;
+      } else {
+        lastErrorText = await tokenResponse2.text();
+        console.warn(`Échec token (body) sur ${endpoint}: ${tokenResponse2.status} - ${lastErrorText}`);
+      }
+    } catch (e) {
+      console.warn(`Erreur réseau (body) sur ${endpoint}: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
@@ -120,8 +151,16 @@ serve(async (req) => {
             }
           );
         }
-        // Recherche multi-champs (dénomination, sigle, enseigne)
-        const q = `(denominationUniteLegale:"*${query}*" OR denominationUsuelleEtablissement:"*${query}*" OR enseigne1Etablissement:"*${query}*" OR sigleUniteLegale:"*${query}*")`;
+        const q = `(
+          denominationUniteLegale:"*${query}*" 
+          OR denominationUsuelle1UniteLegale:"*${query}*" 
+          OR denominationUsuelle2UniteLegale:"*${query}*" 
+          OR denominationUsuelle3UniteLegale:"*${query}*" 
+          OR sigleUniteLegale:"*${query}*" 
+          OR enseigne1Etablissement:"*${query}*" 
+          OR enseigne2Etablissement:"*${query}*" 
+          OR enseigne3Etablissement:"*${query}*"
+        )`;
         url = `${baseUrl}/siret?q=${encodeURIComponent(q)}&nombre=10`;
         break;
       

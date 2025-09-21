@@ -27,7 +27,7 @@ async function getAccessToken(): Promise<string> {
 
   console.log('Demande d\'un nouveau token OAuth2 INSEE...');
 
-  const tokenResponse = await fetch('https://api.insee.fr/token', {
+  const tokenResponse = await fetch('https://api.insee.fr/catalogue/oauth2/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Admin from "./pages/Admin";
 import AdminAnalysis from "./pages/AdminAnalysis";
 import Analysis from "./pages/Analysis";
+import AnalysisMockupReference from "./pages/AnalysisMockupReference";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin-analysis" element={<AdminAnalysis />} />
           <Route path="/analysis" element={<Analysis />} />
+          <Route path="/analysis-mockup" element={<AnalysisMockupReference />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

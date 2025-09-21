@@ -10,7 +10,6 @@ import { useAnalysisData } from "@/hooks/useAnalysisData";
 import { useCompanyData } from "@/hooks/useCompanyData";
 import { CompanySearch } from "@/components/search/CompanySearch";
 import { Link } from "react-router-dom";
-import EnrichedDataDisplayAI from "@/components/analysis/EnrichedDataDisplayAI";
 import { 
   Building2, 
   MapPin, 
@@ -126,9 +125,6 @@ const Analysis = () => {
                   <span className="text-primary-foreground font-bold text-sm">P</span>
                 </div>
                 <h1 className="text-xl font-semibold text-foreground">Predicor</h1>
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                  APIs Intégrées
-                </Badge>
               </div>
               <div className="flex items-center space-x-3">
                 <Link to="/admin-analysis">
@@ -151,16 +147,9 @@ const Analysis = () => {
               <h2 className="text-3xl font-bold text-foreground mb-4">
                 Analyse prédictive d'entreprise
               </h2>
-              <p className="text-lg text-muted-foreground mb-2">
+              <p className="text-lg text-muted-foreground">
                 Recherchez une entreprise pour obtenir une analyse complète de ses risques et opportunités
               </p>
-              <div className="flex flex-wrap justify-center gap-2 mb-6">
-                <Badge variant="outline" className="bg-blue-50 text-blue-700">🔄 INSEE/SIRENE</Badge>
-                <Badge variant="outline" className="bg-purple-50 text-purple-700">📊 Pappers</Badge>
-                <Badge variant="outline" className="bg-orange-50 text-orange-700">💳 RubyPayeur</Badge>
-                <Badge variant="outline" className="bg-red-50 text-red-700">⚖️ Infogreffe</Badge>
-                <Badge variant="outline" className="bg-green-50 text-green-700">🤖 IA GPT-5</Badge>
-              </div>
             </div>
             
             <CompanySearch onCompanySelected={handleCompanySelected} />
@@ -176,17 +165,6 @@ const Analysis = () => {
                 ))}
               </div>
             )}
-
-            {/* Indicateur de disponibilité des APIs */}
-            <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <h3 className="font-semibold text-green-800 mb-2">🚀 Système fonctionnel</h3>
-              <p className="text-sm text-green-700">
-                Toutes les APIs sont intégrées et fonctionnelles. Recherchez une vraie entreprise française pour voir l'analyse complète.
-              </p>
-              <p className="text-xs text-green-600 mt-1">
-                💡 Suggéré: Recherchez "Microsoft", "L'Oreal" ou "Total" pour des exemples complets
-              </p>
-            </div>
           </div>
         </div>
       </div>
@@ -204,9 +182,6 @@ const Analysis = () => {
                 <span className="text-primary-foreground font-bold text-sm">P</span>
               </div>
               <h1 className="text-xl font-semibold text-foreground">Predicor</h1>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                Données Réelles
-              </Badge>
               {loading && (
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -502,22 +477,6 @@ const Analysis = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Données enrichies - nouvelles sections */}
-            {hasRealData && (
-              <>
-                <div className="my-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
-                    Données Enrichies par IA
-                  </h3>
-                  <EnrichedDataDisplayAI data={realData} />
-                </div>
-                
-                {/* Séparateur */}
-                <Separator className="my-6" />
-              </>
-            )}
 
             {/* Informations juridiques détaillées */}
             <div className="grid md:grid-cols-2 gap-6">

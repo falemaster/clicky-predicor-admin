@@ -34,12 +34,14 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-muted-foreground" />
               <span>{pappers.telephone}</span>
+              <Badge variant="success" className="text-xs">Pappers</Badge>
             </div>
           )}
           {pappers?.email && (
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <span>{pappers.email}</span>
+              <Badge variant="success" className="text-xs">Pappers</Badge>
             </div>
           )}
           {pappers?.siteWeb && (
@@ -49,6 +51,7 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
                  className="text-primary hover:underline">
                 {pappers.siteWeb}
               </a>
+              <Badge variant="success" className="text-xs">Pappers</Badge>
             </div>
           )}
 
@@ -100,29 +103,33 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
                 <div>
                   <span className="text-sm font-medium">Forme juridique:</span>
                   <Badge variant="outline" className="ml-2">{infogreffe.formeJuridique}</Badge>
+                  <Badge variant="success" className="ml-1 text-xs">Infogreffe</Badge>
                 </div>
               )}
               {infogreffe.capitalSocial && (
                 <div className="flex items-center gap-2">
                   <Euro className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">Capital: {infogreffe.capitalSocial.toLocaleString()} €</span>
+                  <Badge variant="success" className="text-xs">Infogreffe</Badge>
                 </div>
               )}
               {infogreffe.numeroRcs && (
                 <div>
                   <span className="text-sm font-medium">RCS:</span>
                   <span className="ml-2 text-sm">{infogreffe.numeroRcs}</span>
+                  <Badge variant="success" className="ml-1 text-xs">Infogreffe</Badge>
                 </div>
               )}
               {infogreffe.greffe && (
                 <div>
                   <span className="text-sm font-medium">Greffe:</span>
                   <span className="ml-2 text-sm">{infogreffe.greffe}</span>
+                  <Badge variant="success" className="ml-1 text-xs">Infogreffe</Badge>
                 </div>
               )}
               {infogreffe.dateImmatriculation && (
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreference" />
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">Immatriculé le: {new Date(infogreffe.dateImmatriculation).toLocaleDateString()}</span>
                 </div>
               )}
@@ -151,25 +158,31 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">{rubyPayeur.scoreGlobal}/10</div>
                 <div className="text-sm text-muted-foreground">Score Global</div>
+                <Badge variant="success" className="text-xs mt-1">RubyPayeur</Badge>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">{rubyPayeur.scorePaiement}/10</div>
                 <div className="text-sm text-muted-foreground">Score Paiement</div>
+                <Badge variant="success" className="text-xs mt-1">RubyPayeur</Badge>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{rubyPayeur.retardsMoyens}j</div>
+                <div className="text-2xl font-bold text-warning">{rubyPayeur.retardsMoyens}j</div>
                 <div className="text-sm text-muted-foreground">Retards Moyens</div>
+                <Badge variant="success" className="text-xs mt-1">RubyPayeur</Badge>
               </div>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Tendance:</span>
-              <Badge 
-                variant={rubyPayeur.tendance === 'Amélioration' ? 'default' : 
-                        rubyPayeur.tendance === 'Dégradation' ? 'destructive' : 'secondary'}
-              >
-                {rubyPayeur.tendance}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge 
+                  variant={rubyPayeur.tendance === 'Amélioration' ? 'default' : 
+                          rubyPayeur.tendance === 'Dégradation' ? 'destructive' : 'secondary'}
+                >
+                  {rubyPayeur.tendance}
+                </Badge>
+                <Badge variant="success" className="text-xs">RubyPayeur</Badge>
+              </div>
             </div>
             {rubyPayeur.alertes && rubyPayeur.alertes.length > 0 && (
               <div className="space-y-2">
@@ -178,11 +191,11 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
                   Alertes récentes:
                 </span>
                 {rubyPayeur.alertes.slice(0, 3).map((alerte: any, index: number) => (
-                  <div key={index} className="text-sm p-2 bg-orange-50 rounded border-l-4 border-orange-200">
+                  <div key={index} className="text-sm p-2 bg-warning-light rounded border-l-4 border-warning">
                     <div className="font-medium">{alerte.type}</div>
                     <div className="text-muted-foreground">{alerte.description}</div>
                     {alerte.montant && (
-                      <div className="text-orange-600 font-medium">{alerte.montant.toLocaleString()} €</div>
+                      <div className="text-warning font-medium">{alerte.montant.toLocaleString()} €</div>
                     )}
                   </div>
                 ))}
@@ -204,44 +217,45 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-xl font-bold text-green-600">
+                <div className="text-xl font-bold text-success">
                   {pappers.bilans[0].chiffreAffaires.toLocaleString()} €
                 </div>
                 <div className="text-sm text-muted-foreground">Chiffre d'Affaires</div>
                 <div className="text-xs text-muted-foreground">{pappers.bilans[0].annee}</div>
+                <Badge variant="success" className="text-xs mt-1">Pappers</Badge>
               </div>
               <div className="text-center">
-                <div className={`text-xl font-bold ${pappers.bilans[0].resultatNet >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`text-xl font-bold ${pappers.bilans[0].resultatNet >= 0 ? 'text-success' : 'text-destructive'}`}>
                   {pappers.bilans[0].resultatNet.toLocaleString()} €
                 </div>
                 <div className="text-sm text-muted-foreground">Résultat Net</div>
                 <div className="text-xs text-muted-foreground">{pappers.bilans[0].annee}</div>
+                <Badge variant="success" className="text-xs mt-1">Pappers</Badge>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-blue-600">
+                <div className="text-xl font-bold text-primary">
                   {pappers.bilans[0].fondsPropresBruts.toLocaleString()} €
                 </div>
                 <div className="text-sm text-muted-foreground">Fonds Propres</div>
                 <div className="text-xs text-muted-foreground">{pappers.bilans[0].annee}</div>
+                <Badge variant="success" className="text-xs mt-1">Pappers</Badge>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-600">
+                <div className="text-xl font-bold text-warning">
                   {pappers.bilans[0].dettes.toLocaleString()} €
                 </div>
                 <div className="text-sm text-muted-foreground">Dettes</div>
                 <div className="text-xs text-muted-foreground">{pappers.bilans[0].annee}</div>
+                <Badge variant="success" className="text-xs mt-1">Pappers</Badge>
               </div>
             </div>
-            {pappers.bilans[0].effectifs > 0 && (
-              <>
-                <Separator className="my-4" />
-                <div className="flex items-center justify-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">{pappers.bilans[0].effectifs} employés</span>
-                  <span className="text-sm text-muted-foreground">({pappers.bilans[0].annee})</span>
-                </div>
-              </>
-            )}
+            <Separator className="my-4" />
+            <div className="flex items-center justify-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">{pappers.bilans[0].effectifs} employés</span>
+              <span className="text-sm text-muted-foreground">({pappers.bilans[0].annee})</span>
+              <Badge variant="success" className="text-xs">Pappers</Badge>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -259,7 +273,7 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
                   <div className="font-medium">{bilan.annee}</div>
                   <div className="flex gap-4 text-sm">
                     <div>CA: {bilan.chiffreAffaires.toLocaleString()} €</div>
-                    <div className={bilan.resultatNet >= 0 ? 'text-green-600' : 'text-red-600'}>
+                    <div className={bilan.resultatNet >= 0 ? 'text-success' : 'text-destructive'}>
                       RN: {bilan.resultatNet.toLocaleString()} €
                     </div>
                     {bilan.effectifs > 0 && (

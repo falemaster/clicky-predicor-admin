@@ -16,6 +16,19 @@ export interface SireneCompanyData {
 export interface PappersCompanyData {
   siren: string;
   denomination: string;
+  // Informations enrichies
+  formeJuridique?: string;
+  capitalSocial?: number;
+  telephone?: string;
+  email?: string;
+  siteWeb?: string;
+  adresseSiege?: string;
+  codePostal?: string;
+  ville?: string;
+  codeNaf?: string;
+  libelleNaf?: string;
+  dateCreation?: string;
+  dateCessation?: string;
   dirigeants: PappersDirigeant[];
   bilans: PappersBilan[];
   depotComptes: boolean;
@@ -51,6 +64,21 @@ export interface InfogreffeData {
   procedures: InfogreffeProcedure[];
   actes: InfogreffeActe[];
   comptes: InfogreffeCompte[];
+}
+
+export interface InfogreffeCompanyData {
+  siren: string;
+  formeJuridique?: string;
+  capitalSocial?: number;
+  dateImmatriculation?: string;
+  numeroRcs?: string;
+  greffe?: string;
+  activitePrincipale?: string;
+  dureePersonneMorale?: string;
+  dateClotureExercice?: string;
+  procedures?: InfogreffeProcedure[];
+  actes?: InfogreffeActe[];
+  comptes?: InfogreffeCompte[];
 }
 
 export interface InfogreffeProcedure {
@@ -152,7 +180,7 @@ export interface ApiError {
 export interface CompanyFullData {
   sirene: SireneCompanyData;
   pappers: PappersCompanyData;
-  infogreffe: InfogreffeData;
+  infogreffe: InfogreffeCompanyData;
   rubyPayeur: RubyPayeurData;
   bodacc: BodaccData;
   predictor: PredictorAnalysis;

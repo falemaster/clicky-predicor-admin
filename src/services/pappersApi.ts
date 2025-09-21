@@ -43,6 +43,27 @@ export class PappersApiService {
       const companyData: PappersCompanyData = {
         siren: data.siren,
         denomination: data.nom_entreprise,
+        // Informations enrichies
+        formeJuridique: data.forme_juridique,
+        capitalSocial: data.capital_social || data.capital,
+        telephone: data.telephone,
+        email: data.email,
+        siteWeb: data.site_internet,
+        adresseSiege: data.adresse_ligne_1 ? [
+          data.adresse_ligne_1,
+          data.adresse_ligne_2,
+          data.adresse_ligne_3,
+          data.adresse_ligne_4,
+          data.adresse_ligne_5,
+          data.adresse_ligne_6,
+          data.adresse_ligne_7
+        ].filter(Boolean).join(', ') : undefined,
+        codePostal: data.code_postal,
+        ville: data.ville,
+        codeNaf: data.code_naf,
+        libelleNaf: data.libelle_naf,
+        dateCreation: data.date_creation_entreprise,
+        dateCessation: data.date_cessation_entreprise,
         dirigeants: data.representants?.map((rep: any) => ({
           nom: rep.nom,
           prenom: rep.prenom,

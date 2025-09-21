@@ -3,6 +3,7 @@ import type { CompanyFullData, ApiError } from '@/types/api';
 import { SireneApiService } from '@/services/sireneApi';
 import { PappersApiService } from '@/services/pappersApi';
 import { BodaccApiService } from '@/services/bodaccApi';
+import { InfogreffeApiService } from '@/services/infogreffeApi';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UseCompanyDataOptions {
@@ -30,9 +31,10 @@ export const useCompanyData = ({
   const [errors, setErrors] = useState<ApiError[]>([]);
   const [currentIdentifier, setCurrentIdentifier] = useState<{ value: string; type: 'siren' | 'siret' } | null>(null);
 
-  const sireneService = SireneApiService.getInstance();
-  const pappersService = PappersApiService.getInstance();
-  const bodaccService = BodaccApiService.getInstance();
+    const sireneService = SireneApiService.getInstance();
+    const pappersService = PappersApiService.getInstance();
+    const bodaccService = BodaccApiService.getInstance();
+    const infogreffeService = InfogreffeApiService.getInstance();
 
   const fetchCompanyData = async (identifier: string, type: 'siren' | 'siret') => {
     setLoading(true);
@@ -92,7 +94,23 @@ export const useCompanyData = ({
         });
       }
 
-      // 4. Analyse Predictor (via edge function)
+      // 4. Données Infogreffe (optionnelles)
+      try {
+        const infogreffeResult = await infogreffeService.getMockData(sireneResult.data.siren);
+        if (infogreffeResult.data) {
+          companyData.infogreffe = infogreffeResult.data;
+        } else if (infogreffeResult.error) {
+          allErrors.push(infogreffeResult.error);
+        }
+      } catch (error) {
+        allErrors.push({
+          code: 'INFOGREFFE_FETCH_ERROR',
+          message: 'Erreur lors de la récupération des données Infogreffe',
+          source: 'INFOGREFFE'
+        });
+      }
+
+      // 5. Analyse Predictor (via edge function)
       try {
         const { data: predictorData, error: predictorError } = await supabase.functions.invoke('predictor-analysis', {
           body: { 
@@ -118,7 +136,7 @@ export const useCompanyData = ({
         });
       }
 
-      // 5. RubyPayeur (via edge function)
+      // 6. RubyPayeur (via edge function)
       try {
         const { data: rubyPayeurData, error: rubyPayeurError } = await supabase.functions.invoke('rubypayeur-api', {
           body: { siren: sireneResult.data.siren }

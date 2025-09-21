@@ -64,14 +64,41 @@ const Analysis = () => {
   } : mockData.companyInfo;
 
   const scores = hasRealData ? {
-    global: realData.predictor?.scores?.global || 5.0,
-    financial: realData.predictor?.scores?.financier || 5.0,
-    legal: realData.predictor?.scores?.legal || 5.0,
-    fiscal: realData.predictor?.scores?.fiscal || 5.0,
+    global: realData.predictor?.scores?.global || 5.5,
+    financial: realData.predictor?.scores?.financier || 6.0,
+    legal: realData.predictor?.scores?.legal || 7.5,
+    fiscal: realData.predictor?.scores?.fiscal || 6.8,
     defaultRisk: realData.predictor?.probabiliteDefaut ? 
       `${(realData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1)}%` : 
       'Faible'
   } : mockData.scores;
+
+  // Données enrichies pour les composants enfants
+  const enrichedData = hasRealData ? {
+    companyInfo: companyData,
+    scores,
+    financial: {
+      bilans: realData.pappers?.bilans || [],
+      chiffreAffaires: realData.pappers?.bilans?.[0]?.chiffreAffaires || 0,
+      resultatNet: realData.pappers?.bilans?.[0]?.resultatNet || 0,
+      endettement: realData.pappers?.bilans?.[0]?.dettes || 0,
+      effectifs: realData.pappers?.bilans?.[0]?.effectifs || 0
+    },
+    legal: {
+      procedures: realData.infogreffe?.procedures || [],
+      bodaccAnnonces: realData.bodacc?.annonces || [],
+      compteStatus: realData.pappers?.depotComptes || false
+    },
+    paymentScore: {
+      scoreGlobal: realData.rubyPayeur?.scoreGlobal || 0,
+      scorePaiement: realData.rubyPayeur?.scorePaiement || 0,
+      retardsMoyens: realData.rubyPayeur?.retardsMoyens || 0,
+      tendance: realData.rubyPayeur?.tendance || 'Stable',
+      alertes: realData.rubyPayeur?.alertes || []
+    },
+    predictor: realData.predictor || null,
+    rawData: realData
+  } : null;
 
   const handleCompanySelected = async (siren: string) => {
     setSelectedSiren(siren);
@@ -594,11 +621,11 @@ const Analysis = () => {
           </TabsContent>
 
           <TabsContent value="study" className="space-y-6">
-            <AdvancedStudy />
+            <AdvancedStudy companyData={enrichedData} />
           </TabsContent>
 
           <TabsContent value="predictive" className="space-y-6">
-            <PredictiveAnalysis />
+            <PredictiveAnalysis companyData={enrichedData} />
           </TabsContent>
 
           <TabsContent value="reports" className="space-y-6">

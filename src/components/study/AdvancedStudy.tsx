@@ -7,7 +7,18 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, TrendingDown, Building, Shield, Users, ChevronDown, ChevronRight, Award, CheckCircle, AlertTriangle, XCircle, CreditCard, FileText, Gavel, Crown } from "lucide-react";
 import CompanyMap from "../visualization/CompanyMap";
 
-const AdvancedStudy = () => {
+interface AdvancedStudyProps {
+  companyData?: {
+    companyInfo: any;
+    scores: any;
+    financial: any;
+    legal: any;
+    paymentScore: any;
+    rawData: any;
+  } | null;
+}
+
+const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     economic: false,
     financial: false,
@@ -211,19 +222,33 @@ const AdvancedStudy = () => {
 
                 <div className="grid md:grid-cols-3 gap-6">
                   <div className="text-center">
-                    <div className="text-xl font-bold text-primary mb-2">3.1%</div>
-                    <div className="text-sm text-muted-foreground">Part de marché</div>
-                    <Badge variant="secondary" className="mt-2">+0.3pts vs 2022</Badge>
+                    <div className="text-xl font-bold text-primary mb-2">
+                      {companyData?.financial?.chiffreAffaires ? 
+                        `${(companyData.financial.chiffreAffaires / 1000000).toFixed(1)}M€` : 
+                        '2.4M€'
+                      }
+                    </div>
+                    <div className="text-sm text-muted-foreground">Chiffre d'affaires</div>
+                    <Badge variant="secondary" className="mt-2">Dernier exercice</Badge>
                   </div>
                   <div className="text-center">
-                    <div className="text-xl font-bold text-success mb-2">6.7%</div>
-                    <div className="text-sm text-muted-foreground">Croissance 2023</div>
-                    <Badge variant="secondary" className="mt-2">Secteur: 4.2%</Badge>
+                    <div className="text-xl font-bold text-success mb-2">
+                      {companyData?.financial?.resultatNet ? 
+                        `${((companyData.financial.resultatNet / companyData.financial.chiffreAffaires) * 100).toFixed(1)}%` :
+                        '6.7%'
+                      }
+                    </div>
+                    <div className="text-sm text-muted-foreground">Marge nette</div>
+                    <Badge variant="secondary" className="mt-2">
+                      {companyData?.financial?.resultatNet > 0 ? 'Profitable' : 'Secteur: 4.2%'}
+                    </Badge>
                   </div>
                   <div className="text-center">
-                    <div className="text-xl font-bold text-primary mb-2">85%</div>
-                    <div className="text-sm text-muted-foreground">Satisfaction client</div>
-                    <Badge variant="secondary" className="mt-2">NPS +52</Badge>
+                    <div className="text-xl font-bold text-primary mb-2">
+                      {companyData?.financial?.effectifs || '25'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Effectifs</div>
+                    <Badge variant="secondary" className="mt-2">Salariés</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -304,24 +329,46 @@ const AdvancedStudy = () => {
 
                 <div className="grid md:grid-cols-4 gap-6">
                   <div className="text-center">
-                    <div className="text-xl font-bold text-primary mb-2">1.85</div>
+                    <div className="text-xl font-bold text-primary mb-2">
+                      {companyData?.financial?.bilans?.[0] ? 
+                        ((companyData.financial.bilans[0].chiffreAffaires - companyData.financial.bilans[0].dettes) / companyData.financial.bilans[0].dettes).toFixed(2) :
+                        '1.85'
+                      }
+                    </div>
                     <div className="text-sm text-muted-foreground">Ratio liquidité</div>
                     <Badge variant="secondary" className="mt-2">Seuil: 1.5</Badge>
                   </div>
                   <div className="text-center">
-                    <div className="text-xl font-bold text-success mb-2">7.7%</div>
+                    <div className="text-xl font-bold text-success mb-2">
+                      {companyData?.financial?.bilans?.[0] ? 
+                        ((companyData.financial.bilans[0].resultatNet / companyData.financial.bilans[0].chiffreAffaires) * 100).toFixed(1) + '%' :
+                        '7.7%'
+                      }
+                    </div>
                     <div className="text-sm text-muted-foreground">Rentabilité nette</div>
                     <Badge variant="secondary" className="mt-2">Secteur: 5.2%</Badge>
                   </div>
                   <div className="text-center">
-                    <div className="text-xl font-bold text-primary mb-2">35%</div>
+                    <div className="text-xl font-bold text-primary mb-2">
+                      {companyData?.financial?.bilans?.[0] ? 
+                        ((companyData.financial.bilans[0].dettes / (companyData.financial.bilans[0].chiffreAffaires + companyData.financial.bilans[0].fondsPropresBruts)) * 100).toFixed(0) + '%' :
+                        '35%'
+                      }
+                    </div>
                     <div className="text-sm text-muted-foreground">Taux endettement</div>
                     <Badge variant="secondary" className="mt-2">Limite: 60%</Badge>
                   </div>
                   <div className="text-center">
-                    <div className="text-xl font-bold text-success mb-2">385K€</div>
-                    <div className="text-sm text-muted-foreground">Cash-flow 2023</div>
-                    <Badge variant="secondary" className="mt-2">+22% vs 2022</Badge>
+                    <div className="text-xl font-bold text-success mb-2">
+                      {companyData?.paymentScore?.scoreGlobal ? 
+                        `${companyData.paymentScore.scoreGlobal}/10` :
+                        '385K€'
+                      }
+                    </div>
+                    <div className="text-sm text-muted-foreground">Score paiement</div>
+                    <Badge variant="secondary" className="mt-2">
+                      {companyData?.paymentScore?.tendance || '+22% vs 2022'}
+                    </Badge>
                   </div>
                 </div>
               </CardContent>

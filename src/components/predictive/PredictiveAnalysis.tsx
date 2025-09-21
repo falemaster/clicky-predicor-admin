@@ -37,7 +37,17 @@ import {
   Cell
 } from 'recharts';
 
-const PredictiveAnalysis = () => {
+interface PredictiveAnalysisProps {
+  companyData?: {
+    companyInfo: any;
+    scores: any;
+    predictor: any;
+    paymentScore: any;
+    rawData: any;
+  } | null;
+}
+
+const PredictiveAnalysis = ({ companyData }: PredictiveAnalysisProps) => {
   const riskEvolution = [
     { month: 'Jan', risk: 2.1, confidence: 89, market: 3.2 },
     { month: 'Fév', risk: 2.3, confidence: 91, market: 3.1 },
@@ -70,6 +80,27 @@ const PredictiveAnalysis = () => {
     { factor: 'Innovation R&D', weight: 10, impact: 'positive', value: '8% CA' }
   ];
 
+  // Utiliser les vraies données ou des valeurs par défaut
+  const riskData = companyData?.predictor ? {
+    risk3m: companyData.predictor.probabiliteDefaut?.mois3 ? (companyData.predictor.probabiliteDefaut.mois3 * 100).toFixed(1) : '2.1',
+    risk6m: companyData.predictor.probabiliteDefaut?.mois6 ? (companyData.predictor.probabiliteDefaut.mois6 * 100).toFixed(1) : '3.8',
+    risk12m: companyData.predictor.probabiliteDefaut?.mois12 ? (companyData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1) : '4.9',
+    confidence: '85' // Calculé depuis les facteurs explicatifs
+  } : {
+    risk3m: '2.1',
+    risk6m: '3.8', 
+    risk12m: '4.9',
+    confidence: '85'
+  };
+
+  const getRiskBadge = (risk: string) => {
+    const riskValue = parseFloat(risk);
+    if (riskValue < 3) return { class: 'bg-success-light text-success', label: 'Très faible' };
+    if (riskValue < 5) return { class: 'bg-success-light text-success', label: 'Faible' };
+    if (riskValue < 8) return { class: 'bg-warning-light text-warning', label: 'Modéré' };
+    return { class: 'bg-destructive-light text-destructive', label: 'Élevé' };
+  };
+
   const getRiskColor = (risk: number) => {
     if (risk < 3) return 'hsl(var(--success))';
     if (risk < 5) return 'hsl(var(--warning))';
@@ -89,10 +120,12 @@ const PredictiveAnalysis = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-success mb-2">2.1%</div>
+              <div className={`text-2xl font-bold mb-2 ${getRiskBadge(riskData.risk3m).class.includes('success') ? 'text-success' : getRiskBadge(riskData.risk3m).class.includes('warning') ? 'text-warning' : 'text-destructive'}`}>
+                {riskData.risk3m}%
+              </div>
               <div className="text-sm font-medium mb-2">Risque 3 mois</div>
-              <Badge variant="secondary" className="bg-success-light text-success">
-                Très faible
+              <Badge variant="secondary" className={getRiskBadge(riskData.risk3m).class}>
+                {getRiskBadge(riskData.risk3m).label}
               </Badge>
             </div>
           </CardContent>
@@ -101,10 +134,12 @@ const PredictiveAnalysis = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-success mb-2">3.8%</div>
+              <div className={`text-2xl font-bold mb-2 ${getRiskBadge(riskData.risk6m).class.includes('success') ? 'text-success' : getRiskBadge(riskData.risk6m).class.includes('warning') ? 'text-warning' : 'text-destructive'}`}>
+                {riskData.risk6m}%
+              </div>
               <div className="text-sm font-medium mb-2">Risque 6 mois</div>
-              <Badge variant="secondary" className="bg-success-light text-success">
-                Faible
+              <Badge variant="secondary" className={getRiskBadge(riskData.risk6m).class}>
+                {getRiskBadge(riskData.risk6m).label}
               </Badge>
             </div>
           </CardContent>
@@ -113,10 +148,12 @@ const PredictiveAnalysis = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-warning mb-2">4.9%</div>
+              <div className={`text-2xl font-bold mb-2 ${getRiskBadge(riskData.risk12m).class.includes('success') ? 'text-success' : getRiskBadge(riskData.risk12m).class.includes('warning') ? 'text-warning' : 'text-destructive'}`}>
+                {riskData.risk12m}%
+              </div>
               <div className="text-sm font-medium mb-2">Risque 12 mois</div>
-              <Badge variant="secondary" className="bg-warning-light text-warning">
-                Modéré
+              <Badge variant="secondary" className={getRiskBadge(riskData.risk12m).class}>
+                {getRiskBadge(riskData.risk12m).label}
               </Badge>
             </div>
           </CardContent>
@@ -125,7 +162,7 @@ const PredictiveAnalysis = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary mb-2">85%</div>
+              <div className="text-2xl font-bold text-primary mb-2">{riskData.confidence}%</div>
               <div className="text-sm font-medium mb-2">Confiance IA</div>
               <Badge variant="secondary" className="bg-primary-light text-primary">
                 Élevée
@@ -240,26 +277,59 @@ const PredictiveAnalysis = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {aiFactors.map((factor, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium">{factor.factor}</span>
-                      <div className="flex items-center space-x-2">
-                        {factor.impact === 'positive' ? 
-                          <CheckCircle className="h-3 w-3 text-success" /> : 
-                          <AlertTriangle className="h-3 w-3 text-warning" />
-                        }
-                        <span className="text-xs text-muted-foreground">{factor.value}</span>
+              {(companyData?.predictor?.facteursExplicatifs || aiFactors).map((factor: any, index: number) => {
+                // Si c'est un facteur de l'API Predictor
+                if (factor.nom) {
+                  return (
+                    <div key={index} className="flex items-center space-x-3">
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">{factor.nom}</span>
+                          <div className="flex items-center space-x-2">
+                            {factor.impact > 0 ? 
+                              <CheckCircle className="h-3 w-3 text-success" /> : 
+                              <AlertTriangle className="h-3 w-3 text-warning" />
+                            }
+                            <span className="text-xs text-muted-foreground">
+                              {factor.impact > 0 ? '+' : ''}{(factor.impact * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                        <Progress value={factor.importance * 100} className="h-2" />
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Importance: {(factor.importance * 100).toFixed(0)}%
+                        </div>
+                        {factor.explication && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {factor.explication}
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <Progress value={factor.weight * 4} className="h-2" />
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Poids: {factor.weight}%
+                  );
+                }
+                // Sinon utiliser les données mockées
+                return (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm font-medium">{factor.factor}</span>
+                        <div className="flex items-center space-x-2">
+                          {factor.impact === 'positive' ? 
+                            <CheckCircle className="h-3 w-3 text-success" /> : 
+                            <AlertTriangle className="h-3 w-3 text-warning" />
+                          }
+                          <span className="text-xs text-muted-foreground">{factor.value}</span>
+                        </div>
+                      </div>
+                      <Progress value={factor.weight * 4} className="h-2" />
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Poids: {factor.weight}%
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>

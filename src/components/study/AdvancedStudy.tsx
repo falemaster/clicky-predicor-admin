@@ -3,9 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
-import { TrendingUp, TrendingDown, Building, Shield, Users, ChevronDown, ChevronRight, Award, CheckCircle, AlertTriangle, XCircle, CreditCard, FileText, Gavel, Crown } from "lucide-react";
+import { TrendingUp, TrendingDown, Building, Shield, Users, ChevronDown, ChevronRight, Award, CheckCircle, AlertTriangle, XCircle, CreditCard, FileText, Gavel, Crown, Bot } from "lucide-react";
 import CompanyMap from "../visualization/CompanyMap";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AdvancedStudyProps {
   companyData?: {
@@ -18,13 +21,80 @@ interface AdvancedStudyProps {
   } | null;
 }
 
+interface AIAnalysis {
+  riskProfile: string;
+  defaultRisk: string;
+  sections: {
+    activite: { title: string; content: string };
+    financier: { title: string; content: string };
+    legal: { title: string; content: string };
+    fiscal: { title: string; content: string };
+  };
+  syntheseExecutive: string;
+  recommandations: string[];
+  commentairesPredictifs: {
+    evolutionRisque: string;
+    facteursCles: string;
+    scenarios: string;
+  };
+}
+
 const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
+  const { toast } = useToast();
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     economic: false,
     financial: false,
     compliance: false,
     governance: false
   });
+
+  // Fonction pour générer l'analyse IA approfondie
+  const generateAIAnalysis = async () => {
+    setIsGeneratingAI(true);
+    
+    try {
+      const companyInfo = {
+        name: companyData?.companyInfo?.denomination || 'Entreprise',
+        naf: companyData?.companyInfo?.activitePrincipale || 'Non spécifié',
+        employees: companyData?.companyInfo?.nombreSalaries || 'Non spécifié',
+        foundedYear: companyData?.companyInfo?.dateCreation?.substring(0, 4) || 'Non spécifié',
+        address: companyData?.companyInfo?.adresse || 'Adresse non disponible'
+      };
+
+      const scores = {
+        global: companyData?.scores?.global || 8.4,
+        financial: companyData?.scores?.financial || 7.8,
+        legal: companyData?.scores?.legal || 9.1,
+        fiscal: companyData?.scores?.fiscal || 8.5,
+        defaultRisk: 'Modéré'
+      };
+
+      const { data: result, error } = await supabase.functions.invoke('extrapolate-analysis', {
+        body: { companyData: companyInfo, scores }
+      });
+
+      if (error) throw error;
+      
+      if (result?.success && result?.analysis) {
+        setAiAnalysis(result.analysis);
+        toast({
+          title: "Analyse IA approfondie générée",
+          description: "L'étude détaillée a été générée par l'IA"
+        });
+      }
+    } catch (error) {
+      console.error('Error generating AI analysis:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer l'analyse IA",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({
@@ -106,8 +176,22 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Étude Approfondie</CardTitle>
-          <CardDescription>Analyse multidimensionnelle par volets spécialisés</CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Étude Approfondie</CardTitle>
+              <CardDescription>Analyse multidimensionnelle par volets spécialisés</CardDescription>
+            </div>
+            <Button
+              onClick={generateAIAnalysis}
+              disabled={isGeneratingAI}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Bot className="h-4 w-4" />
+              {isGeneratingAI ? "Génération..." : "Analyse IA Avancée"}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-6 rounded-lg border border-primary/10">
@@ -116,20 +200,40 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                 <Award className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-3 text-primary">Synthèse Exécutive</h3>
+                <h3 className="text-lg font-semibold mb-3 text-primary">
+                  {aiAnalysis ? "Synthèse Exécutive IA" : "Synthèse Exécutive"}
+                </h3>
                 <div className="prose prose-sm text-muted-foreground space-y-3">
-                  <p>
-                    <strong className="text-foreground">Profil d'excellence globale</strong> - L'entreprise présente un profil remarquablement équilibré avec une note moyenne de <span className="font-semibold text-success">8.4/10</span>, plaçant l'organisation dans le quartile supérieur de son secteur.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">Points forts critiques :</strong> La conformité légale (9.1/10) constitue un avantage concurrentiel majeur, témoignant d'une culture de rigueur et de transparence exceptionnelle. La performance économique (8.4/10) reflète une stratégie commerciale bien maîtrisée avec une croissance soutenue et un positionnement concurrentiel solide.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">Axes d'optimisation :</strong> La solidité financière (7.8/10), bien que satisfaisante, présente un potentiel d'amélioration notable. L'optimisation de la structure de capital et l'amélioration des ratios de liquidité pourraient renforcer significativement la résilience financière.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">Recommandation stratégique :</strong> Maintenir l'excellence opérationnelle actuelle tout en investissant dans le renforcement des fondamentaux financiers pour sécuriser la croissance à long terme.
-                  </p>
+                  {aiAnalysis ? (
+                    <div>
+                      <p className="text-foreground">{aiAnalysis.syntheseExecutive}</p>
+                      {aiAnalysis.recommandations && aiAnalysis.recommandations.length > 0 && (
+                        <div className="mt-4">
+                          <strong className="text-foreground">Recommandations IA :</strong>
+                          <ul className="list-disc list-inside mt-2 space-y-1">
+                            {aiAnalysis.recommandations.slice(0, 3).map((rec, index) => (
+                              <li key={index} className="text-sm">{rec}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <p>
+                        <strong className="text-foreground">Profil d'excellence globale</strong> - L'entreprise présente un profil remarquablement équilibré avec une note moyenne de <span className="font-semibold text-success">8.4/10</span>, plaçant l'organisation dans le quartile supérieur de son secteur.
+                      </p>
+                      <p>
+                        <strong className="text-foreground">Points forts critiques :</strong> La conformité légale (9.1/10) constitue un avantage concurrentiel majeur, témoignant d'une culture de rigueur et de transparence exceptionnelle. La performance économique (8.4/10) reflète une stratégie commerciale bien maîtrisée avec une croissance soutenue et un positionnement concurrentiel solide.
+                      </p>
+                      <p>
+                        <strong className="text-foreground">Axes d'optimisation :</strong> La solidité financière (7.8/10), bien que satisfaisante, présente un potentiel d'amélioration notable. L'optimisation de la structure de capital et l'amélioration des ratios de liquidité pourraient renforcer significativement la résilience financière.
+                      </p>
+                      <p>
+                        <strong className="text-foreground">Recommandation stratégique :</strong> Maintenir l'excellence opérationnelle actuelle tout en investissant dans le renforcement des fondamentaux financiers pour sécuriser la croissance à long terme.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

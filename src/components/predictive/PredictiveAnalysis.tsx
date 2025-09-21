@@ -17,8 +17,12 @@ import {
   LineChart as LineChartIcon,
   Settings,
   ArrowRight,
-  Info
+  Info,
+  Bot
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 import {
   LineChart,
   Line,
@@ -47,7 +51,74 @@ interface PredictiveAnalysisProps {
   } | null;
 }
 
+interface AIAnalysis {
+  riskProfile: string;
+  defaultRisk: string;
+  sections: {
+    activite: { title: string; content: string };
+    financier: { title: string; content: string };
+    legal: { title: string; content: string };
+    fiscal: { title: string; content: string };
+  };
+  syntheseExecutive: string;
+  recommandations: string[];
+  commentairesPredictifs: {
+    evolutionRisque: string;
+    facteursCles: string;
+    scenarios: string;
+  };
+}
+
 const PredictiveAnalysis = ({ companyData }: PredictiveAnalysisProps) => {
+  const { toast } = useToast();
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+  // Fonction pour générer l'analyse IA
+  const generateAIAnalysis = async () => {
+    setIsGeneratingAI(true);
+    
+    try {
+      const companyInfo = {
+        name: companyData?.companyInfo?.denomination || 'Entreprise',
+        naf: companyData?.companyInfo?.activitePrincipale || 'Non spécifié',
+        employees: companyData?.companyInfo?.nombreSalaries || 'Non spécifié',
+        foundedYear: companyData?.companyInfo?.dateCreation?.substring(0, 4) || 'Non spécifié',
+        address: companyData?.companyInfo?.adresse || 'Adresse non disponible'
+      };
+
+      const scores = {
+        global: companyData?.scores?.global || 5,
+        financial: companyData?.scores?.financial || 5,
+        legal: companyData?.scores?.legal || 5,
+        fiscal: companyData?.scores?.fiscal || 5,
+        defaultRisk: riskData.risk12m
+      };
+
+      const { data: result, error } = await supabase.functions.invoke('extrapolate-analysis', {
+        body: { companyData: companyInfo, scores }
+      });
+
+      if (error) throw error;
+      
+      if (result?.success && result?.analysis) {
+        setAiAnalysis(result.analysis);
+        toast({
+          title: "Analyse IA générée",
+          description: "L'analyse explicable a été générée avec succès"
+        });
+      }
+    } catch (error) {
+      console.error('Error generating AI analysis:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer l'analyse IA",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
   const riskEvolution = [
     { month: 'Jan', risk: 2.1, confidence: 89, market: 3.2 },
     { month: 'Fév', risk: 2.3, confidence: 91, market: 3.1 },
@@ -115,7 +186,46 @@ const PredictiveAnalysis = ({ companyData }: PredictiveAnalysisProps) => {
 
   return (
     <div className="space-y-6">
+      {/* AI Analysis Card */}
+      {aiAnalysis && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-primary">
+              <Bot className="h-5 w-5" />
+              Analyse IA Explicable
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-relaxed mb-4">{aiAnalysis.syntheseExecutive}</p>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold mb-2">Évolution du risque :</h4>
+                <p className="text-sm text-muted-foreground">{aiAnalysis.commentairesPredictifs.evolutionRisque}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Facteurs clés :</h4>
+                <p className="text-sm text-muted-foreground">{aiAnalysis.commentairesPredictifs.facteursCles}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Risk Summary Cards */}
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Analyse Prédictive</h3>
+        <Button
+          onClick={generateAIAnalysis}
+          disabled={isGeneratingAI}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <Bot className="h-4 w-4" />
+          {isGeneratingAI ? "Génération..." : "Analyse IA"}
+        </Button>
+      </div>
+      
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">

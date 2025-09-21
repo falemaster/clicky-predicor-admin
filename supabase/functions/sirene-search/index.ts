@@ -33,10 +33,9 @@ serve(async (req) => {
 
     let url = '';
     if (type === 'name') {
-      // Recherche par dénomination avec wildcard
-      const cleanQuery = query.trim().replace(/[^\w\s\-\.]/gi, '').substring(0, 50);
-      const searchQuery = `denominationUniteLegale:${cleanQuery}*`;
-      url = `${SIRENE_API_BASE}/siret?q=${encodeURIComponent(searchQuery)}&nombre=${limit}&tri=denominationUniteLegale`;
+      // Utiliser l'API publique recherche-entreprises (pas d'OAuth requis)
+      const cleanQuery = query.trim().substring(0, 80);
+      url = `https://recherche-entreprises.api.gouv.fr/search?q=${encodeURIComponent(cleanQuery)}&page=1&per_page=${limit}&open=true`;
     } else if (type === 'siren') {
       url = `${SIRENE_API_BASE}/siret?q=siren:${query}&nombre=1`;
     } else if (type === 'siret') {
@@ -80,23 +79,18 @@ serve(async (req) => {
     }
 
     const data = await response.json();
+
+    if (type === 'name') {
+      const results = Array.isArray(data.results) ? data.results.slice(0, limit) : [];
+      console.log(`Recherche-Entreprises response: ${results.length} results`);
+      return new Response(JSON.stringify({ results, source: 'recherche-entreprises' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     console.log(`SIRENE API response: ${data.etablissements?.length || 0} results`);
 
     if (!data.etablissements || data.etablissements.length === 0) {
-      // Pas de résultats - essayer des données de démonstration si c'est une recherche par nom
-      if (type === 'name') {
-        const mockResults = generateMockResults(query);
-        if (mockResults.length > 0) {
-          return new Response(JSON.stringify({ 
-            results: mockResults,
-            source: 'mock',
-            message: 'Données de démonstration'
-          }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-      }
-      
       return new Response(JSON.stringify({ results: [] }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

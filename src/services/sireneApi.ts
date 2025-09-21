@@ -13,16 +13,17 @@ export class SireneApiService {
 
   async searchCompaniesByName(query: string, limit: number = 10): Promise<{ data: SireneCompanyData[] | null; error: ApiError | null }> {
     try {
-      // Utiliser l'API INSEE via Supabase Edge Function (pas de fallback démo)
-      const { data: apiResponse, error: functionError } = await supabase.functions.invoke('insee-api', {
+      // Utiliser l'edge function dédiée à l'autocomplétion (sans OAuth INSEE)
+      const { data: apiResponse, error: functionError } = await supabase.functions.invoke('sirene-search', {
         body: {
-          endpoint: 'search',
-          query: query
+          type: 'name',
+          query,
+          limit,
         }
       });
 
       if (functionError) {
-        console.error('Erreur Edge Function INSEE:', functionError);
+        console.error('Erreur Edge Function SIRENE-SEARCH:', functionError);
         return { 
           data: null, 
           error: {
@@ -45,11 +46,41 @@ export class SireneApiService {
         };
       }
 
+      // Mapper d'abord le format de l'API recherche-entreprises (results)
+      if (apiResponse?.results) {
+        const companies: SireneCompanyData[] = (apiResponse.results as any[])
+          .slice(0, limit)
+          .map((item: any) => {
+            const siege = item.siege || {};
+            const denomination = item.nom_complet || item.nom_raison_sociale || item.nom || 'Entreprise';
+            const naf = siege.activite_principale || item.activite_principale || '';
+            const effectifTranche = item.tranche_effectif_salarie || siege.tranche_effectif_salarie || '';
+            const adresse = siege.adresse || [
+              siege.numero_voie,
+              siege.type_voie,
+              siege.libelle_voie,
+              siege.code_postal,
+              siege.commune,
+            ].filter(Boolean).join(' ');
+            return {
+              siren: item.siren,
+              siret: siege.siret || item.siret,
+              denomination,
+              naf,
+              effectifs: this.mapEffectifs(effectifTranche),
+              adresse,
+              statut: (siege.etat_administratif || item.etat_administratif) === 'A' ? 'Actif' : 'Cessé',
+              dateCreation: item.date_creation || siege.date_creation,
+            } as SireneCompanyData;
+          });
+        return { data: companies, error: null };
+      }
+
       if (!apiResponse?.etablissements || apiResponse.etablissements.length === 0) {
         return { data: [], error: null };
       }
 
-      // Mapper les résultats INSEE vers notre format
+      // Mapper les résultats INSEE (Sirene V3)
       const companies: SireneCompanyData[] = apiResponse.etablissements
         .slice(0, limit)
         .map((etablissement: any) => {

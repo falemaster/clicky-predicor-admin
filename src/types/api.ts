@@ -169,21 +169,53 @@ export interface PredictorAlert {
   actions: string[];
 }
 
+export interface EnrichedData {
+  contactInfo: {
+    phone: string;
+    email: string;
+    website: string;
+  };
+  legalInfo: {
+    preciseForm: string;
+    socialCapital: string;
+    rcsNumber: string;
+    fiscalYearEnd: string;
+  };
+  businessInfo: {
+    detailedActivity: string;
+    secondaryActivities: string[];
+    collectiveAgreement: string;
+    mainClients: string;
+  };
+  financialIndicators: {
+    estimatedRevenue: string;
+    profitabilityRange: string;
+    growthTrend: string;
+    riskFactors: string[];
+  };
+  metadata: {
+    dataQuality: string;
+    sources: string;
+    confidence: string;
+  };
+}
+
 // Types d'erreur API
 export interface ApiError {
   code: string;
   message: string;
-  source: 'SIRENE' | 'PAPPERS' | 'INFOGREFFE' | 'RUBYPAYEUR' | 'BODACC' | 'PREDICTOR';
+  source: 'SIRENE' | 'PAPPERS' | 'INFOGREFFE' | 'RUBYPAYEUR' | 'BODACC' | 'PREDICTOR' | 'ENRICHMENT';
 }
 
 // Types pour les réponses agrégées
 export interface CompanyFullData {
-  sirene: SireneCompanyData;
-  pappers: PappersCompanyData;
-  infogreffe: InfogreffeCompanyData;
-  rubyPayeur: RubyPayeurData;
-  bodacc: BodaccData;
-  predictor: PredictorAnalysis;
+  sirene?: SireneCompanyData;
+  pappers?: PappersCompanyData;
+  infogreffe?: InfogreffeCompanyData;
+  rubyPayeur?: RubyPayeurData;
+  bodacc?: BodaccData;
+  predictor?: PredictorAnalysis;
+  enriched?: EnrichedData;
   lastUpdate: string;
   errors: ApiError[];
 }

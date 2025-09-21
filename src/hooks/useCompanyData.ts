@@ -159,6 +159,38 @@ export const useCompanyData = ({
         });
       }
 
+      // 7. Enrichissement IA des données manquantes
+      try {
+        const enrichmentData = {
+          name: sireneResult.data.denomination,
+          siren: sireneResult.data.siren,
+          naf: sireneResult.data.naf,
+          address: sireneResult.data.adresse,
+          employees: sireneResult.data.effectifs,
+          foundedYear: sireneResult.data.dateCreation?.substring(0, 4)
+        };
+
+        const { data: enrichedData, error: enrichedError } = await supabase.functions.invoke('enrich-company-data', {
+          body: { companyData: enrichmentData }
+        });
+
+        if (enrichedData && !enrichedError) {
+          companyData.enriched = enrichedData.enrichedData;
+        } else if (enrichedError) {
+          allErrors.push({
+            code: 'ENRICHMENT_FUNCTION_ERROR',
+            message: `Erreur enrichissement IA: ${enrichedError.message}`,
+            source: 'ENRICHMENT'
+          });
+        }
+      } catch (error) {
+        allErrors.push({
+          code: 'ENRICHMENT_FETCH_ERROR',
+          message: 'Erreur lors de l\'enrichissement des données',
+          source: 'ENRICHMENT'
+        });
+      }
+
       companyData.errors = allErrors;
       setData(companyData as CompanyFullData);
       setErrors(allErrors);

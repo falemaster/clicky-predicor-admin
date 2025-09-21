@@ -36,10 +36,10 @@ serve(async (req) => {
       // Utiliser l'API publique recherche-entreprises (pas d'OAuth requis)
       const cleanQuery = query.trim().substring(0, 80);
       url = `https://recherche-entreprises.api.gouv.fr/search?q=${encodeURIComponent(cleanQuery)}&page=1&per_page=${limit}&open=true`;
-    } else if (type === 'siren') {
-      url = `${SIRENE_API_BASE}/siret?q=siren:${query}&nombre=1`;
-    } else if (type === 'siret') {
-      url = `${SIRENE_API_BASE}/siret/${query}`;
+    } else if (type === 'siren' || type === 'siret') {
+      // Recherche directe via l'API publique (pas d'OAuth) pour fiabiliser SIREN/SIRET
+      const cleanQuery = query.trim().substring(0, 80);
+      url = `https://recherche-entreprises.api.gouv.fr/search?q=${encodeURIComponent(cleanQuery)}&page=1&per_page=1&open=true`;
     }
 
     console.log(`Fetching: ${url}`);
@@ -80,7 +80,7 @@ serve(async (req) => {
 
     const data = await response.json();
 
-    if (type === 'name') {
+    if (type === 'name' || type === 'siren' || type === 'siret') {
       const results = Array.isArray(data.results) ? data.results.slice(0, limit) : [];
       console.log(`Recherche-Entreprises response: ${results.length} results`);
       return new Response(JSON.stringify({ results, source: 'recherche-entreprises' }), {

@@ -186,7 +186,38 @@ export class SireneApiService {
 
   async getCompanyBySiren(siren: string): Promise<{ data: SireneCompanyData | null; error: ApiError | null }> {
     try {
-      // Utiliser l'API INSEE via Supabase Edge Function
+      // 1) Tentative via l'edge function publique (recherche-entreprises)
+      const { data: searchResp, error: searchError } = await supabase.functions.invoke('sirene-search', {
+        body: { type: 'siren', query: siren, limit: 1 }
+      });
+
+      if (!searchError && searchResp?.results && searchResp.results.length > 0) {
+        const item = searchResp.results[0];
+        const siege = (item as any).siege || {};
+        const denomination = item.nom_complet || item.nom_raison_sociale || item.nom || 'Entreprise';
+        const naf = siege.activite_principale || item.activite_principale || '';
+        const effectifTranche = item.tranche_effectif_salarie || siege.tranche_effectif_salarie || '';
+        const adresse = siege.adresse || [
+          siege.numero_voie,
+          siege.type_voie,
+          siege.libelle_voie,
+          siege.code_postal,
+          siege.commune,
+        ].filter(Boolean).join(' ');
+        const data: SireneCompanyData = {
+          siren: item.siren,
+          siret: siege.siret || item.siret,
+          denomination,
+          naf,
+          effectifs: this.mapEffectifs(effectifTranche),
+          adresse,
+          statut: (siege.etat_administratif || item.etat_administratif) === 'A' ? 'Actif' : 'Cessé',
+          dateCreation: item.date_creation || siege.date_creation,
+        };
+        return { data, error: null };
+      }
+
+      // 2) Fallback via API INSEE protégée (OAuth)
       const { data: apiResponse, error: functionError } = await supabase.functions.invoke('insee-api', {
         body: {
           endpoint: 'siren',
@@ -257,7 +288,38 @@ export class SireneApiService {
 
   async getCompanyBySiret(siret: string): Promise<{ data: SireneCompanyData | null; error: ApiError | null }> {
     try {
-      // Utiliser l'API INSEE via Supabase Edge Function
+      // 1) Tentative via l'edge function publique (recherche-entreprises)
+      const { data: searchResp, error: searchError } = await supabase.functions.invoke('sirene-search', {
+        body: { type: 'siret', query: siret, limit: 1 }
+      });
+
+      if (!searchError && searchResp?.results && searchResp.results.length > 0) {
+        const item = searchResp.results[0];
+        const siege = (item as any).siege || {};
+        const denomination = item.nom_complet || item.nom_raison_sociale || item.nom || 'Entreprise';
+        const naf = siege.activite_principale || item.activite_principale || '';
+        const effectifTranche = item.tranche_effectif_salarie || siege.tranche_effectif_salarie || '';
+        const adresse = siege.adresse || [
+          siege.numero_voie,
+          siege.type_voie,
+          siege.libelle_voie,
+          siege.code_postal,
+          siege.commune,
+        ].filter(Boolean).join(' ');
+        const data: SireneCompanyData = {
+          siren: item.siren,
+          siret: siege.siret || item.siret,
+          denomination,
+          naf,
+          effectifs: this.mapEffectifs(effectifTranche),
+          adresse,
+          statut: (siege.etat_administratif || item.etat_administratif) === 'A' ? 'Actif' : 'Cessé',
+          dateCreation: item.date_creation || siege.date_creation,
+        };
+        return { data, error: null };
+      }
+
+      // 2) Fallback via API INSEE protégée (OAuth)
       const { data: apiResponse, error: functionError } = await supabase.functions.invoke('insee-api', {
         body: {
           endpoint: 'siret',

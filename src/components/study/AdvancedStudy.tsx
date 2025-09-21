@@ -219,20 +219,20 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                       )}
                     </div>
                   ) : (
-                    <>
-                      <p>
-                        <strong className="text-foreground">Profil d'excellence globale</strong> - L'entreprise présente un profil remarquablement équilibré avec une note moyenne de <span className="font-semibold text-success">8.4/10</span>, plaçant l'organisation dans le quartile supérieur de son secteur.
-                      </p>
-                      <p>
-                        <strong className="text-foreground">Points forts critiques :</strong> La conformité légale (9.1/10) constitue un avantage concurrentiel majeur, témoignant d'une culture de rigueur et de transparence exceptionnelle. La performance économique (8.4/10) reflète une stratégie commerciale bien maîtrisée avec une croissance soutenue et un positionnement concurrentiel solide.
-                      </p>
-                      <p>
-                        <strong className="text-foreground">Axes d'optimisation :</strong> La solidité financière (7.8/10), bien que satisfaisante, présente un potentiel d'amélioration notable. L'optimisation de la structure de capital et l'amélioration des ratios de liquidité pourraient renforcer significativement la résilience financière.
-                      </p>
-                      <p>
-                        <strong className="text-foreground">Recommandation stratégique :</strong> Maintenir l'excellence opérationnelle actuelle tout en investissant dans le renforcement des fondamentaux financiers pour sécuriser la croissance à long terme.
-                      </p>
-                    </>
+                     <>
+                       <p>
+                         <strong className="text-foreground">Profil de l'entreprise {companyData?.companyInfo?.denomination || 'analysée'}</strong> - L'entreprise présente un profil avec une note moyenne de <span className="font-semibold text-success">{companyData?.scores?.global?.toFixed(1) || '6.0'}/10</span>, {companyData?.scores?.global >= 8 ? 'plaçant l\'organisation dans le quartile supérieur de son secteur' : companyData?.scores?.global >= 6.5 ? 'indiquant une performance correcte dans son secteur' : 'nécessitant une attention particulière pour améliorer sa position sectorielle'}.
+                       </p>
+                       <p>
+                         <strong className="text-foreground">Points forts critiques :</strong> {companyData?.scores?.legal >= 8 ? `La conformité légale (${companyData.scores.legal.toFixed(1)}/10) constitue un avantage concurrentiel majeur` : companyData?.scores?.financial >= 8 ? `La solidité financière (${companyData.scores.financial.toFixed(1)}/10) représente un atout important` : companyData?.scores?.fiscal >= 8 ? `La conformité fiscale (${companyData.scores.fiscal.toFixed(1)}/10) témoigne d'une gestion rigoureuse` : 'L\'entreprise maintient un niveau de performance acceptable dans ses activités principales'}. {companyData?.companyInfo?.activitePrincipale ? `L'activité dans le secteur ${companyData.companyInfo.activitePrincipale} bénéficie d'une expertise reconnue.` : ''}
+                       </p>
+                       <p>
+                         <strong className="text-foreground">Axes d'optimisation :</strong> {companyData?.scores?.financial < 7 ? `La solidité financière (${companyData?.scores?.financial?.toFixed(1) || '6.0'}/10) présente un potentiel d'amélioration notable.` : companyData?.scores?.legal < 7 ? `La conformité légale (${companyData?.scores?.legal?.toFixed(1) || '6.0'}/10) nécessite une attention renforcée.` : 'Les indicateurs montrent des opportunités d\'optimisation.'} L'amélioration de ces aspects pourrait renforcer significativement la position concurrentielle.
+                       </p>
+                       <p>
+                         <strong className="text-foreground">Recommandation stratégique :</strong> {companyData?.scores?.global >= 7.5 ? 'Maintenir l\'excellence opérationnelle actuelle tout en consolidant les acquis' : companyData?.scores?.global >= 6 ? 'Concentrer les efforts sur l\'amélioration des points faibles identifiés' : 'Mise en place d\'un plan d\'action prioritaire pour redresser les indicateurs critiques'} pour sécuriser la croissance à long terme.
+                       </p>
+                     </>
                   )}
                 </div>
               </div>

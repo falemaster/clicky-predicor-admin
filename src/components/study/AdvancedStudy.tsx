@@ -47,6 +47,7 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
     economic: false,
     financial: false,
     compliance: false,
+    fiscal: false,
     governance: false
   });
 
@@ -811,6 +812,285 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                           Profil de risque judiciaire <strong>faible à modéré</strong>. Le contentieux commercial identifié est isolé et fait l'objet d'un provisionnement intégral. 
                           L'absence de contentieux fiscal témoigne d'une gestion rigoureuse des obligations déclaratives. 
                           Recommandation : maintenir la veille juridique active et le suivi préventif des relations contractuelles.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
+        {/* Mitigation Fiscale */}
+        <Card>
+          <Collapsible 
+            open={openSections.fiscal} 
+            onOpenChange={() => toggleSection('fiscal')}
+          >
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg">Mitigation Fiscale</CardTitle>
+                      <CardDescription>Optimisation et stratégies de gestion fiscale</CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="default" className="bg-primary text-primary-foreground">
+                      Performant 8.5/10
+                    </Badge>
+                    {openSections.fiscal ? 
+                      <ChevronDown className="h-4 w-4" /> : 
+                      <ChevronRight className="h-4 w-4" />
+                    }
+                  </div>
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <TrendingDown className="h-4 w-4 mr-2" />
+                        Optimisation Fiscale Actuelle
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center p-3 bg-success-light/20 border border-success-light rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <CheckCircle className="h-4 w-4 text-success" />
+                            <span className="text-sm font-medium">Taux d'IS effectif</span>
+                          </div>
+                          <Badge variant="secondary" className="bg-success-light text-success">
+                            {companyData?.financial?.bilans?.[0] ? 
+                              `${((companyData.financial.bilans[0].resultatNet * 0.25) / companyData.financial.bilans[0].resultatNet * 100).toFixed(1)}%` : 
+                              '24.2%'
+                            }
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Crédit d'impôt recherche</span>
+                            <span className="font-medium text-success">18 K€</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>CVAE économisée</span>
+                            <span className="font-medium text-success">12 K€</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Optimisation amortissements</span>
+                            <span className="font-medium text-success">8 K€</span>
+                          </div>
+                          <div className="flex justify-between text-sm border-t pt-2 font-semibold">
+                            <span>Économies totales 2023</span>
+                            <span className="text-success">38 K€</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Potentiel d'Optimisation
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center p-3 bg-primary-light/20 border border-primary-light rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <AlertTriangle className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">Potentiel identifié</span>
+                          </div>
+                          <Badge variant="secondary" className="bg-primary-light text-primary">
+                            +15 K€
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Report en arrière déficitaire</span>
+                            <span className="font-medium text-primary">+7 K€</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Optimisation TVA</span>
+                            <span className="font-medium text-primary">+4 K€</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Déduction exceptionnelle</span>
+                            <span className="font-medium text-primary">+4 K€</span>
+                          </div>
+                          <div className="flex justify-between text-sm border-t pt-2 font-semibold">
+                            <span>Potentiel total</span>
+                            <span className="text-primary">+15 K€</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Tableaux de stratégies fiscales */}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold mb-4 flex items-center">
+                    <Shield className="h-5 w-5 mr-2 text-primary" />
+                    Stratégies de Mitigation Recommandées
+                  </h4>
+                  <div className="grid md:grid-cols-1 gap-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Plan d'Action Fiscal 2024
+                        </CardTitle>
+                        <CardDescription className="text-xs">
+                          Recommandations prioritaires pour l'optimisation fiscale
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-sm py-2 border-b border-muted/20">
+                            <span className="font-medium text-muted-foreground">Action</span>
+                            <span className="font-medium text-muted-foreground">Impact</span>
+                            <span className="font-medium text-muted-foreground">Priorité</span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-sm py-2">
+                            <span className="flex-1">Restructuration holdings pour optimiser IS</span>
+                            <span className="w-20 text-center font-medium text-success">+12 K€</span>
+                            <Badge variant="outline" className="text-xs bg-destructive-light text-destructive border-destructive ml-2">Élevée</Badge>
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-sm py-2">
+                            <span className="flex-1">Mise en place contrat de management</span>
+                            <span className="w-20 text-center font-medium text-success">+8 K€</span>
+                            <Badge variant="outline" className="text-xs bg-warning-light text-warning border-warning ml-2">Moyenne</Badge>
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-sm py-2">
+                            <span className="flex-1">Optimisation régime TVA sur marge</span>
+                            <span className="w-20 text-center font-medium text-success">+5 K€</span>
+                            <Badge variant="outline" className="text-xs bg-warning-light text-warning border-warning ml-2">Moyenne</Badge>
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-sm py-2">
+                            <span className="flex-1">Déduction frais siège social</span>
+                            <span className="w-20 text-center font-medium text-success">+3 K€</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success ml-2">Faible</Badge>
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-sm py-2 bg-muted/10 rounded">
+                            <span className="flex-1 font-semibold">Économies prévisionnelles totales</span>
+                            <span className="w-20 text-center font-bold text-success">+28 K€</span>
+                            <span className="w-16"></span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+
+                {/* Risques fiscaux et veille */}
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Gestion des Risques Fiscaux
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-success-light/20 border border-success-light rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <CheckCircle className="h-4 w-4 text-success" />
+                            <span className="text-sm font-medium">Niveau de risque</span>
+                          </div>
+                          <Badge variant="secondary" className="bg-success-light text-success">
+                            Faible
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Contrôle fiscal probabilité</span>
+                            <span className="font-medium text-success">2.1%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Provisions constituées</span>
+                            <span className="font-medium text-success">12 K€</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Couverture assurance</span>
+                            <span className="font-medium text-success">Active</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Veille réglementaire</span>
+                            <span className="font-medium text-success">À jour</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Suivi Performance Fiscale
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm">Taux d'optimisation</span>
+                            <span className="text-sm font-medium">78%</span>
+                          </div>
+                          <Progress value={78} className="h-2" />
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm">Conformité déclarative</span>
+                            <span className="text-sm font-medium">95%</span>
+                          </div>
+                          <Progress value={95} className="h-2" />
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm">Anticipation réglementaire</span>
+                            <span className="text-sm font-medium">85%</span>
+                          </div>
+                          <Progress value={85} className="h-2" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="mt-4 p-4 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg border border-primary/10">
+                  <div className="flex items-start space-x-3">
+                    <CreditCard className="h-5 w-5 text-primary mt-0.5" />
+                    <div className="flex-1">
+                      <h5 className="font-medium text-sm mb-2">Recommandations Stratégiques Fiscales</h5>
+                      <div className="text-xs text-muted-foreground space-y-2">
+                        <p>
+                          <strong className="text-foreground">Structuration optimale :</strong> La mise en place d'une holding intermédiaire permettrait une optimisation significative de +12K€ via l'intégration fiscale et la déduction des frais de siège.
+                        </p>
+                        <p>
+                          <strong className="text-foreground">Veille réglementaire active :</strong> Anticipation des évolutions législatives (suppression CVAE, réforme IS) pour adapter la stratégie fiscale en temps réel.
+                        </p>
+                        <p>
+                          <strong className="text-foreground">Documentation renforcée :</strong> Formalisation des prix de transfert et justificatifs économiques pour sécuriser les positions fiscales adoptées.
                         </p>
                       </div>
                     </div>

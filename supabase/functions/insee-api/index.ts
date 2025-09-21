@@ -38,6 +38,7 @@ async function getAccessToken(): Promise<string> {
   ];
 
   let lastErrorText = '';
+  let lastStatus = 0;
   for (const endpoint of tokenEndpoints) {
     // 1) Tentative avec Authorization: Basic
     try {
@@ -48,7 +49,7 @@ async function getAccessToken(): Promise<string> {
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
           'Authorization': `Basic ${btoa(`${clientId}:${clientSecret}`)}`
         },
-        body: 'grant_type=client_credentials'
+        body: new URLSearchParams({ grant_type: 'client_credentials', validity_period: '604800' }).toString()
       });
 
       if (tokenResponse.ok) {
@@ -58,6 +59,7 @@ async function getAccessToken(): Promise<string> {
         console.log(`Token OAuth2 obtenu via ${endpoint} (Basic).`);
         return accessToken;
       } else {
+        lastStatus = tokenResponse.status;
         lastErrorText = await tokenResponse.text();
         console.warn(`Échec token (Basic) sur ${endpoint}: ${tokenResponse.status} - ${lastErrorText}`);
       }
@@ -71,6 +73,7 @@ async function getAccessToken(): Promise<string> {
         grant_type: 'client_credentials',
         client_id: clientId,
         client_secret: clientSecret,
+        validity_period: '604800',
       });
 
       const tokenResponse2 = await fetch(endpoint, {
@@ -89,6 +92,7 @@ async function getAccessToken(): Promise<string> {
         console.log(`Token OAuth2 obtenu via ${endpoint} (body credentials).`);
         return accessToken;
       } else {
+        lastStatus = tokenResponse2.status;
         lastErrorText = await tokenResponse2.text();
         console.warn(`Échec token (body) sur ${endpoint}: ${tokenResponse2.status} - ${lastErrorText}`);
       }
@@ -97,8 +101,9 @@ async function getAccessToken(): Promise<string> {
     }
   }
 
-  console.error(`Tous les endpoints OAuth2 ont échoué. Dernière erreur: ${lastErrorText}`);
-  throw new Error('Impossible d\'obtenir un token OAuth2 INSEE');
+  const errMsg = `Impossible d'obtenir un token OAuth2 INSEE. Dernier statut: ${lastStatus}. Détails: ${lastErrorText}`;
+  console.error(errMsg);
+  throw new Error(errMsg);
 }
 
 serve(async (req) => {
@@ -154,15 +159,19 @@ serve(async (req) => {
             }
           );
         }
+        // Recherche multi-champs (dénomination, sigle, enseigne) avec wildcard suffixe
+        const term = String(query).trim();
+        const sanitized = term.replace(/[^\p{L}\p{N}\s\-']/gu, ' ').replace(/\s+/g, ' ').trim();
+        const token = sanitized.replace(/\s+/g, ' ');
         const q = `(
-          denominationUniteLegale:"*${query}*" 
-          OR denominationUsuelle1UniteLegale:"*${query}*" 
-          OR denominationUsuelle2UniteLegale:"*${query}*" 
-          OR denominationUsuelle3UniteLegale:"*${query}*" 
-          OR sigleUniteLegale:"*${query}*" 
-          OR enseigne1Etablissement:"*${query}*" 
-          OR enseigne2Etablissement:"*${query}*" 
-          OR enseigne3Etablissement:"*${query}*"
+          denominationUniteLegale:${token}* 
+          OR denominationUsuelle1UniteLegale:${token}* 
+          OR denominationUsuelle2UniteLegale:${token}* 
+          OR denominationUsuelle3UniteLegale:${token}* 
+          OR sigleUniteLegale:${token}* 
+          OR enseigne1Etablissement:${token}* 
+          OR enseigne2Etablissement:${token}* 
+          OR enseigne3Etablissement:${token}*
         )`;
         url = `${baseUrl}/siret?q=${encodeURIComponent(q)}&nombre=10`;
         break;

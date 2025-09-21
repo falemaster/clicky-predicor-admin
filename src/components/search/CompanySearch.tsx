@@ -193,6 +193,17 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
                   </div>
                 </div>
                 
+                {searchError && (
+                  <div className="mt-2">
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        {searchError.message}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+                
                 {/* Dropdown d'autocomplétion */}
                 {showDropdown && searchResults.length > 0 && (
                   <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-80 overflow-y-auto">

@@ -19,6 +19,7 @@ interface UseCompanyDataReturn {
   fetchCompanyData: (identifier: string, type: 'siren' | 'siret') => Promise<void>;
   refetch: () => Promise<void>;
   clearData: () => void;
+  updateData: (updatedData: CompanyFullData) => void;
   isInitialLoad: boolean;
 }
 
@@ -247,6 +248,14 @@ export const useCompanyData = ({
     setCurrentIdentifier(null);
   };
 
+  const updateData = (updatedData: CompanyFullData) => {
+    setData(updatedData);
+    // Sauvegarder en cache
+    if (updatedData.sirene?.siren) {
+      localStorage.setItem(`company-data-${updatedData.sirene.siren}`, JSON.stringify(updatedData));
+    }
+  };
+
   // Auto-fetch si siren ou siret fournis
   useEffect(() => {
     if (autoFetch) {
@@ -289,6 +298,7 @@ export const useCompanyData = ({
     fetchCompanyData,
     refetch,
     clearData,
+    updateData,
     isInitialLoad
   };
 };

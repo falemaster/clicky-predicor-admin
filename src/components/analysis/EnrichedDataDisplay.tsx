@@ -2,51 +2,87 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Building2, Phone, Mail, Globe, MapPin, Calendar, Users, Euro, FileText, AlertTriangle } from "lucide-react";
+import { EnrichmentInterface } from "./EnrichmentInterface";
 
 interface EnrichedDataProps {
   companyData: any;
+  onDataEnriched?: (enrichedData: any) => void;
 }
 
-export const EnrichedDataDisplay = ({ companyData }: EnrichedDataProps) => {
+export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDataProps) => {
   if (!companyData) return null;
 
   const { sirene, pappers, infogreffe, rubyPayeur, predictor } = companyData;
 
+  // Check if contact data is missing or incomplete
+  const hasContactData = pappers?.telephone || pappers?.email || pappers?.siteWeb;
+  const isContactDataIncomplete = !pappers?.telephone || !pappers?.email || !pappers?.siteWeb;
+
   return (
     <div className="space-y-6">
       {/* Informations de contact enrichies */}
-      {(pappers?.telephone || pappers?.email || pappers?.siteWeb) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Phone className="h-5 w-5" />
-              Coordonnées
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {pappers?.telephone && (
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{pappers.telephone}</span>
-              </div>
-            )}
-            {pappers?.email && (
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>{pappers.email}</span>
-              </div>
-            )}
-            {pappers?.siteWeb && (
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <a href={pappers.siteWeb} target="_blank" rel="noopener noreferrer" 
-                   className="text-primary hover:underline">
-                  {pappers.siteWeb}
-                </a>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="h-5 w-5" />
+            Coordonnées
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {/* Existing contact data */}
+          {pappers?.telephone && (
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <span>{pappers.telephone}</span>
+            </div>
+          )}
+          {pappers?.email && (
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <span>{pappers.email}</span>
+            </div>
+          )}
+          {pappers?.siteWeb && (
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <a href={pappers.siteWeb} target="_blank" rel="noopener noreferrer" 
+                 className="text-primary hover:underline">
+                {pappers.siteWeb}
+              </a>
+            </div>
+          )}
+
+          {/* Missing data placeholders */}
+          {!pappers?.telephone && (
+            <div className="flex items-center gap-2 opacity-50">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground bg-muted px-2 py-1 rounded blur-sm">+33 X XX XX XX XX</span>
+              <Badge variant="secondary" className="text-xs">Non disponible</Badge>
+            </div>
+          )}
+          {!pappers?.email && (
+            <div className="flex items-center gap-2 opacity-50">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground bg-muted px-2 py-1 rounded blur-sm">contact@entreprise.com</span>
+              <Badge variant="secondary" className="text-xs">Non disponible</Badge>
+            </div>
+          )}
+          {!pappers?.siteWeb && (
+            <div className="flex items-center gap-2 opacity-50">
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground bg-muted px-2 py-1 rounded blur-sm">www.entreprise.com</span>
+              <Badge variant="secondary" className="text-xs">Non disponible</Badge>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Enrichment interface when data is missing */}
+      {isContactDataIncomplete && onDataEnriched && (
+        <EnrichmentInterface 
+          companyData={companyData} 
+          onDataEnriched={onDataEnriched}
+        />
       )}
 
       {/* Informations juridiques enrichies */}

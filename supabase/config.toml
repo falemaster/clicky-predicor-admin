@@ -14,3 +14,18 @@ verify_jwt = false
 
 [functions.sirene-search]
 verify_jwt = false
+
+[functions.web-scraper]
+verify_jwt = false
+
+[functions.outscrapper-search]
+verify_jwt = false
+
+[functions.infogreffe-api]
+verify_jwt = false
+
+[functions.insee-api]
+verify_jwt = false
+
+[functions.enrich-company-data]
+verify_jwt = false

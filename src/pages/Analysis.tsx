@@ -11,6 +11,7 @@ import { useCompanyData } from "@/hooks/useCompanyData";
 import { CompanySearch } from "@/components/search/CompanySearch";
 import { Link } from "react-router-dom";
 import EnrichedDataDisplayAI from "@/components/analysis/EnrichedDataDisplayAI";
+import { EnrichedDataDisplay } from "@/components/analysis/EnrichedDataDisplay";
 import LoadingProgress from "@/components/analysis/LoadingProgress";
 import AnalysisSkeleton from "@/components/analysis/AnalysisSkeleton";
 import { 
@@ -50,7 +51,7 @@ const Analysis = () => {
   const { data: mockData } = useAnalysisData();
   
   // Hook pour les vraies données API
-  const { data: realData, loading, errors, fetchCompanyData, isInitialLoad } = useCompanyData();
+  const { data: realData, loading, errors, fetchCompanyData, isInitialLoad, updateData } = useCompanyData();
 
   // Déterminer l'état de l'application
   const hasRealData = realData && realData.sirene;
@@ -563,7 +564,13 @@ const Analysis = () => {
                     <Building2 className="h-5 w-5" />
                     Données Enrichies par IA
                   </h3>
-                  <EnrichedDataDisplayAI data={realData} />
+                  <EnrichedDataDisplay 
+                    companyData={realData} 
+                    onDataEnriched={updateData}
+                  />
+                  <div className="mt-6">
+                    <EnrichedDataDisplayAI data={realData} />
+                  </div>
                 </div>
                 
                 {/* Séparateur */}

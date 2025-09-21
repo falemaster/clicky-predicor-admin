@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Globe, Search, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Globe, Search, Loader2, CheckCircle, AlertCircle, Users } from "lucide-react";
 
 interface EnrichmentInterfaceProps {
   companyData: any;
@@ -18,6 +18,7 @@ export const EnrichmentInterface = ({ companyData, onDataEnriched }: EnrichmentI
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [isEnrichingWebsite, setIsEnrichingWebsite] = useState(false);
   const [isEnrichingOutscrapper, setIsEnrichingOutscrapper] = useState(false);
+  const [isEnrichingApollo, setIsEnrichingApollo] = useState(false);
   const [enrichmentResults, setEnrichmentResults] = useState<any>(null);
   const { toast } = useToast();
 
@@ -112,6 +113,64 @@ export const EnrichmentInterface = ({ companyData, onDataEnriched }: EnrichmentI
     }
   };
 
+  const handleApolloEnrichment = async () => {
+    setIsEnrichingApollo(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('apollo-search', {
+        body: {
+          companyName: companyData.sirene?.denomination || companyData.sirene?.nom,
+          domain: websiteUrl || companyData.pappers?.siteWeb,
+          address: companyData.sirene?.adresse
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        const enrichedData = { ...companyData };
+        if (!enrichedData.pappers) enrichedData.pappers = {};
+        
+        // Merge Apollo data
+        const apolloData = data.data;
+        Object.assign(enrichedData.pappers, {
+          telephone: apolloData.contacts?.[0]?.phone || enrichedData.pappers?.telephone,
+          email: apolloData.contacts?.[0]?.email || enrichedData.pappers?.email,
+          siteWeb: apolloData.companyInfo?.website || enrichedData.pappers?.siteWeb,
+          contacts: apolloData.contacts,
+          socialMedia: apolloData.socialMedia,
+          industry: apolloData.companyInfo?.industry,
+          description: apolloData.companyInfo?.description
+        });
+        enrichedData.enrichmentSource = 'apollo';
+        
+        setEnrichmentResults({
+          telephone: apolloData.contacts?.[0]?.phone,
+          email: apolloData.contacts?.[0]?.email,
+          siteWeb: apolloData.companyInfo?.website,
+          contactsCount: apolloData.contacts?.length || 0,
+          confidence: '85'
+        });
+        onDataEnriched(enrichedData);
+        
+        toast({
+          title: "Enrichissement réussi",
+          description: `${apolloData.contacts?.length || 0} contacts trouvés via Apollo.io`,
+        });
+      } else {
+        throw new Error(data.error || "Aucune donnée trouvée");
+      }
+    } catch (error) {
+      console.error('Apollo enrichment error:', error);
+      toast({
+        title: "Erreur d'enrichissement",
+        description: "Impossible de trouver des données via Apollo.io",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEnrichingApollo(false);
+    }
+  };
+
   return (
     <Card className="border-dashed border-2 border-muted">
       <CardHeader>
@@ -155,9 +214,8 @@ export const EnrichmentInterface = ({ companyData, onDataEnriched }: EnrichmentI
           <Separator className="flex-1" />
         </div>
 
-        {/* Outscrapper enrichment */}
-        <div className="space-y-3">
-          <Label>Recherche automatique</Label>
+        {/* Enrichment buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Button 
             onClick={handleOutscrapperEnrichment}
             disabled={isEnrichingOutscrapper}
@@ -169,12 +227,26 @@ export const EnrichmentInterface = ({ companyData, onDataEnriched }: EnrichmentI
             ) : (
               <Search className="h-4 w-4 mr-2" />
             )}
-            Enrichir automatiquement avec Outscrapper
+            Enrichir avec Outscrapper
           </Button>
-          <p className="text-xs text-muted-foreground">
-            Recherche automatique basée sur le nom et l'adresse de l'entreprise
-          </p>
+          
+          <Button 
+            onClick={handleApolloEnrichment}
+            disabled={isEnrichingApollo}
+            variant="secondary"
+            className="w-full"
+          >
+            {isEnrichingApollo ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Users className="h-4 w-4 mr-2" />
+            )}
+            Enrichir avec Apollo.io
+          </Button>
         </div>
+        <p className="text-xs text-center text-muted-foreground">
+          Recherche automatique basée sur le nom et l'adresse de l'entreprise
+        </p>
 
         {/* Results preview */}
         {enrichmentResults && (
@@ -192,6 +264,9 @@ export const EnrichmentInterface = ({ companyData, onDataEnriched }: EnrichmentI
               )}
               {enrichmentResults.siteWeb && (
                 <div>Site web: {enrichmentResults.siteWeb}</div>
+              )}
+              {enrichmentResults.contactsCount !== undefined && (
+                <div>Contacts trouvés: {enrichmentResults.contactsCount}</div>
               )}
               {enrichmentResults.confidence && (
                 <Badge variant="outline" className="mt-2">

@@ -21,6 +21,9 @@ verify_jwt = false
 [functions.outscrapper-search]
 verify_jwt = false
 
+[functions.apollo-search]
+verify_jwt = false
+
 [functions.infogreffe-api]
 verify_jwt = false
 

@@ -201,7 +201,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      log_search_activity: {
+        Args: {
+          p_company_id?: string
+          p_ip_address?: unknown
+          p_results_found?: boolean
+          p_search_query: string
+          p_search_type: string
+          p_user_agent?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

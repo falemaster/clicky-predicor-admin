@@ -161,14 +161,10 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
               <span className="text-sm text-muted-foreground">Capital social</span>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">
-                  {enrichedData?.legalInfo?.socialCapital || 
-                   data.infogreffe?.capitalSocial || 
-                   data.pappers?.capitalSocial ||
-                   "50 000"} €
+                  {data.infogreffe?.capitalSocial?.toLocaleString() + ' €' || 
+                   data.pappers?.capitalSocial?.toLocaleString() + ' €' ||
+                   "Non renseigné"}
                 </span>
-                {enrichedData?.legalInfo?.socialCapital && (
-                  <Badge variant="outline">IA</Badge>
-                )}
               </div>
             </div>
             <div className="flex justify-between items-center">

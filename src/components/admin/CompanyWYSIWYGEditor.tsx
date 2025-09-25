@@ -337,11 +337,9 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     foundedYear: formData.sirene?.dateCreation ? new Date(formData.sirene.dateCreation).getFullYear().toString() : '',
     status: getNestedValue(formData, ['sirene', 'statut']),
     capitalSocial: (() => {
-      const enrichedCapital = getNestedValue(formData, ['enriched', 'legalInfo', 'socialCapital']);
       const pappersCapital = formData.pappers?.capitalSocial;
       const infogreffeCapital = formData.infogreffe?.capitalSocial;
       
-      if (enrichedCapital) return `${enrichedCapital} €`;
       if (pappersCapital) return `${pappersCapital.toLocaleString()} €`;
       if (infogreffeCapital) return `${infogreffeCapital.toLocaleString()} €`;
       return '';
@@ -553,7 +551,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                     <EditableField
                       value={displayCompanyData.capitalSocial}
                       placeholder="Capital social (€)"
-                      onSave={(value) => updateField(['enriched', 'legalInfo', 'socialCapital'], value)}
+                      onSave={(value) => updateField(['pappers', 'capitalSocial'], value)}
                       icon={<Euro className="h-4 w-4" />}
                     />
                   </div>

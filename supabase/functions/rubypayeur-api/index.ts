@@ -9,6 +9,15 @@ const corsHeaders = {
 const RUBYPAYEUR_API_KEY = Deno.env.get('RUBYPAYEUR_API_KEY');
 const RUBYPAYEUR_BASE_URL = 'https://api.rubypayeur.com/v1';
 
+// Endpoints to test in order of preference
+const ENDPOINTS = [
+  '/companies/{siren}',
+  '/company/{siren}', 
+  '/companies?siren={siren}',
+  '/companies/{siren}/risk',
+  '/companies/{siren}/risk-score'
+];
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -53,16 +62,45 @@ serve(async (req) => {
 
     console.log(`Fetching RubyPayeur data for SIREN: ${siren}`);
 
-    const response = await fetch(`${RUBYPAYEUR_BASE_URL}/company/${siren}/risk-score`, {
-      headers: {
-        'Authorization': `Bearer ${RUBYPAYEUR_API_KEY}`,
-        'Accept': 'application/json',
-        'User-Agent': 'Predicor/1.0'
-      },
-    });
+    // Try endpoints in order until one works
+    let data = null;
+    let successfulEndpoint = null;
+    
+    for (const endpointTemplate of ENDPOINTS) {
+      try {
+        let url;
+        if (endpointTemplate.includes('?siren=')) {
+          url = `${RUBYPAYEUR_BASE_URL}${endpointTemplate.replace('{siren}', siren)}`;
+        } else {
+          url = `${RUBYPAYEUR_BASE_URL}${endpointTemplate.replace('{siren}', siren)}`;
+        }
+        
+        console.log(`Testing endpoint: ${url}`);
+        
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${RUBYPAYEUR_API_KEY}`,
+            'Accept': 'application/json',
+            'User-Agent': 'Predicor/1.0'
+          },
+        });
 
-    if (!response.ok) {
-      console.error(`RubyPayeur API error: ${response.status} ${response.statusText}`);
+        if (response.ok) {
+          data = await response.json();
+          successfulEndpoint = endpointTemplate;
+          console.log(`Success with endpoint: ${endpointTemplate}`);
+          console.log('API Response structure:', JSON.stringify(data, null, 2));
+          break;
+        } else {
+          console.log(`Endpoint ${endpointTemplate} failed: ${response.status} ${response.statusText}`);
+        }
+      } catch (error) {
+        console.log(`Endpoint ${endpointTemplate} error:`, error);
+      }
+    }
+
+    if (!data) {
+      console.error('All RubyPayeur endpoints failed, using mock data');
       
       // Fallback avec données simulées
       const mockData = {
@@ -82,8 +120,7 @@ serve(async (req) => {
       });
     }
 
-    const data = await response.json();
-    console.log(`RubyPayeur data fetched successfully for SIREN: ${siren}`);
+    console.log(`RubyPayeur data fetched successfully for SIREN: ${siren} using endpoint: ${successfulEndpoint}`);
 
     // Transformer les données RubyPayeur au format attendu
     const transformedData = {

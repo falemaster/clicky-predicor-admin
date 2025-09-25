@@ -56,6 +56,7 @@ export type Database = {
           created_at: string
           edited_at: string | null
           edited_by: string | null
+          enriched_data: Json | null
           id: string
           is_manually_edited: boolean | null
           last_searched: string | null
@@ -75,6 +76,7 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           edited_by?: string | null
+          enriched_data?: Json | null
           id?: string
           is_manually_edited?: boolean | null
           last_searched?: string | null
@@ -94,6 +96,7 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           edited_by?: string | null
+          enriched_data?: Json | null
           id?: string
           is_manually_edited?: boolean | null
           last_searched?: string | null

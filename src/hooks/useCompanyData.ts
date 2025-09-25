@@ -49,7 +49,20 @@ export const useCompanyData = ({
     const allErrors: ApiError[] = [];
 
     try {
-      // Recherche directe par SIREN/SIRET via l'API INSEE
+      // 1. Vérifier d'abord s'il y a des données admin modifiées
+      const adminDataResult = await supabase
+        .from('admin_companies')
+        .select('enriched_data, is_manually_edited')
+        .eq('siren', type === 'siren' ? identifier : identifier.substring(0, 9))
+        .maybeSingle();
+
+      let adminData: CompanyFullData | null = null;
+      if (adminDataResult.data?.is_manually_edited && adminDataResult.data?.enriched_data) {
+        adminData = adminDataResult.data.enriched_data as unknown as CompanyFullData;
+        console.log('📋 Données admin trouvées, elles seront prioritaires sur les données API');
+      }
+
+      // 2. Recherche directe par SIREN/SIRET via l'API INSEE
       console.log(`📡 Appel API INSEE pour ${type}: ${identifier}`);
       let sireneResult = type === 'siren' 
         ? await sireneService.getCompanyBySiren(identifier)
@@ -199,12 +212,19 @@ export const useCompanyData = ({
         });
       }
 
-      companyData.errors = allErrors;
-      setData(companyData as CompanyFullData);
+      // 8. Merger les données admin avec les données API (admin prioritaire)
+      let finalData = companyData as CompanyFullData;
+      if (adminData) {
+        finalData = mergeAdminDataWithApiData(adminData, companyData as CompanyFullData);
+        console.log('🔄 Données admin mergées avec les données API');
+      }
+
+      finalData.errors = allErrors;
+      setData(finalData);
       setErrors(allErrors);
 
       // Sauvegarder en localStorage pour la cache
-      localStorage.setItem(`company-data-${sireneResult.data.siren}`, JSON.stringify(companyData));
+      localStorage.setItem(`company-data-${sireneResult.data.siren}`, JSON.stringify(finalData));
 
     } catch (error) {
       const globalError: ApiError = {
@@ -217,6 +237,25 @@ export const useCompanyData = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fonction pour merger intelligemment les données admin avec les données API
+  const mergeAdminDataWithApiData = (adminData: CompanyFullData, apiData: CompanyFullData): CompanyFullData => {
+    const merged = { ...apiData };
+    
+    // Les données admin écrasent les données API quand elles existent
+    if (adminData.sirene) merged.sirene = { ...apiData.sirene, ...adminData.sirene };
+    if (adminData.pappers) merged.pappers = { ...apiData.pappers, ...adminData.pappers };
+    if (adminData.infogreffe) merged.infogreffe = { ...apiData.infogreffe, ...adminData.infogreffe };
+    if (adminData.rubyPayeur) merged.rubyPayeur = { ...apiData.rubyPayeur, ...adminData.rubyPayeur };
+    if (adminData.predictor) merged.predictor = { ...apiData.predictor, ...adminData.predictor };
+    if (adminData.enriched) merged.enriched = { ...apiData.enriched, ...adminData.enriched };
+    if (adminData.bodacc) merged.bodacc = { ...apiData.bodacc, ...adminData.bodacc };
+
+    // Marquer que les données contiennent des modifications admin
+    (merged as any).hasAdminModifications = true;
+    
+    return merged;
   };
 
   const refetch = async () => {

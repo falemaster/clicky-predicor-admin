@@ -175,7 +175,8 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
         status: formData.sirene.statut === 'Actif' ? 'active' : 'inactive',
         is_manually_edited: true,
         edited_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        enriched_data: JSON.parse(JSON.stringify(formData)) // Convert to JSON
       };
 
       if (existingCompany) {
@@ -190,7 +191,7 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
         // Insert new company
         const { error } = await supabase
           .from('admin_companies')
-          .insert([companyUpdateData]);
+          .insert(companyUpdateData);
 
         if (error) throw error;
       }
@@ -198,7 +199,7 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
       setHasChanges(false);
       toast({
         title: "Données sauvegardées",
-        description: "Les informations de l'entreprise ont été mises à jour avec succès.",
+        description: "Les modifications admin sont maintenant visibles côté utilisateur.",
       });
     } catch (error) {
       console.error('Error saving company data:', error);

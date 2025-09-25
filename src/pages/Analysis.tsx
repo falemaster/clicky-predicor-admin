@@ -9,6 +9,7 @@ import AdvancedStudy from "@/components/study/AdvancedStudy";
 import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
 import { useAnalysisData } from "@/hooks/useAnalysisData";
 import { useCompanyData } from "@/hooks/useCompanyData";
+import { getScoreTheme } from "@/utils/scoreUtils";
 import { CompanySearch } from "@/components/search/CompanySearch";
 import { Link } from "react-router-dom";
 import EnrichedDataDisplayAI from "@/components/analysis/EnrichedDataDisplayAI";
@@ -470,14 +471,20 @@ const Analysis = () => {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center">
-                    <TrendingUp className="h-4 w-4 mr-2 text-success" />
+                    {(() => {
+                      const theme = getScoreTheme(scores.financial, 'financial');
+                      const HeaderIcon = theme.icon;
+                      return <HeaderIcon className={`h-4 w-4 mr-2 ${theme.iconColor}`} />;
+                    })()}
                     Santé financière
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-success mb-2">{scores.financial}/10</div>
+                  <div className={`text-2xl font-bold mb-2 ${getScoreTheme(scores.financial, 'financial').textColor}`}>
+                    {scores.financial}/10
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Résultats stables avec une croissance du CA de +12% sur l'exercice.
+                    {getScoreTheme(scores.financial, 'financial').description}
                   </p>
                 </CardContent>
               </Card>
@@ -485,14 +492,20 @@ const Analysis = () => {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center">
-                    <Shield className="h-4 w-4 mr-2 text-primary" />
+                    {(() => {
+                      const theme = getScoreTheme(scores.legal, 'legal');
+                      const HeaderIcon = theme.icon;
+                      return <HeaderIcon className={`h-4 w-4 mr-2 ${theme.iconColor}`} />;
+                    })()}
                     Conformité légale
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-primary mb-2">{scores.legal}/10</div>
+                  <div className={`text-2xl font-bold mb-2 ${getScoreTheme(scores.legal, 'legal').textColor}`}>
+                    {scores.legal}/10
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Excellent respect des obligations légales et réglementaires.
+                    {getScoreTheme(scores.legal, 'legal').description}
                   </p>
                 </CardContent>
               </Card>
@@ -500,14 +513,40 @@ const Analysis = () => {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center">
-                    <BarChart3 className="h-4 w-4 mr-2 text-warning" />
+                    {(() => {
+                      // Convert defaultRisk from string to number for theming
+                      const riskValue = typeof scores.defaultRisk === 'string' 
+                        ? scores.defaultRisk === 'Faible' 
+                          ? 1 
+                          : parseFloat(scores.defaultRisk.replace('%', '')) / 10 
+                        : scores.defaultRisk;
+                      const theme = getScoreTheme(riskValue, 'risk');
+                      const HeaderIcon = theme.icon;
+                      return <HeaderIcon className={`h-4 w-4 mr-2 ${theme.iconColor}`} />;
+                    })()}
                     Risque prédictif 12m
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-success mb-2">{scores.defaultRisk}</div>
+                  <div className={`text-2xl font-bold mb-2 ${(() => {
+                    const riskValue = typeof scores.defaultRisk === 'string' 
+                      ? scores.defaultRisk === 'Faible' 
+                        ? 1 
+                        : parseFloat(scores.defaultRisk.replace('%', '')) / 10 
+                      : scores.defaultRisk;
+                    return getScoreTheme(riskValue, 'risk').textColor;
+                  })()}`}>
+                    {scores.defaultRisk}
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Probabilité de défaillance inférieure à 5% sur 12 mois.
+                    {(() => {
+                      const riskValue = typeof scores.defaultRisk === 'string' 
+                        ? scores.defaultRisk === 'Faible' 
+                          ? 1 
+                          : parseFloat(scores.defaultRisk.replace('%', '')) / 10 
+                        : scores.defaultRisk;
+                      return getScoreTheme(riskValue, 'risk').description;
+                    })()}
                   </p>
                 </CardContent>
               </Card>

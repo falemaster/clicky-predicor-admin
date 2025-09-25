@@ -1,18 +1,121 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Building, DollarSign, Scale, TrendingUp, FileText, Save, RefreshCw, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Building2, 
+  Phone, 
+  Mail, 
+  Globe, 
+  MapPin, 
+  Calendar, 
+  Users, 
+  Euro, 
+  FileText, 
+  AlertTriangle, 
+  Save, 
+  RefreshCw, 
+  AlertCircle,
+  Edit3,
+  Check,
+  X 
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyData } from "@/hooks/useCompanyData";
-import { CompanyDataForm } from "./CompanyDataForm";
 import { supabase } from "@/integrations/supabase/client";
 import type { CompanyFullData } from "@/types/api";
 
 interface CompanyWYSIWYGEditorProps {
   siren: string;
+}
+
+interface EditableFieldProps {
+  value: string | undefined;
+  placeholder: string;
+  onSave: (value: string) => void;
+  multiline?: boolean;
+  icon?: React.ReactNode;
+  badge?: string;
+  type?: 'text' | 'email' | 'tel' | 'url';
+}
+
+function EditableField({ 
+  value, 
+  placeholder, 
+  onSave, 
+  multiline = false, 
+  icon, 
+  badge, 
+  type = 'text' 
+}: EditableFieldProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value || '');
+
+  const hasValue = value && value.trim() !== '';
+
+  const handleSave = () => {
+    onSave(editValue);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(value || '');
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        {icon}
+        {multiline ? (
+          <Textarea 
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            className="flex-1"
+            rows={3}
+          />
+        ) : (
+          <Input 
+            type={type}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            className="flex-1"
+            placeholder={placeholder}
+          />
+        )}
+        <Button size="sm" onClick={handleSave}>
+          <Check className="h-4 w-4" />
+        </Button>
+        <Button size="sm" variant="outline" onClick={handleCancel}>
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className={`flex items-center gap-2 group cursor-pointer hover:bg-muted/50 p-2 rounded transition-colors ${
+        !hasValue ? 'opacity-50' : ''
+      }`}
+      onClick={() => setIsEditing(true)}
+    >
+      {icon}
+      <span className={`flex-1 ${!hasValue ? 'text-muted-foreground bg-muted px-2 py-1 rounded blur-sm' : ''}`}>
+        {hasValue ? value : placeholder}
+      </span>
+      {badge && (
+        <Badge variant={hasValue ? "success" : "secondary"} className="text-xs">
+          {hasValue ? badge : "Non disponible"}
+        </Badge>
+      )}
+      <Edit3 className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+    </div>
+  );
 }
 
 export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
@@ -28,7 +131,22 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
     }
   }, [data]);
 
-  const handleFormChange = (updatedData: CompanyFullData) => {
+  const updateField = (field: string, value: string) => {
+    if (!formData) return;
+    
+    // Handle nested field updates
+    const fieldParts = field.split('.');
+    const updatedData = { ...formData };
+    
+    if (fieldParts.length === 2) {
+      if (!updatedData[fieldParts[0] as keyof CompanyFullData]) {
+        (updatedData as any)[fieldParts[0]] = {};
+      }
+      (updatedData as any)[fieldParts[0]][fieldParts[1]] = value;
+    } else {
+      (updatedData as any)[field] = value;
+    }
+    
     setFormData(updatedData);
     setHasChanges(true);
   };
@@ -131,16 +249,16 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Building className="h-5 w-5" />
+                <Building2 className="h-5 w-5" />
                 {formData.sirene?.denomination || 'Entreprise inconnue'}
               </CardTitle>
               <CardDescription>
-                SIREN: {siren} • Édition manuelle des données
+                SIREN: {siren} • Édition WYSIWYG des données
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
               {hasChanges && (
-                <Badge variant="warning" className="animate-pulse">
+                <Badge variant="outline" className="animate-pulse border-warning text-warning">
                   Modifications non sauvegardées
                 </Badge>
               )}
@@ -156,7 +274,6 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
               <Button
                 onClick={handleSave}
                 disabled={!hasChanges || isSaving}
-                className="bg-success hover:bg-success/90"
               >
                 <Save className="h-4 w-4 mr-2" />
                 {isSaving ? "Sauvegarde..." : "Sauvegarder"}
@@ -166,71 +283,259 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
         </CardHeader>
       </Card>
 
-      {/* Tabbed editor interface */}
-      <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="general" className="flex items-center gap-2">
-            <Building className="h-4 w-4" />
+      {/* Coordonnées enrichies - Identique au front */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="h-5 w-5" />
+            Coordonnées
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <EditableField
+            value={formData.pappers?.telephone}
+            placeholder="+33 X XX XX XX XX"
+            onSave={(value) => updateField('pappers.telephone', value)}
+            icon={<Phone className="h-4 w-4 text-muted-foreground" />}
+            badge="Pappers"
+            type="tel"
+          />
+          <EditableField
+            value={formData.pappers?.email}
+            placeholder="contact@entreprise.com"
+            onSave={(value) => updateField('pappers.email', value)}
+            icon={<Mail className="h-4 w-4 text-muted-foreground" />}
+            badge="Pappers"
+            type="email"
+          />
+          <EditableField
+            value={formData.pappers?.siteWeb}
+            placeholder="www.entreprise.com"
+            onSave={(value) => updateField('pappers.siteWeb', value)}
+            icon={<Globe className="h-4 w-4 text-muted-foreground" />}
+            badge="Pappers"
+            type="url"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Informations générales */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
             Informations générales
-          </TabsTrigger>
-          <TabsTrigger value="financial" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Données financières
-          </TabsTrigger>
-          <TabsTrigger value="legal" className="flex items-center gap-2">
-            <Scale className="h-4 w-4" />
-            Juridique
-          </TabsTrigger>
-          <TabsTrigger value="predictive" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Scores prédictifs
-          </TabsTrigger>
-          <TabsTrigger value="notes" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Notes & Commentaires
-          </TabsTrigger>
-        </TabsList>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <EditableField
+                value={formData.sirene?.adresse}
+                placeholder="Adresse de l'entreprise"
+                onSave={(value) => updateField('sirene.adresse', value)}
+                icon={<MapPin className="h-4 w-4 text-muted-foreground" />}
+                badge="SIRENE"
+                multiline
+              />
+              <EditableField
+                value={formData.sirene?.dateCreation ? new Date(formData.sirene.dateCreation).getFullYear().toString() : undefined}
+                placeholder="Année de création"
+                onSave={(value) => updateField('sirene.dateCreation', `${value}-01-01`)}
+                icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
+                badge="SIRENE"
+              />
+            </div>
+            <div className="space-y-4">
+              <EditableField
+                value={formData.sirene?.effectifs?.toString()}
+                placeholder="Nombre d'employés"
+                onSave={(value) => updateField('sirene.effectifs', value)}
+                icon={<Users className="h-4 w-4 text-muted-foreground" />}
+                badge="SIRENE"
+              />
+              <EditableField
+                value={formData.sirene?.naf}
+                placeholder="Code NAF"
+                onSave={(value) => updateField('sirene.naf', value)}
+                icon={<Building2 className="h-4 w-4 text-muted-foreground" />}
+                badge="SIRENE"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="general" className="space-y-4">
-          <CompanyDataForm
-            section="general"
-            data={formData}
-            onChange={handleFormChange}
-          />
-        </TabsContent>
+      {/* Informations juridiques enrichies */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            Informations Juridiques
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-2 gap-4">
+            <EditableField
+              value={formData.infogreffe?.formeJuridique}
+              placeholder="Forme juridique"
+              onSave={(value) => updateField('infogreffe.formeJuridique', value)}
+              badge="Infogreffe"
+            />
+            <EditableField
+              value={formData.infogreffe?.capitalSocial?.toString()}
+              placeholder="Capital social (€)"
+              onSave={(value) => updateField('infogreffe.capitalSocial', value)}
+              icon={<Euro className="h-4 w-4 text-muted-foreground" />}
+              badge="Infogreffe"
+            />
+            <EditableField
+              value={formData.infogreffe?.numeroRcs}
+              placeholder="Numéro RCS"
+              onSave={(value) => updateField('infogreffe.numeroRcs', value)}
+              badge="Infogreffe"
+            />
+            <EditableField
+              value={formData.infogreffe?.greffe}
+              placeholder="Greffe"
+              onSave={(value) => updateField('infogreffe.greffe', value)}
+              badge="Infogreffe"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="financial" className="space-y-4">
-          <CompanyDataForm
-            section="financial"
-            data={formData}
-            onChange={handleFormChange}
-          />
-        </TabsContent>
+      {/* Score de paiement enrichi */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Comportement de Paiement
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <EditableField
+                value={formData.rubyPayeur?.scoreGlobal?.toString()}
+                placeholder="Score Global (/10)"
+                onSave={(value) => updateField('rubyPayeur.scoreGlobal', value)}
+              />
+              <div className="text-sm text-muted-foreground mt-1">Score Global</div>
+            </div>
+            <div className="text-center">
+              <EditableField
+                value={formData.rubyPayeur?.scorePaiement?.toString()}
+                placeholder="Score Paiement (/10)"
+                onSave={(value) => updateField('rubyPayeur.scorePaiement', value)}
+              />
+              <div className="text-sm text-muted-foreground mt-1">Score Paiement</div>
+            </div>
+            <div className="text-center">
+              <EditableField
+                value={formData.rubyPayeur?.retardsMoyens?.toString()}
+                placeholder="Retards moyens (j)"
+                onSave={(value) => updateField('rubyPayeur.retardsMoyens', value)}
+              />
+              <div className="text-sm text-muted-foreground mt-1">Retards Moyens</div>
+            </div>
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Tendance:</span>
+            <EditableField
+              value={formData.rubyPayeur?.tendance}
+              placeholder="Tendance"
+              onSave={(value) => updateField('rubyPayeur.tendance', value)}
+              badge="RubyPayeur"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="legal" className="space-y-4">
-          <CompanyDataForm
-            section="legal"
-            data={formData}
-            onChange={handleFormChange}
-          />
-        </TabsContent>
+      {/* Données financières enrichies */}
+      {formData.pappers?.bilans && formData.pappers.bilans.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Euro className="h-5 w-5" />
+              Données Financières Récentes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <EditableField
+                  value={formData.pappers.bilans[0]?.chiffreAffaires?.toString()}
+                  placeholder="Chiffre d'affaires (€)"
+                  onSave={(value) => updateField('pappers.bilans.0.chiffreAffaires', value)}
+                />
+                <div className="text-sm text-muted-foreground">Chiffre d'Affaires</div>
+              </div>
+              <div className="text-center">
+                <EditableField
+                  value={formData.pappers.bilans[0]?.resultatNet?.toString()}
+                  placeholder="Résultat net (€)"
+                  onSave={(value) => updateField('pappers.bilans.0.resultatNet', value)}
+                />
+                <div className="text-sm text-muted-foreground">Résultat Net</div>
+              </div>
+              <div className="text-center">
+                <EditableField
+                  value={formData.pappers.bilans[0]?.fondsPropresBruts?.toString()}
+                  placeholder="Fonds propres (€)"
+                  onSave={(value) => updateField('pappers.bilans.0.fondsPropresBruts', value)}
+                />
+                <div className="text-sm text-muted-foreground">Fonds Propres</div>
+              </div>
+              <div className="text-center">
+                <EditableField
+                  value={formData.pappers.bilans[0]?.dettes?.toString()}
+                  placeholder="Dettes (€)"
+                  onSave={(value) => updateField('pappers.bilans.0.dettes', value)}
+                />
+                <div className="text-sm text-muted-foreground">Dettes</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Euro className="h-5 w-5" />
+              Données Financières
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-muted-foreground">
+              <p>Aucune donnée financière disponible</p>
+              <p className="text-sm">Cliquez pour ajouter des informations financières</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        <TabsContent value="predictive" className="space-y-4">
-          <CompanyDataForm
-            section="predictive"
-            data={formData}
-            onChange={handleFormChange}
+      {/* Notes administratives */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Notes Administratives
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EditableField
+            value={(formData as any).adminNotes || ''}
+            placeholder="Ajouter des notes administratives sur cette entreprise..."
+            onSave={(value) => updateField('adminNotes', value)}
+            multiline
           />
-        </TabsContent>
-
-        <TabsContent value="notes" className="space-y-4">
-          <CompanyDataForm
-            section="notes"
-            data={formData}
-            onChange={handleFormChange}
-          />
-        </TabsContent>
-      </Tabs>
+          <div className="mt-4 text-xs text-muted-foreground">
+            Toutes les modifications sont tracées avec l'horodatage et l'utilisateur.
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

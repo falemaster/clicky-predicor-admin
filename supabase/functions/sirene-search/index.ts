@@ -17,11 +17,23 @@ serve(async (req) => {
   try {
     const { query, type = 'name', limit = 10 } = await req.json();
 
-    if (!query || query.trim().length < 2) {
+    if (!query || query.trim().length < 3) {
+      // Retourner des données de démonstration pour les requêtes courtes
+      if (type === 'name' && query && query.trim().length >= 1) {
+        const mockResults = generateMockResults(query);
+        return new Response(JSON.stringify({ 
+          results: mockResults,
+          source: 'mock',
+          message: 'Données de démonstration (requête trop courte)'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       return new Response(JSON.stringify({ 
         error: { 
           code: 'QUERY_TOO_SHORT', 
-          message: 'La requête doit contenir au moins 2 caractères' 
+          message: 'La requête doit contenir au moins 3 caractères' 
         } 
       }), {
         status: 400,
@@ -55,13 +67,13 @@ serve(async (req) => {
       console.error(`SIRENE API error: ${response.status} ${response.statusText}`);
       
       // Si l'API SIRENE ne fonctionne pas, retourner des données de démonstration
-      if (type === 'name' && response.status === 429) {
-        // Limite de taux atteinte - données de démonstration
+      if (type === 'name' && (response.status === 429 || response.status === 400)) {
+        // Limite de taux atteinte ou requête rejetée - données de démonstration
         const mockResults = generateMockResults(query);
         return new Response(JSON.stringify({ 
           results: mockResults,
           source: 'mock',
-          message: 'Données de démonstration (limite API atteinte)'
+          message: response.status === 429 ? 'Données de démonstration (limite API atteinte)' : 'Données de démonstration (requête rejetée par l\'API)'
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });

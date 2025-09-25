@@ -59,6 +59,14 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
+      // Un 404 signifie simplement qu'il n'y a pas d'annonces pour cette entreprise
+      if (response.status === 404) {
+        console.log(`Aucune annonce BODACC trouvée pour SIREN: ${siren}`);
+        return new Response(JSON.stringify({ records: [] }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       console.error(`BODACC API error: ${response.status} ${response.statusText}`);
       return new Response(JSON.stringify({ 
         error: { 

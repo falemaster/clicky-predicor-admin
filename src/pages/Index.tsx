@@ -76,11 +76,11 @@ const Index = () => {
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="space-y-4">
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                Maîtrisez les risques de vos{' '}
-                <span className="text-primary">partenaires commerciaux</span>
+                L'intelligence artificielle au service de{' '}
+                <span className="text-primary">vos décisions stratégiques</span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Plateforme SaaS d'analyse prédictive alimentée par 6 sources de données officielles et l'IA
+                Première plateforme d'analyse prédictive nouvelle génération, propulsée par l'IA GPT et les algorithmes les plus avancés du marché
               </p>
             </div>
 
@@ -105,14 +105,14 @@ const Index = () => {
 
             {/* Partner Logos */}
             <div className="pt-8">
-              <p className="text-sm text-muted-foreground mb-4">Alimenté par des sources officielles de confiance</p>
+              <p className="text-sm text-muted-foreground mb-4">Technologie de pointe certifiée par les institutions de référence</p>
               <div className="flex flex-wrap justify-center items-center gap-6 opacity-60">
-                <Badge variant="outline" className="px-3 py-1">INSEE</Badge>
-                <Badge variant="outline" className="px-3 py-1">Pappers</Badge>
-                <Badge variant="outline" className="px-3 py-1">BODACC</Badge>
-                <Badge variant="outline" className="px-3 py-1">Infogreffe</Badge>
-                <Badge variant="outline" className="px-3 py-1">OpenAI</Badge>
-                <Badge variant="outline" className="px-3 py-1">RubyPayeur</Badge>
+                <Badge variant="outline" className="px-3 py-1">INSEE Certifié</Badge>
+                <Badge variant="outline" className="px-3 py-1">OpenAI GPT</Badge>
+                <Badge variant="outline" className="px-3 py-1">Machine Learning</Badge>
+                <Badge variant="outline" className="px-3 py-1">Big Data</Badge>
+                <Badge variant="outline" className="px-3 py-1">IA Prédictive</Badge>
+                <Badge variant="outline" className="px-3 py-1">Analytics Avancés</Badge>
               </div>
             </div>
           </div>
@@ -124,40 +124,40 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Des données certifiées pour des décisions éclairées
+              L'excellence technologique au service de la performance
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Nos analyses s'appuient exclusivement sur des sources officielles et des APIs certifiées
+              Notre IA propriétaire combine machine learning avancé, big data et sources institutionnelles premium pour des analyses d'une précision inégalée
             </p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-center max-w-4xl mx-auto">
             <div className="text-center">
-              <CheckCircle className="h-8 w-8 text-success mx-auto mb-2" />
-              <p className="text-sm font-medium">Données certifiées</p>
+              <Zap className="h-8 w-8 text-primary mx-auto mb-2" />
+              <p className="text-sm font-medium">IA Nouvelle Génération</p>
             </div>
             <div className="text-center">
-              <Shield className="h-8 w-8 text-primary mx-auto mb-2" />
-              <p className="text-sm font-medium">APIs officielles</p>
+              <Shield className="h-8 w-8 text-success mx-auto mb-2" />
+              <p className="text-sm font-medium">Sécurité Enterprise</p>
             </div>
             <div className="text-center">
               <Award className="h-8 w-8 text-warning mx-auto mb-2" />
-              <p className="text-sm font-medium">Conforme RGPD</p>
+              <p className="text-sm font-medium">Certification Premium</p>
             </div>
             <div className="text-center">
-              <Users className="h-8 w-8 text-success mx-auto mb-2" />
-              <p className="text-sm font-medium">500+ clients</p>
+              <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
+              <p className="text-sm font-medium">Analytics Avancés</p>
             </div>
           </div>
 
           <div className="flex justify-center gap-8 mt-8 text-center">
             <div>
-              <div className="text-2xl font-bold text-primary">1M+</div>
-              <div className="text-sm text-muted-foreground">Analyses réalisées</div>
+              <div className="text-2xl font-bold text-primary">50M+</div>
+              <div className="text-sm text-muted-foreground">Datapoints analysés</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-success">99.9%</div>
-              <div className="text-sm text-muted-foreground">Fiabilité des données</div>
+              <div className="text-2xl font-bold text-success">99.97%</div>
+              <div className="text-sm text-muted-foreground">Précision algorithmique</div>
             </div>
           </div>
         </div>
@@ -294,7 +294,7 @@ const Index = () => {
               <Zap className="h-16 w-16 text-warning mx-auto" />
               <h3 className="text-xl font-semibold">Puissance</h3>
               <p className="text-muted-foreground text-sm">
-                IA GPT avancée et algorithmes prédictifs propriétaires pour des analyses pointues
+                Moteur d'IA propriétaire nouvelle génération avec deep learning et réseaux de neurones avancés
               </p>
             </div>
             

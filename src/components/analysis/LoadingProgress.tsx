@@ -35,7 +35,7 @@ export default function LoadingProgress({ companyName, siren }: LoadingProgressP
     },
     {
       id: 'rubypayeur',
-      name: 'RubyPayeur',
+      name: 'Score Crédit/Finance',
       description: 'Analyse comportement paiement',
       icon: CreditCard,
       status: 'pending'

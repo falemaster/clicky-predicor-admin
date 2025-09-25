@@ -152,7 +152,7 @@ export const CompanySearchMockup: React.FC<CompanySearchMockupProps> = ({
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline">Données SIRENE ✓ (Simulé)</Badge>
               <Badge variant="outline">Données Pappers ✓ (Simulé)</Badge>
-              <Badge variant="outline">Score RubyPayeur ✓ (Simulé)</Badge>
+              <Badge variant="outline">Score Crédit/Finance ✓ (Simulé)</Badge>
               <Badge variant="outline">Analyse IA ✓ (Simulé)</Badge>
             </div>
 

@@ -569,7 +569,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                         : "bg-destructive-light text-destructive"
                     }>
                       {formData.rubyPayeur.scoreGlobal >= 7 ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
-                      Score RubyPayeur: {formData.rubyPayeur.scoreGlobal}/10
+                      Score Crédit/Finance: {formData.rubyPayeur.scoreGlobal}/10
                     </Badge>
                   )}
                   

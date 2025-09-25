@@ -315,7 +315,7 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
                 <Badge variant="outline">Données BODACC ✓</Badge>
               )}
               {data.rubyPayeur && (
-                <Badge variant="outline">Score RubyPayeur ✓</Badge>
+                <Badge variant="outline">Score Crédit/Finance ✓</Badge>
               )}
               {data.predictor && (
                 <Badge variant="outline">Analyse Predictor ✓</Badge>

@@ -177,7 +177,7 @@ const Analysis = () => {
                 </Badge>
                 <Badge variant="outline" className="bg-orange-50 text-orange-700 flex items-center gap-1">
                   <CreditCard className="h-3 w-3" />
-                  RubyPayeur
+                  Crédit/Finance
                 </Badge>
                 <Badge variant="outline" className="bg-red-50 text-red-700 flex items-center gap-1">
                   <Scale className="h-3 w-3" />
@@ -397,7 +397,7 @@ const Analysis = () => {
                         : "bg-destructive-light text-destructive"
                     }>
                       {realData.rubyPayeur.scoreGlobal >= 7 ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
-                      Score RubyPayeur: {realData.rubyPayeur.scoreGlobal}/10
+                      Score Crédit/Finance: {realData.rubyPayeur.scoreGlobal}/10
                     </Badge>
                   )}
 
@@ -549,7 +549,7 @@ const Analysis = () => {
                     <p className="text-sm leading-relaxed">
                       <strong>{companyData.name}</strong> - Analyse basée sur des données simulées. 
                       Recherchez une entreprise réelle pour obtenir une analyse prédictive complète 
-                      basée sur les dernières données SIRENE, BODACC, et les scores de paiement RubyPayeur.
+                      basée sur les dernières données SIRENE, BODACC, et les scores de paiement financier.
                     </p>
                   )}
                 </div>

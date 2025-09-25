@@ -319,7 +319,7 @@ const Analysis = () => {
                         : "bg-destructive-light text-destructive"
                     }>
                       {realData.rubyPayeur.scoreGlobal >= 7 ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
-                      Score RubyPayeur: {realData.rubyPayeur.scoreGlobal}/10
+                      Score Crédit/Finance: {realData.rubyPayeur.scoreGlobal}/10
                     </Badge>
                   )}
 

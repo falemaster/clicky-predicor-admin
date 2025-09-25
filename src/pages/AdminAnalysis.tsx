@@ -70,7 +70,7 @@ const AdminAnalysis = () => {
 
   const [additionalFields, setAdditionalFields] = useState({
     badges: [
-      "Bon payeur RubyPayeur",
+      "Bon payeur Crédit/Finance",
       "Conformité fiscale", 
       "Comptes à jour",
       "Retard URSSAF mineur"

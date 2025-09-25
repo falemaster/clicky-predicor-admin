@@ -158,17 +158,17 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">{rubyPayeur.scoreGlobal}/10</div>
                 <div className="text-sm text-muted-foreground">Score Global</div>
-                <Badge variant="success" className="text-xs mt-1">RubyPayeur</Badge>
+                <Badge variant="success" className="text-xs mt-1">Crédit/Finance</Badge>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">{rubyPayeur.scorePaiement}/10</div>
                 <div className="text-sm text-muted-foreground">Score Paiement</div>
-                <Badge variant="success" className="text-xs mt-1">RubyPayeur</Badge>
+                <Badge variant="success" className="text-xs mt-1">Crédit/Finance</Badge>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-warning">{rubyPayeur.retardsMoyens}j</div>
                 <div className="text-sm text-muted-foreground">Retards Moyens</div>
-                <Badge variant="success" className="text-xs mt-1">RubyPayeur</Badge>
+                <Badge variant="success" className="text-xs mt-1">Crédit/Finance</Badge>
               </div>
             </div>
             <Separator />
@@ -181,7 +181,7 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
                 >
                   {rubyPayeur.tendance}
                 </Badge>
-                <Badge variant="success" className="text-xs">RubyPayeur</Badge>
+                <Badge variant="success" className="text-xs">Crédit/Finance</Badge>
               </div>
             </div>
             {rubyPayeur.alertes && rubyPayeur.alertes.length > 0 && (

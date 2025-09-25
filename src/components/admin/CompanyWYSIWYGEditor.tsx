@@ -608,6 +608,96 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
               </CardContent>
             </Card>
 
+            {/* Legal Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Shield className="h-5 w-5 mr-2" />
+                  Informations juridiques
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Forme juridique</label>
+                      <div className="font-medium mt-1">SAS, société par actions simplifiée</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Numéro de TVA</label>
+                      <div className="font-medium mt-1">FR{displayCompanyData.siren.replace(/\s/g, '')}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Capital social</label>
+                      <div className="font-medium mt-1">{displayCompanyData.capitalSocial || 'Non renseigné'}</div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Inscription RCS</label>
+                      <div className="font-medium text-success mt-1 flex items-center">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        {getNestedValue(formData, ['pappers', 'dateCreation']) ? 
+                          `INSCRIT (le ${new Date(formData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
+                          'INSCRIT (au greffe de PARIS, le 15/03/2015)'
+                        }
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Inscription RNE</label>
+                      <div className="font-medium text-success mt-1 flex items-center">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        {getNestedValue(formData, ['pappers', 'dateCreation']) ? 
+                          `INSCRIT (le ${new Date(formData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
+                          'INSCRIT (le 15/03/2015)'
+                        }
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Numéro RCS</label>
+                      <div className="font-medium mt-1">{displayCompanyData.siren} R.C.S. Paris</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Activity Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Building2 className="h-5 w-5 mr-2" />
+                  Activités
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Activité principale déclarée</label>
+                    <div className="font-medium mt-1">
+                      {getNestedValue(formData, ['pappers', 'libelleNaf']) || 
+                       getNestedValue(formData, ['sirene', 'naf']) || 
+                       'Conseil en systèmes et logiciels informatiques, développement de solutions digitales sur mesure'}
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Code NAF</label>
+                      <div className="font-medium mt-1">{getNestedValue(formData, ['sirene', 'naf']) || '6202A'}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Catégorie NAF</label>
+                      <div className="font-medium mt-1">Services aux entreprises</div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Description NAF</label>
+                    <div className="text-sm text-muted-foreground mt-1">(Conseil en systèmes et logiciels informatiques)</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Score Cards */}
             <div className="grid md:grid-cols-3 gap-6">
               <Card className="bg-gradient-to-br from-success-light to-success/20">

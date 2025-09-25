@@ -14,7 +14,185 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_analytics: {
+        Row: {
+          anonymous_searches: number | null
+          api_calls: number | null
+          created_at: string
+          date: string
+          id: string
+          registered_users: number | null
+          total_searches: number | null
+          unique_users: number | null
+        }
+        Insert: {
+          anonymous_searches?: number | null
+          api_calls?: number | null
+          created_at?: string
+          date: string
+          id?: string
+          registered_users?: number | null
+          total_searches?: number | null
+          unique_users?: number | null
+        }
+        Update: {
+          anonymous_searches?: number | null
+          api_calls?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          registered_users?: number | null
+          total_searches?: number | null
+          unique_users?: number | null
+        }
+        Relationships: []
+      }
+      admin_companies: {
+        Row: {
+          activity: string | null
+          address: string | null
+          city: string | null
+          company_name: string
+          created_at: string
+          edited_at: string | null
+          edited_by: string | null
+          id: string
+          is_manually_edited: boolean | null
+          last_searched: string | null
+          naf_code: string | null
+          postal_code: string | null
+          search_count: number | null
+          siren: string
+          siret: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          activity?: string | null
+          address?: string | null
+          city?: string | null
+          company_name: string
+          created_at?: string
+          edited_at?: string | null
+          edited_by?: string | null
+          id?: string
+          is_manually_edited?: boolean | null
+          last_searched?: string | null
+          naf_code?: string | null
+          postal_code?: string | null
+          search_count?: number | null
+          siren: string
+          siret?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activity?: string | null
+          address?: string | null
+          city?: string | null
+          company_name?: string
+          created_at?: string
+          edited_at?: string | null
+          edited_by?: string | null
+          id?: string
+          is_manually_edited?: boolean | null
+          last_searched?: string | null
+          naf_code?: string | null
+          postal_code?: string | null
+          search_count?: number | null
+          siren?: string
+          siret?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_search_history: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          results_found: boolean | null
+          search_query: string
+          search_type: string
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          results_found?: boolean | null
+          search_query: string
+          search_type: string
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          results_found?: boolean | null
+          search_query?: string
+          search_type?: string
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_search_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          is_active: boolean | null
+          last_login: string | null
+          last_name: string | null
+          subscription_status: string | null
+          total_searches: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          last_name?: string | null
+          subscription_status?: string | null
+          total_searches?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          last_name?: string | null
+          subscription_status?: string | null
+          total_searches?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

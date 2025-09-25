@@ -111,6 +111,8 @@ export interface RubyPayeurData {
   tendance: 'Amélioration' | 'Stable' | 'Dégradation';
   derniereMAJ: string;
   alertes: RubyPayeurAlerte[];
+  source?: 'api' | 'mock' | 'fallback';
+  error?: string;
 }
 
 export interface RubyPayeurAlerte {

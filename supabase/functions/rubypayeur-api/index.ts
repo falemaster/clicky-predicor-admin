@@ -7,7 +7,8 @@ const corsHeaders = {
 };
 
 const RUBYPAYEUR_API_KEY = Deno.env.get('RUBYPAYEUR_API_KEY');
-const RUBYPAYEUR_BASE_URL = 'https://api.rubypayeur.com/v1';
+// URL corrigée selon la documentation RubyPayeur
+const RUBYPAYEUR_BASE_URL = 'https://api.rubypayeur.fr/v1';
 
 // Endpoints to test in order of preference
 const ENDPOINTS = [

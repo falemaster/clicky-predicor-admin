@@ -405,6 +405,9 @@ const Analysis = () => {
                     }>
                       {realData.rubyPayeur.scoreGlobal >= 7 ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
                       Score Crédit/Finance: {realData.rubyPayeur.scoreGlobal}/10
+                      {realData.rubyPayeur.source && (realData.rubyPayeur.source === 'mock' || realData.rubyPayeur.source === 'fallback') && (
+                        <span className="ml-1 text-xs opacity-75">(simulé)</span>
+                      )}
                     </Badge>
                   )}
 

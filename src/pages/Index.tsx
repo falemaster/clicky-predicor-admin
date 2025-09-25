@@ -47,7 +47,7 @@ const Index = () => {
                   Predicor
                 </h1>
                 <p className="text-xs text-muted-foreground font-medium tracking-wider">
-                  INTELLIGENCE PRÉDICTIVE
+                  INTELLIGENCE FINANCIÈRE • ANALYSE PRÉDICTIVE
                 </p>
               </div>
             </div>

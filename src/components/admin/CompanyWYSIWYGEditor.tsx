@@ -57,6 +57,7 @@ import {
   ChevronRight,
   Gavel
 } from "lucide-react";
+import { ScoreEditorModal } from "./ScoreEditorModal";
 import type { CompanyFullData } from "@/types/api";
 
 interface CompanyWYSIWYGEditorProps {
@@ -258,6 +259,21 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     }));
   };
 
+  const handleScoresChange = (newScores: {
+    economic: number;
+    financial: number;
+    legal: number;
+    fiscal: number;
+    global: number;
+  }) => {
+    // Sauvegarder les nouvelles notes dans formData
+    updateField(['enriched', 'adminScores', 'economic'], newScores.economic.toString());
+    updateField(['enriched', 'adminScores', 'financial'], newScores.financial.toString());
+    updateField(['enriched', 'adminScores', 'legal'], newScores.legal.toString());
+    updateField(['enriched', 'adminScores', 'fiscal'], newScores.fiscal.toString());
+    updateField(['enriched', 'adminScores', 'global'], newScores.global.toString());
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -315,10 +331,22 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
   };
 
   const displayScores = {
-    global: formData.predictor?.scores?.global || 6.0,
-    financial: formData.predictor?.scores?.financier || 6.0,
-    legal: formData.predictor?.scores?.legal || 7.5,
-    fiscal: formData.predictor?.scores?.fiscal || 6.8,
+    // Priorité aux scores admin-édités, sinon scores API
+    economic: getNestedValue(formData, ['enriched', 'adminScores', 'economic']) 
+      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'economic'])) 
+      : (formData.predictor?.scores?.global || 6.0),
+    financial: getNestedValue(formData, ['enriched', 'adminScores', 'financial']) 
+      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'financial'])) 
+      : (formData.predictor?.scores?.financier || 6.0),
+    legal: getNestedValue(formData, ['enriched', 'adminScores', 'legal']) 
+      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'legal'])) 
+      : (formData.predictor?.scores?.legal || 7.5),
+    fiscal: getNestedValue(formData, ['enriched', 'adminScores', 'fiscal']) 
+      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'fiscal'])) 
+      : (formData.predictor?.scores?.fiscal || 6.8),
+    global: getNestedValue(formData, ['enriched', 'adminScores', 'global']) 
+      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'global'])) 
+      : (formData.predictor?.scores?.global || 6.0),
     defaultRisk: formData.predictor?.probabiliteDefaut ? 
       `${(formData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1)}%` : 
       'Faible'
@@ -395,8 +423,24 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
               </div>
             </div>
             <div className="text-center md:text-right">
-              <div className="text-2xl md:text-3xl font-bold text-primary mb-1">{displayScores.global.toFixed(1)}/10</div>
-              <div className="text-sm text-muted-foreground">Score global</div>
+              <ScoreEditorModal
+                globalScore={displayScores.global}
+                economicScore={displayScores.economic}
+                financialScore={displayScores.financial}
+                legalScore={displayScores.legal}
+                fiscalScore={displayScores.fiscal}
+                onScoresChange={handleScoresChange}
+              >
+                <div className="cursor-pointer hover:bg-muted/20 p-2 rounded-lg transition-colors group">
+                  <div className="text-2xl md:text-3xl font-bold text-primary mb-1 group-hover:text-primary/80">
+                    {displayScores.global.toFixed(1)}/10
+                  </div>
+                  <div className="text-sm text-muted-foreground flex items-center justify-center md:justify-end">
+                    Score global
+                    <Edit className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+              </ScoreEditorModal>
             </div>
           </div>
         </div>
@@ -610,7 +654,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                             </div>
                             <div className="flex items-center space-x-2">
                               <Badge variant="default" className="bg-success text-success-foreground">
-                                Excellent {displayScores.global.toFixed(1)}/10
+                                Économique {displayScores.economic.toFixed(1)}/10
                               </Badge>
                               {openSections.economic ? 
                                 <ChevronDown className="h-4 w-4" /> : 
@@ -665,7 +709,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                             </div>
                             <div className="flex items-center space-x-2">
                               <Badge variant="secondary" className="bg-primary-light text-primary">
-                                Solide {displayScores.financial.toFixed(1)}/10
+                                Financière {displayScores.financial.toFixed(1)}/10
                               </Badge>
                               {openSections.financial ? 
                                 <ChevronDown className="h-4 w-4" /> : 
@@ -727,7 +771,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                             </div>
                             <div className="flex items-center space-x-2">
                               <Badge variant="default" className="bg-success text-success-foreground">
-                                Excellent {displayScores.legal.toFixed(1)}/10
+                                Juridique {displayScores.legal.toFixed(1)}/10
                               </Badge>
                               {openSections.compliance ? 
                                 <ChevronDown className="h-4 w-4" /> : 
@@ -799,7 +843,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                             </div>
                             <div className="flex items-center space-x-2">
                               <Badge variant="default" className="bg-primary text-primary-foreground">
-                                Performant {displayScores.fiscal.toFixed(1)}/10
+                                Fiscale {displayScores.fiscal.toFixed(1)}/10
                               </Badge>
                               {openSections.fiscal ? 
                                 <ChevronDown className="h-4 w-4" /> : 
@@ -871,7 +915,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                             </div>
                             <div className="flex items-center space-x-2">
                               <Badge variant="secondary" className="bg-primary-light text-primary">
-                                Solide 8.2/10
+                                Gouvernance 8.2/10
                               </Badge>
                               {openSections.governance ? 
                                 <ChevronDown className="h-4 w-4" /> : 

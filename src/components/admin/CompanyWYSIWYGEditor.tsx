@@ -63,6 +63,7 @@ import {
   Clock
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VisibilityToggle } from "./VisibilityToggle";
 import { ScoreEditorModal } from "./ScoreEditorModal";
 import { AlertBadge } from "./AlertBadge";
@@ -930,9 +931,17 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                         </CardHeader>
                       </CollapsibleTrigger>
                       
-                      <CollapsibleContent>
-                        <CardContent className="space-y-6">
-                          {/* Visibility Controls */}
+                       <CollapsibleContent>
+                         <CardContent className="space-y-6">
+                           {/* Sources officielles */}
+                           <div className="flex items-center justify-center mb-4">
+                             <Badge variant="outline" className="text-xs text-muted-foreground border-muted-foreground/30">
+                               <Building2 className="h-3 w-3 mr-1" />
+                               Sources partenaires : Portalis • DGFIP • Copernic • CreditSafe
+                             </Badge>
+                           </div>
+                           
+                           {/* Visibility Controls */}
                           <div className="bg-muted/30 p-4 rounded-lg border border-dashed">
                             <h4 className="font-semibold mb-3 flex items-center">
                               <Eye className="h-4 w-4 mr-2" />
@@ -1049,8 +1058,17 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                               Conformité Judiciaire
                             </h4>
                             <div className="grid md:grid-cols-2 gap-6">
-                              <Card className="p-4">
-                                <h5 className="font-medium mb-3 text-warning">Contentieux Fiscal</h5>
+                               <Card className="p-4">
+                                 <TooltipProvider>
+                                   <Tooltip>
+                                     <TooltipTrigger asChild>
+                                       <h5 className="font-medium mb-3 text-warning cursor-help">Contentieux Fiscal</h5>
+                                     </TooltipTrigger>
+                                     <TooltipContent>
+                                       <p className="text-xs">Données DGFIP</p>
+                                     </TooltipContent>
+                                   </Tooltip>
+                                 </TooltipProvider>
                                 <div className="space-y-2">
                                   <EditableField
                                     value={getNestedValue(formData, ['enriched', 'compliance', 'fiscalLitigation', 'redressements'])}
@@ -1070,8 +1088,17 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                                   />
                                 </div>
                               </Card>
-                              <Card className="p-4">
-                                <h5 className="font-medium mb-3 text-destructive">Contentieux Judiciaire</h5>
+                               <Card className="p-4">
+                                 <TooltipProvider>
+                                   <Tooltip>
+                                     <TooltipTrigger asChild>
+                                       <h5 className="font-medium mb-3 text-destructive cursor-help">Contentieux Judiciaire</h5>
+                                     </TooltipTrigger>
+                                     <TooltipContent>
+                                       <p className="text-xs">Base Portalis</p>
+                                     </TooltipContent>
+                                   </Tooltip>
+                                 </TooltipProvider>
                                 <div className="space-y-2">
                                   <EditableField
                                     value={getNestedValue(formData, ['enriched', 'compliance', 'judicialLitigation', 'procedures'])}
@@ -1098,11 +1125,20 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                           {/* Procédures */}
                           <div className="space-y-4">
                             <div className="grid md:grid-cols-2 gap-6">
-                              <Card className="p-4">
-                                <h5 className="font-medium mb-3 flex items-center">
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Procédures Juridiques
-                                </h5>
+                               <Card className="p-4">
+                                 <TooltipProvider>
+                                   <Tooltip>
+                                     <TooltipTrigger asChild>
+                                       <h5 className="font-medium mb-3 flex items-center cursor-help">
+                                         <FileText className="h-4 w-4 mr-2" />
+                                         Procédures Juridiques
+                                       </h5>
+                                     </TooltipTrigger>
+                                     <TooltipContent>
+                                       <p className="text-xs">Données Copernic</p>
+                                     </TooltipContent>
+                                   </Tooltip>
+                                 </TooltipProvider>
                                 <div className="space-y-2">
                                   <EditableField
                                     value={getNestedValue(formData, ['enriched', 'compliance', 'legalProcedures', 'sauvegarde'])}
@@ -1126,11 +1162,20 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                                   />
                                 </div>
                               </Card>
-                              <Card className="p-4">
-                                <h5 className="font-medium mb-3 flex items-center">
-                                  <Scale className="h-4 w-4 mr-2" />
-                                  Procédures Judiciaires
-                                </h5>
+                               <Card className="p-4">
+                                 <TooltipProvider>
+                                   <Tooltip>
+                                     <TooltipTrigger asChild>
+                                       <h5 className="font-medium mb-3 flex items-center cursor-help">
+                                         <Scale className="h-4 w-4 mr-2" />
+                                         Procédures Judiciaires
+                                       </h5>
+                                     </TooltipTrigger>
+                                     <TooltipContent>
+                                       <p className="text-xs">Base Portalis</p>
+                                     </TooltipContent>
+                                   </Tooltip>
+                                 </TooltipProvider>
                                 <div className="space-y-2">
                                   <EditableField
                                     value={getNestedValue(formData, ['enriched', 'compliance', 'judicialProcedures', 'commercial'])}
@@ -1159,12 +1204,21 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
 
                           {/* Analyse de Risque Juridique */}
                           <Card className="bg-gradient-to-r from-destructive/5 to-warning/5 border-destructive/10">
-                            <CardHeader>
-                              <CardTitle className="text-lg flex items-center">
-                                <AlertTriangle className="h-5 w-5 mr-2 text-destructive" />
-                                Analyse de Risque Juridique
-                              </CardTitle>
-                            </CardHeader>
+                             <CardHeader>
+                               <TooltipProvider>
+                                 <Tooltip>
+                                   <TooltipTrigger asChild>
+                                     <CardTitle className="text-lg flex items-center cursor-help">
+                                       <AlertTriangle className="h-5 w-5 mr-2 text-destructive" />
+                                       Analyse de Risque Juridique
+                                     </CardTitle>
+                                   </TooltipTrigger>
+                                   <TooltipContent>
+                                     <p className="text-xs">Données CreditSafe</p>
+                                   </TooltipContent>
+                                 </Tooltip>
+                               </TooltipProvider>
+                             </CardHeader>
                             <CardContent className="space-y-4">
                               <div className="space-y-4">
                                 <div>
@@ -1219,8 +1273,16 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                                 onSave={(value) => updateField(['enriched', 'compliance', 'litigation'], value)}
                               />
                             </div>
-                          </div>
-                          <EditableField
+                           </div>
+                           
+                           {/* Legal Note */}
+                           <div className="mt-6 pt-4 border-t border-muted">
+                             <p className="text-xs text-muted-foreground text-center">
+                               Données collectées et agrégées depuis les bases officielles partenaires
+                             </p>
+                           </div>
+                           
+                           <EditableField
                             value={getNestedValue(formData, ['enriched', 'compliance', 'analysis'])}
                             placeholder="Analyse détaillée de la conformité réglementaire et des risques juridiques..."
                             onSave={(value) => updateField(['enriched', 'compliance', 'analysis'], value)}

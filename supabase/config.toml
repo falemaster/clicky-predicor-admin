@@ -1,5 +1,8 @@
 project_id = "vwnkziovsjhrsqokmfzi"
 
+[functions.bodacc-api]
+verify_jwt = false
+
 [functions.extrapolate-analysis]
 verify_jwt = false
 

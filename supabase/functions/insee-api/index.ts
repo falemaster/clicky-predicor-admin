@@ -57,7 +57,7 @@ async function getAccessToken(): Promise<string> {
         accessToken = tokenData.access_token;
         tokenExpiry = now + (tokenData.expires_in * 1000);
         console.log(`Token OAuth2 obtenu via ${endpoint} (Basic).`);
-        return accessToken;
+        return accessToken!;
       } else {
         lastStatus = tokenResponse.status;
         lastErrorText = await tokenResponse.text();
@@ -90,7 +90,7 @@ async function getAccessToken(): Promise<string> {
         accessToken = tokenData.access_token;
         tokenExpiry = now + (tokenData.expires_in * 1000);
         console.log(`Token OAuth2 obtenu via ${endpoint} (body credentials).`);
-        return accessToken;
+        return accessToken!;
       } else {
         lastStatus = tokenResponse2.status;
         lastErrorText = await tokenResponse2.text();

@@ -1,7 +1,5 @@
 import type { BodaccData, ApiError } from '@/types/api';
 
-const BODACC_API_BASE = 'https://bodacc-datainfogreffe.opendatasoft.com/api/records/1.0/search/';
-
 export class BodaccApiService {
   private static instance: BodaccApiService;
   
@@ -14,26 +12,33 @@ export class BodaccApiService {
 
   async getCompanyAnnouncements(siren: string): Promise<{ data: BodaccData | null; error: ApiError | null }> {
     try {
-      const query = `dataset=annonces-commerciales&q=siren:${siren}&rows=50&sort=dateparution&facet=typeavis&facet=departement`;
+      const { supabase } = await import('@/integrations/supabase/client');
       
-      const response = await fetch(`${BODACC_API_BASE}?${query}`, {
-        headers: {
-          'Accept': 'application/json',
-        },
+      const { data: result, error: functionError } = await supabase.functions.invoke('bodacc-api', {
+        body: { siren, type: 'annonces' }
       });
 
-      if (!response.ok) {
+      if (functionError) {
         return {
           data: null,
           error: {
-            code: `BODACC_${response.status}`,
-            message: `Erreur API BODACC: ${response.statusText}`,
+            code: 'BODACC_FUNCTION_ERROR',
+            message: `Erreur fonction BODACC: ${functionError.message}`,
             source: 'BODACC'
           }
         };
       }
 
-      const result = await response.json();
+      if (result?.error) {
+        return {
+          data: null,
+          error: {
+            code: result.error.code,
+            message: result.error.message,
+            source: 'BODACC'
+          }
+        };
+      }
       
       const annonces = result.records?.map((record: any) => ({
         date: record.fields.dateparution,
@@ -62,26 +67,34 @@ export class BodaccApiService {
 
   async getProcedureCollective(siren: string): Promise<{ data: any; error: ApiError | null }> {
     try {
-      const query = `dataset=procedures-collectives&q=siren:${siren}&rows=20&sort=dateparution`;
+      const { supabase } = await import('@/integrations/supabase/client');
       
-      const response = await fetch(`${BODACC_API_BASE}?${query}`, {
-        headers: {
-          'Accept': 'application/json',
-        },
+      const { data: result, error: functionError } = await supabase.functions.invoke('bodacc-api', {
+        body: { siren, type: 'procedures' }
       });
 
-      if (!response.ok) {
+      if (functionError) {
         return {
           data: null,
           error: {
-            code: `BODACC_PROCEDURES_${response.status}`,
-            message: `Erreur API BODACC procédures: ${response.statusText}`,
+            code: 'BODACC_PROCEDURES_FUNCTION_ERROR',
+            message: `Erreur fonction BODACC procédures: ${functionError.message}`,
             source: 'BODACC'
           }
         };
       }
 
-      const result = await response.json();
+      if (result?.error) {
+        return {
+          data: null,
+          error: {
+            code: result.error.code,
+            message: result.error.message,
+            source: 'BODACC'
+          }
+        };
+      }
+
       return { data: result.records || [], error: null };
     } catch (error) {
       return {

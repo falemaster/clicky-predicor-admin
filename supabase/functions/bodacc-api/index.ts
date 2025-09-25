@@ -6,8 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const PAPPERS_API_KEY = Deno.env.get('PAPPERS_API_KEY');
-const PAPPERS_BASE_URL = 'https://api.pappers.fr/v2';
+const BODACC_API_BASE = 'https://bodacc-datainfogreffe.opendatasoft.com/api/records/1.0/search/';
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -16,19 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    if (!PAPPERS_API_KEY) {
-      return new Response(JSON.stringify({ 
-        error: { 
-          code: 'PAPPERS_API_KEY_MISSING', 
-          message: 'Clé API Pappers non configurée' 
-        } 
-      }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const { siren, endpoint = 'entreprise' } = await req.json();
+    const { siren, type = 'annonces' } = await req.json();
 
     if (!siren) {
       return new Response(JSON.stringify({ 
@@ -42,24 +29,21 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Fetching Pappers data for SIREN: ${siren}, endpoint: ${endpoint}`);
+    console.log(`Fetching BODACC data for SIREN: ${siren}, type: ${type}`);
 
-    let url = '';
-    switch (endpoint) {
-      case 'entreprise':
-        url = `${PAPPERS_BASE_URL}/entreprise?api_token=${PAPPERS_API_KEY}&siren=${siren}&format_devise=symbole`;
+    let query = '';
+    switch (type) {
+      case 'annonces':
+        query = `dataset=annonces-commerciales&q=siren:${siren}&rows=50&sort=dateparution&facet=typeavis&facet=departement`;
         break;
-      case 'bilans':
-        url = `${PAPPERS_BASE_URL}/entreprise/bilans?api_token=${PAPPERS_API_KEY}&siren=${siren}`;
-        break;
-      case 'dirigeants':
-        url = `${PAPPERS_BASE_URL}/entreprise/dirigeants?api_token=${PAPPERS_API_KEY}&siren=${siren}`;
+      case 'procedures':
+        query = `dataset=procedures-collectives&q=siren:${siren}&rows=20&sort=dateparution`;
         break;
       default:
         return new Response(JSON.stringify({ 
           error: { 
-            code: 'INVALID_ENDPOINT', 
-            message: 'Endpoint non supporté' 
+            code: 'INVALID_TYPE', 
+            message: 'Type non supporté' 
           } 
         }), {
           status: 400,
@@ -67,7 +51,7 @@ serve(async (req) => {
         });
     }
 
-    const response = await fetch(url, {
+    const response = await fetch(`${BODACC_API_BASE}?${query}`, {
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'Predicor/1.0'
@@ -75,11 +59,11 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      console.error(`Pappers API error: ${response.status} ${response.statusText}`);
+      console.error(`BODACC API error: ${response.status} ${response.statusText}`);
       return new Response(JSON.stringify({ 
         error: { 
-          code: `PAPPERS_API_${response.status}`, 
-          message: `Erreur API Pappers: ${response.statusText}` 
+          code: `BODACC_API_${response.status}`, 
+          message: `Erreur API BODACC: ${response.statusText}` 
         } 
       }), {
         status: response.status,
@@ -88,17 +72,17 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log(`Pappers data fetched successfully for SIREN: ${siren}`);
+    console.log(`BODACC data fetched successfully for SIREN: ${siren}`);
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in pappers-api function:', error);
+    console.error('Error in bodacc-api function:', error);
     return new Response(JSON.stringify({ 
       error: { 
-        code: 'PAPPERS_INTERNAL_ERROR', 
+        code: 'BODACC_INTERNAL_ERROR', 
         message: error instanceof Error ? error.message : 'Erreur inconnue' 
       } 
     }), {

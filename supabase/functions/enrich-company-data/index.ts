@@ -104,10 +104,18 @@ INSTRUCTIONS :
     
     console.log('Generated enriched data:', generatedText);
 
-    // Parse the JSON response from ChatGPT
+    // Parse the JSON response from ChatGPT, removing potential markdown formatting
     let enrichedData;
     try {
-      enrichedData = JSON.parse(generatedText);
+      // Clean the response from potential markdown formatting
+      let cleanText = generatedText.trim();
+      if (cleanText.startsWith('```json')) {
+        cleanText = cleanText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanText.startsWith('```')) {
+        cleanText = cleanText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      enrichedData = JSON.parse(cleanText);
     } catch (parseError) {
       console.error('Failed to parse ChatGPT response as JSON:', parseError);
       console.error('Raw response:', generatedText);
@@ -156,7 +164,7 @@ INSTRUCTIONS :
     console.error('Error in enrich-company-data function:', error);
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message 
+      error: error instanceof Error ? error.message : 'Erreur inconnue' 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

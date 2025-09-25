@@ -109,7 +109,7 @@ serve(async (req) => {
           postalCode: organization.primary_address.postal_code,
         } : null,
       },
-      contacts: contacts.slice(0, 5).map(person => ({
+      contacts: contacts.slice(0, 5).map((person: any) => ({
         name: `${person.first_name || ''} ${person.last_name || ''}`.trim(),
         title: person.title,
         email: person.email,
@@ -121,7 +121,7 @@ serve(async (req) => {
           ? person.departments[0] 
           : null,
         seniority: person.seniority,
-      })).filter(contact => contact.name),
+      })).filter((contact: any) => contact.name),
       socialMedia: {
         linkedin: organization.linkedin_url,
         twitter: organization.twitter_url,
@@ -149,7 +149,7 @@ serve(async (req) => {
     console.error('Erreur dans apollo-search:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: error.message
+      error: error instanceof Error ? error.message : 'Erreur inconnue'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

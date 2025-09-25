@@ -114,7 +114,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       error: { 
         code: 'INFOGREFFE_INTERNAL_ERROR', 
-        message: error.message 
+        message: error instanceof Error ? error.message : 'Erreur inconnue' 
       } 
     }), {
       status: 500,

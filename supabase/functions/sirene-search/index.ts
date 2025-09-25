@@ -139,7 +139,7 @@ serve(async (req) => {
           results: mockResults,
           source: 'mock',
           message: 'Données de démonstration (erreur API)',
-          error: error.message
+          error: error instanceof Error ? error.message : 'Erreur inconnue'
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -149,7 +149,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       error: { 
         code: 'SIRENE_INTERNAL_ERROR', 
-        message: error.message 
+        message: error instanceof Error ? error.message : 'Erreur inconnue' 
       } 
     }), {
       status: 500,

@@ -49,7 +49,7 @@ serve(async (req) => {
     console.error('Error in web-scraper function:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: error.message
+      error: error instanceof Error ? error.message : 'Erreur inconnue'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -78,7 +78,7 @@ function extractContactInfo(html: string) {
   // Extract phone numbers (French format)
   const phoneRegex = /(?:(?:\+33|0033|0)[1-9])(?:[0-9]{8})|(?:(?:\+33|0033|0)[1-9])(?:[\s.-]?[0-9]{2}){4}/g;
   const phones = html.match(phoneRegex) || [];
-  if (phones.length > 0) {
+  if (phones.length > 0 && phones[0]) {
     contactInfo.telephone = phones[0].replace(/[\s.-]/g, '');
   }
 

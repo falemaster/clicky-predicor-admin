@@ -8,7 +8,8 @@ export type AlertLevel = 'critical' | 'high' | 'medium' | 'low' | 'good';
 export interface AlertBadgeProps {
   level: AlertLevel;
   message: string;
-  score: number;
+  score?: number;
+  showScore?: boolean;
   className?: string;
 }
 
@@ -40,7 +41,7 @@ const alertConfig = {
   },
 };
 
-export function AlertBadge({ level, message, score, className }: AlertBadgeProps) {
+export function AlertBadge({ level, message, score, showScore = true, className }: AlertBadgeProps) {
   const config = alertConfig[level];
   const Icon = config.icon;
 
@@ -50,9 +51,11 @@ export function AlertBadge({ level, message, score, className }: AlertBadgeProps
         <Icon className="h-3 w-3" />
         <span>{message}</span>
       </Badge>
-      <Badge variant="outline" className="text-xs">
-        {score.toFixed(1)}/10
-      </Badge>
+      {showScore && score !== undefined && (
+        <Badge variant="outline" className="text-xs">
+          {score.toFixed(1)}/10
+        </Badge>
+      )}
     </div>
   );
 }

@@ -59,6 +59,7 @@ import {
 } from "lucide-react";
 import { ScoreEditorModal } from "./ScoreEditorModal";
 import { AlertBadge } from "./AlertBadge";
+import { AlertSummaryBadge } from "./AlertSummaryBadge";
 import { ExecutiveSummary } from "./ExecutiveSummary";
 import { calculateAlert, getGlobalAlertLevel, countAlertsByLevel } from "@/utils/alertUtils";
 import type { CompanyFullData } from "@/types/api";
@@ -441,34 +442,10 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       <CheckCircle className="h-3 w-3 mr-1" />
                       {displayCompanyData.status || 'Actif'}
                     </Badge>
-                    {(() => {
-                      // Obtenir les 3 alertes les plus critiques
-                      const allAlerts = [
-                        { ...calculateAlert(displayScores.economic, 'economic'), score: displayScores.economic, type: 'economic' },
-                        { ...calculateAlert(displayScores.financial, 'financial'), score: displayScores.financial, type: 'financial' },
-                        { ...calculateAlert(displayScores.legal, 'legal'), score: displayScores.legal, type: 'legal' },
-                        { ...calculateAlert(displayScores.fiscal, 'fiscal'), score: displayScores.fiscal, type: 'fiscal' }
-                      ];
-
-                      // Filtrer et trier par criticité (critical > high > medium)
-                      const criticalAlerts = allAlerts
-                        .filter(alert => alert.level !== 'good' && alert.level !== 'low')
-                        .sort((a, b) => {
-                          const levelOrder = { critical: 0, high: 1, medium: 2 };
-                          return levelOrder[a.level] - levelOrder[b.level];
-                        })
-                        .slice(0, 3);
-
-                      return criticalAlerts.map((alert, index) => (
-                        <AlertBadge 
-                          key={`${alert.type}-${index}`}
-                          level={alert.level}
-                          message={alert.message}
-                          score={alert.score}
-                          className="shrink-0"
-                        />
-                      ));
-                    })()}
+                    <AlertSummaryBadge 
+                      scores={displayScores}
+                      className="shrink-0"
+                    />
                   </div>
                 </div>
                 <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-6 text-sm text-muted-foreground">

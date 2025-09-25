@@ -158,7 +158,7 @@ const AnalysisMockupReference = () => {
           </TabsContent>
 
           <TabsContent value="study">
-            <AdvancedStudy />
+            <AdvancedStudy companyData={data} />
           </TabsContent>
 
           <TabsContent value="predictive">

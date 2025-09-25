@@ -608,6 +608,48 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
               </CardContent>
             </Card>
 
+            {/* Score Cards */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="bg-gradient-to-br from-success-light to-success/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <TrendingUp className="h-5 w-5 mr-2 text-success" />
+                    Santé Financière
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-success mb-2">{displayScores.financial.toFixed(1)}/10</div>
+                  <p className="text-sm text-success-dark">Performance financière solide avec des indicateurs positifs</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-primary-light to-primary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <Shield className="h-5 w-5 mr-2 text-primary" />
+                    Conformité Légale
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-primary mb-2">{displayScores.legal.toFixed(1)}/10</div>
+                  <p className="text-sm text-primary-dark">Conformité réglementaire excellente</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-warning-light to-warning/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <AlertTriangle className="h-5 w-5 mr-2 text-warning" />
+                    Risque Prédictif
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-warning mb-2">{displayScores.defaultRisk}</div>
+                  <p className="text-sm text-warning-dark">Probabilité de défaut sur 12 mois</p>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Data Quality Dashboard */}
             <Card>
               <CardHeader>
@@ -697,48 +739,6 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Score Cards */}
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-success-light to-success/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <TrendingUp className="h-5 w-5 mr-2 text-success" />
-                    Santé Financière
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-success mb-2">{displayScores.financial.toFixed(1)}/10</div>
-                  <p className="text-sm text-success-dark">Performance financière solide avec des indicateurs positifs</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-primary-light to-primary/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <Shield className="h-5 w-5 mr-2 text-primary" />
-                    Conformité Légale
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-primary mb-2">{displayScores.legal.toFixed(1)}/10</div>
-                  <p className="text-sm text-primary-dark">Conformité réglementaire excellente</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-warning-light to-warning/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <AlertTriangle className="h-5 w-5 mr-2 text-warning" />
-                    Risque Prédictif
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-warning mb-2">{displayScores.defaultRisk}</div>
-                  <p className="text-sm text-warning-dark">Probabilité de défaut sur 12 mois</p>
-                </CardContent>
-              </Card>
-            </div>
 
             {/* AI Analysis */}
             <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/10">

@@ -114,14 +114,21 @@ const Index = () => {
 
             {/* Partner Logos */}
             <div className="pt-8">
-              <p className="text-sm text-muted-foreground mb-4">Technologie de pointe certifiée par les institutions de référence</p>
-              <div className="flex flex-wrap justify-center items-center gap-6 opacity-60">
-                <Badge variant="outline" className="px-3 py-1">INSEE Certifié</Badge>
-                <Badge variant="outline" className="px-3 py-1">OpenAI GPT</Badge>
-                <Badge variant="outline" className="px-3 py-1">Machine Learning</Badge>
-                <Badge variant="outline" className="px-3 py-1">Big Data</Badge>
-                <Badge variant="outline" className="px-3 py-1">IA Prédictive</Badge>
-                <Badge variant="outline" className="px-3 py-1">Analytics Avancés</Badge>
+              <p className="text-sm text-muted-foreground mb-4">Sources officielles et partenaires institutionnels certifiés</p>
+              <div className="flex flex-wrap justify-center items-center gap-4 opacity-70">
+                <Badge variant="outline" className="px-3 py-1 font-medium">INSEE</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">BODACC</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">Pappers</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">CreditSafe</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">DGFiP</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">Portalis</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">COPERNIC</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">CHORUS</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">HELIOS</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">CASSIOPÉE</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">RUBIS</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">ARIANE</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-medium">SIRHEN</Badge>
               </div>
             </div>
           </div>

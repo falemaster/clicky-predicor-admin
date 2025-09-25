@@ -35,11 +35,20 @@ const Index = () => {
       <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-primary" />
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary via-primary-dark to-slate-700 rounded-lg flex items-center justify-center shadow-lg">
+                  <Building2 className="h-5 w-5 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-warning via-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
+              </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">Predicor</h1>
-                <p className="text-xs text-muted-foreground">Analyse Prédictive d'Entreprise</p>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-slate-700 to-primary-dark bg-clip-text text-transparent tracking-tight">
+                  Predicor
+                </h1>
+                <p className="text-xs text-muted-foreground font-medium tracking-wider">
+                  INTELLIGENCE PRÉDICTIVE
+                </p>
               </div>
             </div>
             

@@ -128,75 +128,19 @@ export function ExecutiveSummary({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Profil de l'entreprise */}
+        {/* Executive Summary - Single paragraph format */}
         <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Badge className="bg-primary text-primary-foreground">
-              <span className={`font-bold ${getScoreColor(scores.global)}`}>
-                {scores.global.toFixed(1)}/10
-              </span>
-            </Badge>
-            <h3 className="font-semibold text-foreground">Profil de l'entreprise analysée</h3>
-          </div>
           {isEditing ? (
             <Textarea
               value={editingSummary?.profile || ""}
               onChange={(e) => setEditingSummary(prev => prev ? {...prev, profile: e.target.value} : undefined)}
-              className="min-h-[60px]"
+              className="min-h-[120px] text-muted-foreground leading-relaxed"
+              placeholder="Synthèse exécutive en paragraphe libre (6-7 lignes maximum)..."
             />
           ) : (
-            <p className="text-muted-foreground leading-relaxed">{currentSummary.profile}</p>
-          )}
-        </div>
-
-        {/* Points forts critiques */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <TrendingUp className="h-4 w-4 text-success" />
-            <h3 className="font-semibold text-foreground">Points forts critiques :</h3>
-          </div>
-          {isEditing ? (
-            <Textarea
-              value={editingSummary?.strengths || ""}
-              onChange={(e) => setEditingSummary(prev => prev ? {...prev, strengths: e.target.value} : undefined)}
-              className="min-h-[60px]"
-            />
-          ) : (
-            <p className="text-muted-foreground leading-relaxed">{currentSummary.strengths}</p>
-          )}
-        </div>
-
-        {/* Axes d'optimisation */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Target className="h-4 w-4 text-warning" />
-            <h3 className="font-semibold text-foreground">Axes d'optimisation :</h3>
-          </div>
-          {isEditing ? (
-            <Textarea
-              value={editingSummary?.optimizationAreas || ""}
-              onChange={(e) => setEditingSummary(prev => prev ? {...prev, optimizationAreas: e.target.value} : undefined)}
-              className="min-h-[60px]"
-            />
-          ) : (
-            <p className="text-muted-foreground leading-relaxed">{currentSummary.optimizationAreas}</p>
-          )}
-        </div>
-
-        {/* Recommandation stratégique */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Lightbulb className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-foreground">Recommandation stratégique :</h3>
-          </div>
-          {isEditing ? (
-            <Textarea
-              value={editingSummary?.strategicRecommendation || ""}
-              onChange={(e) => setEditingSummary(prev => prev ? {...prev, strategicRecommendation: e.target.value} : undefined)}
-              className="min-h-[60px]"
-            />
-          ) : (
-            <p className="text-muted-foreground leading-relaxed">{currentSummary.strategicRecommendation}</p>
+            <p className="text-muted-foreground leading-relaxed">
+              {currentSummary.profile}
+            </p>
           )}
         </div>
       </CardContent>

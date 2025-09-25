@@ -672,16 +672,10 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                   }}
                   companyName={displayCompanyData.name}
                   existingSummary={{
-                    profile: getNestedValue(formData, ['enriched', 'executiveSummary', 'profile']),
-                    strengths: getNestedValue(formData, ['enriched', 'executiveSummary', 'strengths']),
-                    optimizationAreas: getNestedValue(formData, ['enriched', 'executiveSummary', 'optimizationAreas']),
-                    strategicRecommendation: getNestedValue(formData, ['enriched', 'executiveSummary', 'strategicRecommendation'])
+                    profile: getNestedValue(formData, ['enriched', 'executiveSummary', 'profile'])
                   }}
                   onSummaryChange={(summary) => {
                     updateField(['enriched', 'executiveSummary', 'profile'], summary.profile);
-                    updateField(['enriched', 'executiveSummary', 'strengths'], summary.strengths);
-                    updateField(['enriched', 'executiveSummary', 'optimizationAreas'], summary.optimizationAreas);
-                    updateField(['enriched', 'executiveSummary', 'strategicRecommendation'], summary.strategicRecommendation);
                   }}
                   editable={true}
                 />

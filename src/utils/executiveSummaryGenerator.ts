@@ -19,63 +19,23 @@ export function generateExecutiveSummary(
 ): ExecutiveSummaryData {
   const globalScore = scores.global;
   
-  // Profil général basé sur la note globale
-  let profile = "";
+  // Génération d'un paragraphe libre et condensé de 6-7 lignes maximum
+  let executiveSummary = "";
+  
   if (globalScore >= 8) {
-    profile = `${companyName} présente un profil d'excellence avec une note moyenne de ${globalScore.toFixed(1)}/10, démontrant une performance remarquable dans l'ensemble de ses activités sectorielles.`;
+    executiveSummary = `${companyName} présente un profil d'excellence avec une note moyenne de ${globalScore.toFixed(1)}/10, démontrant une performance remarquable dans l'ensemble de ses activités sectorielles. L'entreprise maintient un niveau de performance exceptionnel dans ses domaines clés, constituant ses principaux atouts concurrentiels. Les indicateurs montrent une position solide avec des fondamentaux sains qui témoignent d'une gestion rigoureuse et d'une stratégie bien maîtrisée. Cette performance équilibrée offre une base stable pour envisager une croissance durable et le renforcement de l'avantage concurrentiel. La consolidation des acquis et la mise en place d'une stratégie d'expansion ciblée permettront de maintenir cette excellence opérationnelle à long terme.`;
   } else if (globalScore >= 6.5) {
-    profile = `${companyName} présente un profil solide avec une note moyenne de ${globalScore.toFixed(1)}/10, maintenant un niveau de performance satisfaisant dans son secteur d'activité.`;
+    executiveSummary = `${companyName} présente un profil solide avec une note moyenne de ${globalScore.toFixed(1)}/10, maintenant un niveau de performance satisfaisant dans son secteur d'activité. L'entreprise démontre une stabilité dans ses opérations principales tout en révélant des opportunités d'optimisation ciblées qui pourraient renforcer significativement sa position concurrentielle. Les analyses sectorielles mettent en évidence des atouts importants à valoriser ainsi que des axes d'amélioration identifiés pour progresser vers l'excellence. L'équilibre général des indicateurs suggère une trajectoire positive avec un potentiel de croissance bien maîtrisé. La mise en place d'un plan d'amélioration continue sur les domaines identifiés sécurisera et renforcera durablement la performance opérationnelle.`;
   } else if (globalScore >= 5) {
-    profile = `${companyName} présente un profil moyen avec une note moyenne de ${globalScore.toFixed(1)}/10, nécessitant une attention particulière pour améliorer sa position sectorielle.`;
+    executiveSummary = `${companyName} présente un profil moyen avec une note moyenne de ${globalScore.toFixed(1)}/10, nécessitant une attention particulière pour améliorer sa position sectorielle. L'analyse révèle des défis opérationnels significatifs qui requièrent des mesures correctives ciblées pour sécuriser la pérennité de l'activité. Plusieurs domaines montrent des signaux d'alerte qui, bien que gérables, demandent une approche structurée pour redresser les indicateurs critiques. Les opportunités d'optimisation identifiées offrent des leviers d'amélioration concrets pour renforcer les fondamentaux de l'entreprise. Un plan d'action prioritaire focalisé sur les points faibles sera déterminant pour sécuriser la croissance et restaurer une trajectoire de performance durable.`;
   } else {
-    profile = `${companyName} présente un profil fragile avec une note moyenne de ${globalScore.toFixed(1)}/10, requérant des mesures correctives urgentes pour sécuriser sa pérennité.`;
-  }
-
-  // Points forts basés sur les meilleurs scores
-  const scoreEntries = [
-    { name: 'économique', score: scores.economic },
-    { name: 'financière', score: scores.financial },
-    { name: 'juridique', score: scores.legal },
-    { name: 'fiscale', score: scores.fiscal }
-  ].sort((a, b) => b.score - a.score);
-
-  const topScores = scoreEntries.filter(s => s.score >= 6.5);
-  let strengths = "";
-  
-  if (topScores.length >= 2) {
-    const areas = topScores.slice(0, 2).map(s => `situation ${s.name}`).join(' et ');
-    strengths = `L'entreprise maintient un niveau de performance satisfaisant dans sa ${areas}, constituant ses principaux atouts concurrentiels.`;
-  } else if (topScores.length === 1) {
-    strengths = `L'entreprise démontre une performance correcte principalement dans sa situation ${topScores[0].name}, qui constitue son principal point fort.`;
-  } else {
-    strengths = `L'entreprise présente des défis dans l'ensemble de ses domaines d'activité, nécessitant une approche globale de redressement.`;
-  }
-
-  // Axes d'optimisation basés sur les scores les plus faibles
-  const weakScores = scoreEntries.filter(s => s.score < 6.5);
-  let optimizationAreas = "";
-  
-  if (weakScores.length >= 1) {
-    const areas = weakScores.slice(0, 2).map(s => `gestion ${s.name}`).join(' et ');
-    optimizationAreas = `Les indicateurs montrent des opportunités d'optimisation significatives dans la ${areas}. L'amélioration de ces aspects pourrait renforcer considérablement la position concurrentielle.`;
-  } else {
-    optimizationAreas = `L'entreprise présente une performance équilibrée sur l'ensemble des domaines analysés, avec des opportunités d'optimisation ciblées pour atteindre l'excellence opérationnelle.`;
-  }
-
-  // Recommandation stratégique basée sur la situation globale
-  let strategicRecommendation = "";
-  if (globalScore >= 7) {
-    strategicRecommendation = `Consolidation des acquis et mise en place d'une stratégie de croissance durable pour maintenir l'avantage concurrentiel à long terme.`;
-  } else if (globalScore >= 5.5) {
-    strategicRecommendation = `Mise en place d'un plan d'amélioration continue ciblé sur les domaines identifiés pour sécuriser et renforcer la performance opérationnelle.`;
-  } else {
-    strategicRecommendation = `Mise en place d'un plan d'action prioritaire pour redresser les indicateurs critiques et sécuriser la croissance à long terme.`;
+    executiveSummary = `${companyName} présente un profil fragile avec une note moyenne de ${globalScore.toFixed(1)}/10, requérant des mesures correctives urgentes pour sécuriser sa pérennité. L'analyse met en évidence des vulnérabilités importantes dans plusieurs domaines critiques qui nécessitent une intervention rapide et structurée. Les indicateurs révèlent des risques significatifs qui, sans action corrective immédiate, pourraient compromettre la stabilité opérationnelle et financière de l'organisation. Cette situation critique exige une approche globale de redressement avec des priorités clairement définies et un suivi rigoureux des actions mises en œuvre. La mise en place urgente d'un plan de restructuration et de stabilisation constitue un prérequis indispensable pour restaurer les équilibres fondamentaux et engager une dynamique de redressement durable.`;
   }
 
   return {
-    profile,
-    strengths,
-    optimizationAreas,
-    strategicRecommendation
+    profile: executiveSummary,
+    strengths: "",
+    optimizationAreas: "",
+    strategicRecommendation: ""
   };
 }

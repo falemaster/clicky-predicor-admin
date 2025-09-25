@@ -8,6 +8,7 @@ import AdminAnalysis from "./pages/AdminAnalysis";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminUsers from "./pages/AdminUsers";
+import AdminCompanies from "./pages/AdminCompanies";
 import Analysis from "./pages/Analysis";
 import AnalysisMockupReference from "./pages/AnalysisMockupReference";
 import NotFound from "./pages/NotFound";
@@ -29,7 +30,7 @@ const App = () => (
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
-            <Route path="companies" element={<div className="p-6">Gestion des entreprises - À venir</div>} />
+            <Route path="companies" element={<AdminCompanies />} />
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="editor" element={<div className="p-6">Éditeur WYSIWYG - À venir</div>} />
             <Route path="settings" element={<div className="p-6">Configuration - À venir</div>} />

@@ -85,30 +85,37 @@ export function AdminDashboard() {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today);
 
-      // Get recent activity (simulated for now)
-      const recentActivity: ActivityItem[] = [
-        {
-          id: '1',
+      // Get recent activity from database
+      const { data: searchHistory, error: searchError } = await supabase
+        .from('admin_search_history')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      let recentActivity: ActivityItem[] = [];
+      
+      if (searchHistory && !searchError) {
+        recentActivity = searchHistory.map(search => ({
+          id: search.id,
           type: 'search',
-          description: 'Recherche SIREN 123456789',
-          timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
-          user: 'user@example.com'
-        },
-        {
-          id: '2',
-          type: 'company_edit',
-          description: 'Modification manuelle de TechCorp SARL',
-          timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
-          user: 'admin@predicor.com'
-        },
-        {
-          id: '3',
-          type: 'user_register',
-          description: 'Nouvel utilisateur inscrit',
-          timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
-          user: 'newuser@example.com'
-        }
-      ];
+          description: `Recherche ${search.search_type} ${search.search_query}`,
+          timestamp: search.created_at,
+          user: search.user_id || 'Utilisateur anonyme'
+        }));
+      }
+
+      // Add some simulated activity if no real data yet
+      if (recentActivity.length === 0) {
+        recentActivity = [
+          {
+            id: 'sim-1',
+            type: 'search',
+            description: 'Aucune activité récente',
+            timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
+            user: 'System'
+          }
+        ];
+      }
 
       setStats({
         totalUsers: totalUsers || 0,

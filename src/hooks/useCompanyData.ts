@@ -48,6 +48,18 @@ export const useCompanyData = ({
 
     const allErrors: ApiError[] = [];
 
+    // Log search activity to admin_search_history
+    try {
+      await supabase.rpc('log_search_activity', {
+        p_search_type: type.toUpperCase(),
+        p_search_query: identifier,
+        p_results_found: true, // Will be updated later if no results
+        p_user_agent: navigator.userAgent
+      });
+    } catch (logError) {
+      console.warn('Failed to log search activity:', logError);
+    }
+
     try {
       // 1. Vérifier d'abord s'il y a des données admin modifiées
       const adminDataResult = await supabase

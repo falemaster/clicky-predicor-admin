@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCompanyData } from '@/hooks/useCompanyData';
 import { SireneApiService } from '@/services/sireneApi';
 import type { ApiError, SireneCompanyData } from '@/types/api';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CompanySearchProps {
   onCompanySelected?: (siren: string) => void;
@@ -63,6 +64,18 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
       } else {
         setSearchResults(companies || []);
         setShowDropdown(true);
+        
+        // Log name search activity
+        try {
+          await supabase.rpc('log_search_activity', {
+            p_search_type: 'NAME',
+            p_search_query: query,
+            p_results_found: companies && companies.length > 0,
+            p_user_agent: navigator.userAgent
+          });
+        } catch (logError) {
+          console.warn('Failed to log search activity:', logError);
+        }
       }
     } catch (error) {
       setSearchError({

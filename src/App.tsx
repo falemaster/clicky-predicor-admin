@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import AdminAnalysis from "./pages/AdminAnalysis";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -24,7 +25,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/analysis" replace />} />
+          <Route path="/" element={<Index />} />
           
           {/* New Admin Routes with Layout */}
           <Route path="/admin" element={<AdminLayout />}>

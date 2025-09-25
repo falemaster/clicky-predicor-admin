@@ -64,14 +64,21 @@ export const useCompanyData = ({
       // 1. Vérifier d'abord s'il y a des données admin modifiées
       const adminDataResult = await supabase
         .from('admin_companies')
-        .select('enriched_data, is_manually_edited')
+        .select('enriched_data, is_manually_edited, show_data_quality_dashboard')
         .eq('siren', type === 'siren' ? identifier : identifier.substring(0, 9))
         .maybeSingle();
 
       let adminData: CompanyFullData | null = null;
+      let showDataQualityDashboard = false; // Default to false (hidden)
+      
       if (adminDataResult.data?.is_manually_edited && adminDataResult.data?.enriched_data) {
         adminData = adminDataResult.data.enriched_data as unknown as CompanyFullData;
         console.log('📋 Données admin trouvées, elles seront prioritaires sur les données API');
+      }
+      
+      // Always get the visibility setting, even if no admin data exists
+      if (adminDataResult.data) {
+        showDataQualityDashboard = adminDataResult.data.show_data_quality_dashboard || false;
       }
 
       // 2. Recherche directe par SIREN/SIRET via l'API INSEE
@@ -230,6 +237,11 @@ export const useCompanyData = ({
         finalData = mergeAdminDataWithApiData(adminData, companyData as CompanyFullData);
         console.log('🔄 Données admin mergées avec les données API');
       }
+
+      // Add admin settings to the final data
+      (finalData as any).adminSettings = {
+        showDataQualityDashboard
+      };
 
       finalData.errors = allErrors;
       setData(finalData);

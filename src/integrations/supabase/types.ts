@@ -63,6 +63,7 @@ export type Database = {
           naf_code: string | null
           postal_code: string | null
           search_count: number | null
+          show_data_quality_dashboard: boolean
           siren: string
           siret: string | null
           status: string | null
@@ -83,6 +84,7 @@ export type Database = {
           naf_code?: string | null
           postal_code?: string | null
           search_count?: number | null
+          show_data_quality_dashboard?: boolean
           siren: string
           siret?: string | null
           status?: string | null
@@ -103,6 +105,7 @@ export type Database = {
           naf_code?: string | null
           postal_code?: string | null
           search_count?: number | null
+          show_data_quality_dashboard?: boolean
           siren?: string
           siret?: string | null
           status?: string | null

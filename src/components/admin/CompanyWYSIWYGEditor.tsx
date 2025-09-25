@@ -206,7 +206,15 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
 
   useEffect(() => {
     if (companyData) {
-      setFormData(companyData);
+      // Initialize formData with company data and admin settings
+      const formDataWithAdminSettings = {
+        ...companyData,
+        adminSettings: {
+          showDataQualityDashboard: (companyData as any)?.adminSettings?.showDataQualityDashboard || false,
+          ...(companyData as any)?.adminSettings
+        }
+      } as any;
+      setFormData(formDataWithAdminSettings);
     }
   }, [companyData]);
 
@@ -249,7 +257,8 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
           status: getNestedValue(formData, ['sirene', 'statut']) || 'active',
           enriched_data: JSON.parse(JSON.stringify(formData)),
           is_manually_edited: true,
-          edited_at: new Date().toISOString()
+          edited_at: new Date().toISOString(),
+          show_data_quality_dashboard: (formData as any)?.adminSettings?.showDataQualityDashboard || false
         }, {
           onConflict: 'siren'
         })
@@ -977,6 +986,27 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                                 onToggle={(visible) => updateField(['enriched', 'uiSettings', 'sectionVisibility', 'compliance', 'riskAnalysis'], visible.toString())}
                                 label="Analyse de risque juridique"
                               />
+                            </div>
+                            
+                            {/* Global Visibility Controls */}
+                            <div className="border-t pt-4 mt-4">
+                              <h5 className="font-medium mb-3 text-muted-foreground text-sm uppercase tracking-wide">Sections Globales</h5>
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <VisibilityToggle
+                                  isVisible={(formData as any)?.adminSettings?.showDataQualityDashboard || false}
+                                  onToggle={(visible) => {
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      adminSettings: {
+                                        ...(prev as any)?.adminSettings,
+                                        showDataQualityDashboard: visible
+                                      }
+                                    }));
+                                    setHasChanges(true);
+                                  }}
+                                  label="Tableau de bord - Qualité des données"
+                                />
+                              </div>
                             </div>
                           </div>
 

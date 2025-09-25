@@ -364,47 +364,49 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
           </Collapsible>
         </Card>
 
-        {/* Tableau de bord Qualité des données */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-primary" />
-              Tableau de bord - Qualité des données
-            </CardTitle>
-            <CardDescription>
-              Indicateurs de complétude, fraîcheur et sources des informations analysées
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center p-4 border rounded-lg bg-success/5">
-                <div className="text-2xl font-bold text-success mb-2">94%</div>
-                <div className="text-sm text-muted-foreground mb-2">Complétude des données</div>
-                <Progress value={94} className="h-2 mb-2" />
-                <div className="text-xs text-muted-foreground">
-                  Basé sur 47 champs d'analyse
+        {/* Tableau de bord Qualité des données - Conditionally rendered */}
+        {companyData?.rawData?.adminSettings?.showDataQualityDashboard && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-primary" />
+                Tableau de bord - Qualité des données
+              </CardTitle>
+              <CardDescription>
+                Indicateurs de complétude, fraîcheur et sources des informations analysées
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center p-4 border rounded-lg bg-success/5">
+                  <div className="text-2xl font-bold text-success mb-2">94%</div>
+                  <div className="text-sm text-muted-foreground mb-2">Complétude des données</div>
+                  <Progress value={94} className="h-2 mb-2" />
+                  <div className="text-xs text-muted-foreground">
+                    Basé sur 47 champs d'analyse
+                  </div>
+                </div>
+                <div className="text-center p-4 border rounded-lg bg-primary/5">
+                  <div className="flex items-center justify-center mb-2">
+                    <Clock className="h-5 w-5 text-primary mr-2" />
+                    <span className="text-2xl font-bold text-primary">J-2</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-2">Fraîcheur moyenne</div>
+                  <div className="text-xs text-muted-foreground">
+                    Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
+                  </div>
+                </div>
+                <div className="text-center p-4 border rounded-lg bg-accent/5">
+                  <div className="text-2xl font-bold text-accent mb-2">7</div>
+                  <div className="text-sm text-muted-foreground mb-2">Sources officielles</div>
+                  <div className="text-xs text-muted-foreground">
+                    APIs institutionnelles connectées
+                  </div>
                 </div>
               </div>
-              <div className="text-center p-4 border rounded-lg bg-primary/5">
-                <div className="flex items-center justify-center mb-2">
-                  <Clock className="h-5 w-5 text-primary mr-2" />
-                  <span className="text-2xl font-bold text-primary">J-2</span>
-                </div>
-                <div className="text-sm text-muted-foreground mb-2">Fraîcheur moyenne</div>
-                <div className="text-xs text-muted-foreground">
-                  Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
-                </div>
-              </div>
-              <div className="text-center p-4 border rounded-lg bg-accent/5">
-                <div className="text-2xl font-bold text-accent mb-2">7</div>
-                <div className="text-sm text-muted-foreground mb-2">Sources officielles</div>
-                <div className="text-xs text-muted-foreground">
-                  APIs institutionnelles connectées
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Situation financière */}
         <Card>

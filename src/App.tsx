@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Admin from "./pages/Admin";
 import AdminAnalysis from "./pages/AdminAnalysis";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminUsers from "./pages/AdminUsers";
 import Analysis from "./pages/Analysis";
 import AnalysisMockupReference from "./pages/AnalysisMockupReference";
@@ -29,7 +30,7 @@ const App = () => (
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="companies" element={<div className="p-6">Gestion des entreprises - À venir</div>} />
-            <Route path="analytics" element={<div className="p-6">Analytics - À venir</div>} />
+            <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="editor" element={<div className="p-6">Éditeur WYSIWYG - À venir</div>} />
             <Route path="settings" element={<div className="p-6">Configuration - À venir</div>} />
           </Route>

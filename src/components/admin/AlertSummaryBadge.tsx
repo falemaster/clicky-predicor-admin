@@ -77,9 +77,18 @@ export function AlertSummaryBadge({ scores, className }: AlertSummaryBadgeProps)
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Badge className={cn(config.className, "cursor-pointer p-1.5 h-auto", className)}>
+        <button 
+          className={cn(
+            config.className, 
+            "cursor-pointer p-1.5 h-auto rounded-full border inline-flex items-center justify-center text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", 
+            className
+          )}
+          onClick={(e) => {
+            console.log('Button clicked!', e);
+          }}
+        >
           <Icon className="h-3 w-3" />
-        </Badge>
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="start">
         <div className="space-y-3">

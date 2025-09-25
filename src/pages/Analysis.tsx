@@ -664,14 +664,20 @@ const Analysis = () => {
                       <span className="text-muted-foreground">Inscription RCS :</span>
                       <div className="font-medium text-success">
                         <CheckCircle className="h-3 w-3 inline mr-1" />
-                        INSCRIT (au greffe de PARIS, le 15/03/2015)
+                        {realData?.pappers?.dateCreation ? 
+                          `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
+                          'INSCRIT (au greffe de PARIS, le 15/03/2015)'
+                        }
                       </div>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Inscription RNE :</span>
                       <div className="font-medium text-success">
                         <CheckCircle className="h-3 w-3 inline mr-1" />
-                        INSCRIT (le 15/03/2015)
+                        {realData?.pappers?.dateCreation ? 
+                          `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
+                          'INSCRIT (le 15/03/2015)'
+                        }
                       </div>
                     </div>
                     <div>
@@ -714,7 +720,7 @@ const Analysis = () => {
                   <div>
                     <span className="text-sm text-muted-foreground">Activité principale déclarée :</span>
                     <div className="font-medium mt-1">
-                      Conseil en systèmes et logiciels informatiques, développement de solutions digitales sur mesure
+                      {realData?.pappers?.libelleNaf || realData?.sirene?.naf || 'Conseil en systèmes et logiciels informatiques, développement de solutions digitales sur mesure'}
                     </div>
                   </div>
                   

@@ -32,7 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface AdvancedStudyProps {
-  companyData: any;
+  companyData?: any;
 }
 
 // Interface pour l'analyse IA générée
@@ -61,6 +61,24 @@ interface AIAnalysis {
 
 const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
   const { toast } = useToast();
+  
+  // Provide default data when companyData is not provided (for mockup compatibility)
+  const defaultCompanyData = {
+    companyInfo: {
+      name: "Entreprise Exemple",
+      siren: "123456789",
+      siret: "12345678900123"
+    },
+    scores: {
+      global: 7.2,
+      financial: 6.8,
+      commercial: 8.1,
+      legal: 7.5,
+      risk: 2.3
+    }
+  };
+  
+  const data = companyData || defaultCompanyData;
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -76,13 +94,13 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
     setIsGeneratingAI(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('extrapolate-analysis', {
+      const { data: analysisData, error } = await supabase.functions.invoke('extrapolate-analysis', {
         body: {
-          companyData: companyData,
+          companyData: data,
           scores: {
-            financial: companyData?.scores?.financial || 0,
-            legal: companyData?.scores?.legal || 0,
-            commercial: companyData?.scores?.commercial || 0
+            financial: data?.scores?.financial || 0,
+            legal: data?.scores?.legal || 0,
+            commercial: data?.scores?.commercial || 0
           },
           analysisType: 'advanced_study'
         }
@@ -92,8 +110,8 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
         throw error;
       }
 
-      if (data?.analysis) {
-        setAiAnalysis(data.analysis);
+      if (analysisData?.analysis) {
+        setAiAnalysis(analysisData.analysis);
         toast({
           title: "Analyse IA générée",
           description: "L'analyse approfondie par IA a été générée avec succès.",
@@ -673,8 +691,8 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                             <span className="text-sm font-medium">Taux d'IS effectif</span>
                           </div>
                           <Badge variant="secondary" className="bg-success-light text-success">
-                            {companyData?.financial?.bilans?.[0] ? 
-                              `${((companyData.financial.bilans[0].resultatNet * 0.25) / companyData.financial.bilans[0].resultatNet * 100).toFixed(1)}%` : 
+                            {data?.financial?.bilans?.[0] ? 
+                              `${((data.financial.bilans[0].resultatNet * 0.25) / data.financial.bilans[0].resultatNet * 100).toFixed(1)}%` : 
                               '24.2%'
                             }
                           </Badge>
@@ -1058,7 +1076,7 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
           </Collapsible>
         </Card>
 
-        {companyData && (
+        {data && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center">

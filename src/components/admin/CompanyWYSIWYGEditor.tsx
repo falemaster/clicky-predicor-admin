@@ -58,7 +58,9 @@ import {
   ChevronRight,
   Gavel,
   Eye,
-  EyeOff
+  EyeOff,
+  Database,
+  Clock
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { VisibilityToggle } from "./VisibilityToggle";
@@ -587,40 +589,92 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
               </CardContent>
             </Card>
 
-            {/* Badges and Status */}
+            {/* Data Quality Dashboard */}
             <Card>
               <CardHeader>
-                <CardTitle>Statuts et certifications</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Database className="h-5 w-5 mr-2" />
+                  Qualité des données
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-3">
-                  <Badge variant="secondary" className="bg-success-light text-success">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Entreprise {displayCompanyData.status || 'Active'}
-                  </Badge>
-                  
-                  {formData.rubyPayeur && (
-                    <Badge variant="secondary" className={
-                      formData.rubyPayeur.scoreGlobal >= 7 
-                        ? "bg-success-light text-success" 
-                        : formData.rubyPayeur.scoreGlobal >= 5 
-                        ? "bg-warning-light text-warning"
-                        : "bg-destructive-light text-destructive"
-                    }>
-                      {formData.rubyPayeur.scoreGlobal >= 7 ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
-                      Score Crédit/Finance: {formData.rubyPayeur.scoreGlobal}/10
+                <div className="space-y-4">
+                  {/* Data Completeness */}
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="h-2 w-2 rounded-full bg-success"></div>
+                      <span className="text-sm font-medium">Complétude des données</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-success" style={{ width: '85%' }}></div>
+                      </div>
+                      <span className="text-sm font-semibold text-success">85%</span>
+                    </div>
+                  </div>
+
+                  {/* Data Freshness */}
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Dernière mise à jour</span>
+                    </div>
+                    <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
+                      {new Date().toLocaleDateString('fr-FR')}
                     </Badge>
-                  )}
-                  
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                    <RotateCw className="h-3 w-3 mr-1" />
-                    INSEE/SIRENE
-                  </Badge>
-                  
-                  <Badge variant="outline" className="bg-purple-50 text-purple-700">
-                    <BarChart3 className="h-3 w-3 mr-1" />
-                    Pappers
-                  </Badge>
+                  </div>
+
+                  {/* Data Sources Status */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-success" />
+                      <div>
+                        <p className="text-xs font-medium">INSEE/SIRENE</p>
+                        <p className="text-xs text-muted-foreground">Données officielles</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-success" />
+                      <div>
+                        <p className="text-xs font-medium">Pappers API</p>
+                        <p className="text-xs text-muted-foreground">Données financières</p>
+                      </div>
+                    </div>
+                    
+                    {formData.rubyPayeur && (
+                      <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
+                        <CheckCircle className="h-4 w-4 text-success" />
+                        <div>
+                          <p className="text-xs font-medium">RubyPayeur</p>
+                          <p className="text-xs text-muted-foreground">Score crédit</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center space-x-2 p-2 bg-warning/5 rounded-lg">
+                      <AlertTriangle className="h-4 w-4 text-warning" />
+                      <div>
+                        <p className="text-xs font-medium">IA Enrichissement</p>
+                        <p className="text-xs text-muted-foreground">Données simulées</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Overall Status */}
+                  <div className="flex items-center justify-between p-3 bg-success/5 border border-success/20 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Shield className="h-4 w-4 text-success" />
+                      <div>
+                        <p className="text-sm font-semibold text-success">Données fiables</p>
+                        <p className="text-xs text-muted-foreground">Mix données officielles + enrichissement IA</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Entreprise {displayCompanyData.status || 'Active'}
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>

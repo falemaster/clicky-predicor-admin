@@ -19,19 +19,19 @@ export interface AlertSummaryBadgeProps {
 const alertConfig = {
   critical: {
     icon: AlertTriangle,
-    className: "border-transparent bg-red-500 text-white hover:bg-red-600",
+    className: "border-transparent bg-red-600 text-white hover:bg-red-700",
   },
   high: {
     icon: AlertTriangle,
-    className: "border-transparent bg-orange-500 text-white hover:bg-orange-600",
+    className: "border-transparent bg-orange-600 text-white hover:bg-orange-700",
   },
   medium: {
     icon: AlertCircle,
-    className: "border-transparent bg-yellow-500 text-white hover:bg-yellow-600",
+    className: "border-transparent bg-orange-400 text-white hover:bg-orange-500",
   },
   low: {
     icon: Shield,
-    className: "border-transparent bg-green-500 text-white hover:bg-green-600",
+    className: "border-transparent bg-yellow-500 text-white hover:bg-yellow-600",
   },
   good: {
     icon: CheckCircle,
@@ -104,14 +104,16 @@ export function AlertSummaryBadge({ scores, className }: AlertSummaryBadgeProps)
                       "p-1 rounded-full",
                       alert.level === 'critical' && "bg-red-100",
                       alert.level === 'high' && "bg-orange-100", 
-                      alert.level === 'medium' && "bg-yellow-100"
+                      alert.level === 'medium' && "bg-orange-50",
+                      alert.level === 'low' && "bg-yellow-50"
                     )}>
                       {React.createElement(alertIcon, { 
                         className: cn(
                           "h-3 w-3",
                           alert.level === 'critical' && "text-red-600",
                           alert.level === 'high' && "text-orange-600",
-                          alert.level === 'medium' && "text-yellow-600"
+                          alert.level === 'medium' && "text-orange-500",
+                          alert.level === 'low' && "text-yellow-600"
                         )
                       })}
                     </div>

@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { AIDataIndicator } from "@/components/ui/ai-data-indicator";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import AdvancedStudy from "@/components/study/AdvancedStudy";
+import { OverviewDisplay } from "@/components/analysis/OverviewDisplay";
+import { StudyDisplay } from "@/components/analysis/StudyDisplay";
 import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
 import { useAnalysisData } from "@/hooks/useAnalysisData";
 import { useCompanyData } from "@/hooks/useCompanyData";
@@ -13,7 +14,6 @@ import { getScoreTheme } from "@/utils/scoreUtils";
 import { CompanySearch } from "@/components/search/CompanySearch";
 import { Link } from "react-router-dom";
 import EnrichedDataDisplayAI from "@/components/analysis/EnrichedDataDisplayAI";
-import { EnrichedDataDisplay } from "@/components/analysis/EnrichedDataDisplay";
 import LoadingProgress from "@/components/analysis/LoadingProgress";
 import AnalysisSkeleton from "@/components/analysis/AnalysisSkeleton";
 import { 
@@ -605,27 +605,6 @@ const Analysis = () => {
               </CardContent>
             </Card>
 
-            {/* Données enrichies - nouvelles sections */}
-            {hasRealData && (
-              <>
-                <div className="my-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
-                    Données Enrichies par IA
-                  </h3>
-                  <EnrichedDataDisplay 
-                    companyData={realData} 
-                    onDataEnriched={updateData}
-                  />
-                  <div className="mt-6">
-                    <EnrichedDataDisplayAI data={realData} />
-                  </div>
-                </div>
-                
-                {/* Séparateur */}
-                <Separator className="my-6" />
-              </>
-            )}
 
             {/* Informations juridiques détaillées */}
             <div className="grid md:grid-cols-2 gap-6">
@@ -780,7 +759,7 @@ const Analysis = () => {
           </TabsContent>
 
           <TabsContent value="study" className="space-y-6">
-            <AdvancedStudy companyData={enrichedData} />
+            <StudyDisplay companyData={enrichedData} />
           </TabsContent>
 
           <TabsContent value="predictive" className="space-y-6">

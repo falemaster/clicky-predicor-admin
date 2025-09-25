@@ -4,13 +4,13 @@ import {
   Building2, 
   TrendingUp, 
   Bell, 
-  Shield, 
-  Zap, 
+  Calculator, 
+  Radar, 
   MousePointer, 
-  Award,
+  Target,
   CheckCircle,
   Star,
-  BarChart3,
+  Brain,
   Clock,
   Users,
   ArrowRight,
@@ -149,19 +149,19 @@ const Index = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-center max-w-4xl mx-auto">
             <div className="text-center">
-              <Zap className="h-8 w-8 text-primary mx-auto mb-2" />
+              <Radar className="h-8 w-8 text-primary mx-auto mb-2" />
               <p className="text-sm font-medium">Détection Préventive IA</p>
             </div>
             <div className="text-center">
-              <Shield className="h-8 w-8 text-success mx-auto mb-2" />
+              <Calculator className="h-8 w-8 text-success mx-auto mb-2" />
               <p className="text-sm font-medium">Audit de Solvabilité</p>
             </div>
             <div className="text-center">
-              <Award className="h-8 w-8 text-warning mx-auto mb-2" />
+              <Target className="h-8 w-8 text-warning mx-auto mb-2" />
               <p className="text-sm font-medium">Scoring de Défaillance</p>
             </div>
             <div className="text-center">
-              <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
+              <Brain className="h-8 w-8 text-primary mx-auto mb-2" />
               <p className="text-sm font-medium">Intelligence Prédictive</p>
             </div>
           </div>
@@ -299,7 +299,7 @@ const Index = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center space-y-4">
-              <Shield className="h-16 w-16 text-primary mx-auto" />
+              <Calculator className="h-16 w-16 text-primary mx-auto" />
               <h3 className="text-xl font-semibold">Fiabilité</h3>
               <p className="text-muted-foreground text-sm">
                 Sources officielles exclusivement, données certifiées et mises à jour en temps réel
@@ -307,7 +307,7 @@ const Index = () => {
             </div>
             
             <div className="text-center space-y-4">
-              <Zap className="h-16 w-16 text-warning mx-auto" />
+              <Radar className="h-16 w-16 text-warning mx-auto" />
               <h3 className="text-xl font-semibold">Puissance</h3>
               <p className="text-muted-foreground text-sm">
                 Moteur d'IA propriétaire nouvelle génération avec deep learning et réseaux de neurones avancés
@@ -323,7 +323,7 @@ const Index = () => {
             </div>
             
             <div className="text-center space-y-4">
-              <Award className="h-16 w-16 text-primary mx-auto" />
+              <Target className="h-16 w-16 text-primary mx-auto" />
               <h3 className="text-xl font-semibold">Sérieux</h3>
               <p className="text-muted-foreground text-sm">
                 Utilisé quotidiennement par les directeurs financiers et credit managers
@@ -465,7 +465,7 @@ const Index = () => {
             
             <div className="text-center mt-8">
               <Button size="lg" onClick={() => navigate('/analysis-mockup')}>
-                <BarChart3 className="mr-2 h-5 w-5" />
+                <Brain className="mr-2 h-5 w-5" />
                 Tester avec vos données
               </Button>
             </div>
@@ -555,7 +555,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card>
               <CardHeader>
-                <BarChart3 className="h-12 w-12 text-primary mb-4" />
+                <Brain className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Méthodologie IA</CardTitle>
               </CardHeader>
               <CardContent>
@@ -582,7 +582,7 @@ const Index = () => {
 
             <Card>
               <CardHeader>
-                <Shield className="h-12 w-12 text-success mb-4" />
+                <Calculator className="h-12 w-12 text-success mb-4" />
                 <CardTitle>Conformité RGPD</CardTitle>
               </CardHeader>
               <CardContent>
@@ -609,7 +609,7 @@ const Index = () => {
 
             <Card>
               <CardHeader>
-                <Award className="h-12 w-12 text-warning mb-4" />
+                <Target className="h-12 w-12 text-warning mb-4" />
                 <CardTitle>Transparence</CardTitle>
               </CardHeader>
               <CardContent>
@@ -742,7 +742,7 @@ const Index = () => {
 
             <Card>
               <CardHeader>
-                <Zap className="h-12 w-12 text-warning mb-4" />
+                <Radar className="h-12 w-12 text-warning mb-4" />
                 <CardTitle>Intégrations</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -769,7 +769,7 @@ const Index = () => {
 
             <Card>
               <CardHeader>
-                <Shield className="h-12 w-12 text-success mb-4" />
+                <Calculator className="h-12 w-12 text-success mb-4" />
                 <CardTitle>Sécurité</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Building2, Phone, Mail, Globe, MapPin, Calendar, Users, Euro, FileText, AlertTriangle } from "lucide-react";
+import { Building2, Phone, Mail, Globe, MapPin, Calendar, Users, Euro, FileText, AlertTriangle, Shield, Gavel } from "lucide-react";
 import { EnrichmentInterface } from "./EnrichmentInterface";
 
 interface EnrichedDataProps {
@@ -12,7 +12,17 @@ interface EnrichedDataProps {
 export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDataProps) => {
   if (!companyData) return null;
 
-  const { sirene, pappers, infogreffe, rubyPayeur, predictor } = companyData;
+  const { sirene, pappers, infogreffe, rubyPayeur, predictor, enriched } = companyData;
+
+  // Check visibility settings
+  const isVisible = (section: string, subsection?: string) => {
+    const sectionPath = subsection 
+      ? enriched?.uiSettings?.sectionVisibility?.[section]?.[subsection]
+      : enriched?.uiSettings?.sectionVisibility?.[section];
+    
+    // Default to visible if not explicitly set to "false"
+    return sectionPath !== "false";
+  };
 
   // Check if contact data is missing or incomplete
   const hasContactData = pappers?.telephone || pappers?.email || pappers?.siteWeb;
@@ -145,7 +155,7 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
       )}
 
       {/* Score de paiement enrichi */}
-      {rubyPayeur && (
+      {rubyPayeur && isVisible('compliance', 'creditScore') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -203,6 +213,162 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Conformité et obligations légales enrichies */}
+      {enriched?.compliance && isVisible('compliance', 'complianceCards') && (
+        <div className="space-y-4">
+          {/* Scores de conformité par domaine */}
+          {(enriched.compliance.domainScores || enriched.compliance.lastAudits) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Conformité par Domaine
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {['fiscal', 'social', 'environmental', 'gdpr', 'sector'].map((domain) => {
+                    const score = enriched.compliance.domainScores?.[domain];
+                    const lastAudit = enriched.compliance.lastAudits?.[domain];
+                    if (!score && !lastAudit) return null;
+                    
+                    return (
+                      <div key={domain} className="text-center p-3 bg-muted/50 rounded">
+                        <div className="font-medium capitalize text-sm mb-1">{domain === 'gdpr' ? 'RGPD' : domain}</div>
+                        {score && (
+                          <div className="text-lg font-bold text-primary">{score}/10</div>
+                        )}
+                        {lastAudit && (
+                          <div className="text-xs text-muted-foreground">Audit: {lastAudit}</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Conformité judiciaire */}
+          {(enriched.compliance.fiscalLitigation || enriched.compliance.judicialLitigation) && isVisible('compliance', 'judicialCompliance') && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Gavel className="h-5 w-5" />
+                  Conformité Judiciaire
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {enriched.compliance.fiscalLitigation && (
+                    <div className="p-3 bg-warning-light rounded border-l-4 border-warning">
+                      <h4 className="font-medium text-warning-dark mb-2">Contentieux Fiscal</h4>
+                      {enriched.compliance.fiscalLitigation.redressements && (
+                        <div className="text-sm mb-1">Redressements: {enriched.compliance.fiscalLitigation.redressements}</div>
+                      )}
+                      {enriched.compliance.fiscalLitigation.penalties && (
+                        <div className="text-sm font-medium text-warning">Pénalités: {enriched.compliance.fiscalLitigation.penalties} K€</div>
+                      )}
+                    </div>
+                  )}
+                  {enriched.compliance.judicialLitigation && (
+                    <div className="p-3 bg-destructive-light rounded border-l-4 border-destructive">
+                      <h4 className="font-medium text-destructive-dark mb-2">Contentieux Judiciaire</h4>
+                      {enriched.compliance.judicialLitigation.procedures && (
+                        <div className="text-sm mb-1">Procédures: {enriched.compliance.judicialLitigation.procedures}</div>
+                      )}
+                      {enriched.compliance.judicialLitigation.amounts && (
+                        <div className="text-sm font-medium text-destructive">Montants: {enriched.compliance.judicialLitigation.amounts} K€</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Procédures */}
+          {(enriched.compliance.legalProcedures || enriched.compliance.judicialProcedures) && isVisible('compliance', 'legalProcedures') && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Procédures en Cours
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {enriched.compliance.legalProcedures && (
+                    <div>
+                      <h4 className="font-medium mb-2">Procédures Juridiques</h4>
+                      <div className="space-y-2">
+                        {Object.entries(enriched.compliance.legalProcedures).map(([key, value]) => {
+                          if (!value || value === 'Aucune') return null;
+                          return (
+                            <div key={key} className="flex justify-between text-sm">
+                              <span className="capitalize">{key}:</span>
+                              <Badge variant={value === 'Aucune' ? 'default' : 'destructive'}>
+                                {String(value)}
+                              </Badge>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  {enriched.compliance.judicialProcedures && (
+                    <div>
+                      <h4 className="font-medium mb-2">Procédures Judiciaires</h4>
+                      <div className="space-y-2">
+                        {Object.entries(enriched.compliance.judicialProcedures).map(([key, value]) => {
+                          if (!value || value === 'Aucune') return null;
+                          return (
+                            <div key={key} className="flex justify-between text-sm">
+                              <span className="capitalize">{key}:</span>
+                              <Badge variant={value === 'Aucune' ? 'default' : 'destructive'}>
+                                {String(value)}
+                              </Badge>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Analyse de risque juridique */}
+          {enriched.compliance.riskAnalysis && isVisible('compliance', 'riskAnalysis') && (
+            <Card className="border-destructive/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-5 w-5" />
+                  Analyse de Risque Juridique
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {enriched.compliance.riskAnalysis.profile && (
+                  <div>
+                    <h4 className="font-medium mb-2">Profil de risque</h4>
+                    <p className="text-sm text-muted-foreground">{enriched.compliance.riskAnalysis.profile}</p>
+                  </div>
+                )}
+                {enriched.compliance.riskAnalysis.recommendations && (
+                  <div>
+                    <h4 className="font-medium mb-2">Recommandations</h4>
+                    <div className="text-sm text-muted-foreground whitespace-pre-line">
+                      {enriched.compliance.riskAnalysis.recommendations}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
 
       {/* Données financières enrichies */}

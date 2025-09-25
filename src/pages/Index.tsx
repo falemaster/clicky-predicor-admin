@@ -150,19 +150,19 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-center max-w-4xl mx-auto">
             <div className="text-center">
               <Zap className="h-8 w-8 text-primary mx-auto mb-2" />
-              <p className="text-sm font-medium">IA Nouvelle Génération</p>
+              <p className="text-sm font-medium">Détection Préventive IA</p>
             </div>
             <div className="text-center">
               <Shield className="h-8 w-8 text-success mx-auto mb-2" />
-              <p className="text-sm font-medium">Sécurité Enterprise</p>
+              <p className="text-sm font-medium">Audit de Solvabilité</p>
             </div>
             <div className="text-center">
               <Award className="h-8 w-8 text-warning mx-auto mb-2" />
-              <p className="text-sm font-medium">Certification Premium</p>
+              <p className="text-sm font-medium">Scoring de Défaillance</p>
             </div>
             <div className="text-center">
               <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
-              <p className="text-sm font-medium">Analytics Avancés</p>
+              <p className="text-sm font-medium">Intelligence Prédictive</p>
             </div>
           </div>
 

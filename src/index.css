@@ -68,6 +68,16 @@ All colors MUST be HSL.
     --gradient-success: linear-gradient(135deg, hsl(142, 76%, 36%) 0%, hsl(142, 76%, 26%) 100%);
     --gradient-warning: linear-gradient(135deg, hsl(38, 92%, 50%) 0%, hsl(38, 92%, 40%) 100%);
     
+    /* Alert colors */
+    --alert-critical: 0 84% 60%;
+    --alert-critical-foreground: 0 0% 100%;
+    --alert-high: 25 95% 53%;
+    --alert-high-foreground: 0 0% 100%;
+    --alert-medium: 38 92% 50%;
+    --alert-medium-foreground: 0 0% 100%;
+    --alert-low: 142 76% 36%;
+    --alert-low-foreground: 0 0% 100%;
+    
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(220 13% 18% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(220 13% 18% / 0.1), 0 2px 4px -2px hsl(220 13% 18% / 0.1);

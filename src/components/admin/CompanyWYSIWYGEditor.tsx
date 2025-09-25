@@ -58,6 +58,8 @@ import {
   Gavel
 } from "lucide-react";
 import { ScoreEditorModal } from "./ScoreEditorModal";
+import { AlertBadge } from "./AlertBadge";
+import { calculateAlert, getGlobalAlertLevel, countAlertsByLevel } from "@/utils/alertUtils";
 import type { CompanyFullData } from "@/types/api";
 
 interface CompanyWYSIWYGEditorProps {
@@ -366,6 +368,29 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
               <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
                 Mode Édition
               </Badge>
+              {(() => {
+                const alertCounts = countAlertsByLevel(displayScores);
+                const globalLevel = getGlobalAlertLevel(displayScores);
+                
+                if (alertCounts.total > 0) {
+                  return (
+                    <Badge 
+                      className={
+                        globalLevel === 'critical' 
+                          ? "bg-alert-critical text-alert-critical-foreground border-transparent" 
+                          : globalLevel === 'high'
+                          ? "bg-alert-high text-alert-high-foreground border-transparent"
+                          : "bg-alert-medium text-alert-medium-foreground border-transparent"
+                      }
+                    >
+                      {alertCounts.critical > 0 && `${alertCounts.critical} Critique${alertCounts.critical > 1 ? 's' : ''}`}
+                      {alertCounts.critical === 0 && alertCounts.high > 0 && `${alertCounts.high} Alerte${alertCounts.high > 1 ? 's' : ''}`}
+                      {alertCounts.critical === 0 && alertCounts.high === 0 && `${alertCounts.medium} Vigilance${alertCounts.medium > 1 ? 's' : ''}`}
+                    </Badge>
+                  );
+                }
+                return null;
+              })()}
             </div>
             <div className="flex items-center space-x-3">
               <Button 
@@ -653,9 +678,10 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Badge variant="default" className="bg-success text-success-foreground">
-                                Économique {displayScores.economic.toFixed(1)}/10
-                              </Badge>
+                              <AlertBadge 
+                                {...calculateAlert(displayScores.economic, 'economic')}
+                                score={displayScores.economic}
+                              />
                               {openSections.economic ? 
                                 <ChevronDown className="h-4 w-4" /> : 
                                 <ChevronRight className="h-4 w-4" />
@@ -708,9 +734,10 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Badge variant="secondary" className="bg-primary-light text-primary">
-                                Financière {displayScores.financial.toFixed(1)}/10
-                              </Badge>
+                              <AlertBadge 
+                                {...calculateAlert(displayScores.financial, 'financial')}
+                                score={displayScores.financial}
+                              />
                               {openSections.financial ? 
                                 <ChevronDown className="h-4 w-4" /> : 
                                 <ChevronRight className="h-4 w-4" />
@@ -770,9 +797,10 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Badge variant="default" className="bg-success text-success-foreground">
-                                Juridique {displayScores.legal.toFixed(1)}/10
-                              </Badge>
+                              <AlertBadge 
+                                {...calculateAlert(displayScores.legal, 'legal')}
+                                score={displayScores.legal}
+                              />
                               {openSections.compliance ? 
                                 <ChevronDown className="h-4 w-4" /> : 
                                 <ChevronRight className="h-4 w-4" />
@@ -842,9 +870,10 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Badge variant="default" className="bg-primary text-primary-foreground">
-                                Fiscale {displayScores.fiscal.toFixed(1)}/10
-                              </Badge>
+                              <AlertBadge 
+                                {...calculateAlert(displayScores.fiscal, 'fiscal')}
+                                score={displayScores.fiscal}
+                              />
                               {openSections.fiscal ? 
                                 <ChevronDown className="h-4 w-4" /> : 
                                 <ChevronRight className="h-4 w-4" />

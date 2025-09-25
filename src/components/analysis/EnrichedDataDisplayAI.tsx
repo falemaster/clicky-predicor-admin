@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AIDataIndicator } from "@/components/ui/ai-data-indicator";
 import { Phone, Mail, Globe, Building, CreditCard, Users, TrendingUp, AlertTriangle, Bot, Sparkles, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -97,37 +98,43 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
           <div className="flex items-center gap-3">
             <Phone className="h-4 w-4 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium">Téléphone</p>
+              <p className="text-sm font-medium flex items-center gap-2">
+                Téléphone
+                {enrichedData?.contactInfo?.phone && (
+                  <AIDataIndicator variant="mini" />
+                )}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {enrichedData?.contactInfo?.phone || data.pappers?.telephone || "01 XX XX XX XX"}
               </p>
-              {enrichedData?.contactInfo?.phone && (
-                <Badge variant="outline" className="mt-1">IA</Badge>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Mail className="h-4 w-4 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium">Email</p>
+              <p className="text-sm font-medium flex items-center gap-2">
+                Email
+                {enrichedData?.contactInfo?.email && (
+                  <AIDataIndicator variant="mini" />
+                )}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {enrichedData?.contactInfo?.email || data.pappers?.email || "contact@entreprise.fr"}
               </p>
-              {enrichedData?.contactInfo?.email && (
-                <Badge variant="outline" className="mt-1">IA</Badge>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Globe className="h-4 w-4 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium">Site web</p>
+              <p className="text-sm font-medium flex items-center gap-2">
+                Site web
+                {enrichedData?.contactInfo?.website && (
+                  <AIDataIndicator variant="mini" />
+                )}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {enrichedData?.contactInfo?.website || data.pappers?.siteWeb || "www.entreprise.fr"}
               </p>
-              {enrichedData?.contactInfo?.website && (
-                <Badge variant="outline" className="mt-1">IA</Badge>
-              )}
             </div>
           </div>
         </CardContent>
@@ -153,7 +160,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
                    "SAS"}
                 </span>
                 {enrichedData?.legalInfo?.preciseForm && (
-                  <Badge variant="outline">IA</Badge>
+                  <AIDataIndicator variant="mini" />
                 )}
               </div>
             </div>
@@ -176,7 +183,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
                    "Paris B 123 456 789"}
                 </span>
                 {enrichedData?.legalInfo?.rcsNumber && (
-                  <Badge variant="outline">IA</Badge>
+                  <AIDataIndicator variant="mini" />
                 )}
               </div>
             </div>
@@ -191,7 +198,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
                    "31/12"}
                 </span>
                 {enrichedData?.legalInfo?.fiscalYearEnd && (
-                  <Badge variant="outline">IA</Badge>
+                  <AIDataIndicator variant="mini" />
                 )}
               </div>
             </div>
@@ -202,7 +209,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
                   {enrichedData?.businessInfo?.collectiveAgreement || "Syntec"}
                 </span>
                 {enrichedData?.businessInfo?.collectiveAgreement && (
-                  <Badge variant="outline">IA</Badge>
+                  <AIDataIndicator variant="mini" />
                 )}
               </div>
             </div>
@@ -235,14 +242,14 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
                  "L'entreprise évolue dans le secteur du conseil informatique et développement logiciel. Elle propose des services de transformation digitale et d'accompagnement technologique aux entreprises."}
               </p>
               {enrichedData?.businessInfo?.detailedActivity && (
-                <Badge variant="outline">IA</Badge>
+                <AIDataIndicator variant="mini" />
               )}
             </div>
             <div className="mt-4">
               <div className="flex items-center gap-2 mb-2">
                 <h4 className="font-medium text-foreground">Activités secondaires :</h4>
                 {enrichedData?.businessInfo?.secondaryActivities && (
-                  <Badge variant="outline">IA</Badge>
+                  <AIDataIndicator variant="mini" />
                 )}
               </div>
               <ul className="list-disc list-inside space-y-1">
@@ -259,7 +266,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
               <div className="mt-4">
                 <div className="flex items-center gap-2 mb-2">
                   <h4 className="font-medium text-foreground">Clientèle principale :</h4>
-                  <Badge variant="outline">IA</Badge>
+                  <AIDataIndicator variant="mini" />
                 </div>
                 <p>{enrichedData.businessInfo.mainClients}</p>
               </div>
@@ -291,7 +298,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
                     <p className="text-xs text-muted-foreground">Basé sur secteur et taille</p>
                   </div>
                     {enrichedData?.financialIndicators?.estimatedRevenue && (
-                      <Badge variant="outline">IA</Badge>
+                      <AIDataIndicator variant="mini" />
                     )}
                 </div>
               </div>
@@ -308,7 +315,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
                     <p className="text-xs text-muted-foreground">Fourchette sectorielle</p>
                   </div>
                     {enrichedData?.financialIndicators?.profitabilityRange && (
-                      <Badge variant="outline">IA</Badge>
+                      <AIDataIndicator variant="mini" />
                     )}
                 </div>
               </div>
@@ -319,7 +326,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
               <div className="flex items-center gap-2 mb-2">
                 <h4 className="font-medium">Facteurs de risque :</h4>
                 {enrichedData?.financialIndicators?.riskFactors && (
-                  <Badge variant="outline">IA</Badge>
+                  <AIDataIndicator variant="mini" />
                 )}
               </div>
               <div className="space-y-2">
@@ -339,7 +346,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <h4 className="font-medium">Tendance de croissance :</h4>
-                  <Badge variant="outline">IA</Badge>
+                  <AIDataIndicator variant="mini" />
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {enrichedData.financialIndicators.growthTrend}

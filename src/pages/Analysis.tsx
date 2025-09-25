@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AIDataIndicator } from "@/components/ui/ai-data-indicator";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import AdvancedStudy from "@/components/study/AdvancedStudy";
@@ -356,10 +357,16 @@ const Analysis = () => {
                     <div className="flex items-center space-x-3">
                       <Phone className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">{companyData.phone}</span>
+                      {hasRealData && realData.enriched?.contactInfo?.phone && (
+                        <AIDataIndicator variant="mini" />
+                      )}
                     </div>
                     <div className="flex items-center space-x-3">
                       <Mail className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">{companyData.email}</span>
+                      {hasRealData && realData.enriched?.contactInfo?.email && (
+                        <AIDataIndicator variant="mini" />
+                      )}
                     </div>
                     <div className="flex items-center space-x-3">
                       <User className="h-4 w-4 text-muted-foreground" />

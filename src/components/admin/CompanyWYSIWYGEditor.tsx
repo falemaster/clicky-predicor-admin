@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCompanyData } from "@/hooks/useCompanyData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AIDataIndicator } from "@/components/ui/ai-data-indicator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,6 +82,7 @@ interface EditableFieldProps {
   badge?: string;
   type?: "text" | "number" | "email" | "tel" | "url";
   label?: string;
+  isAIGenerated?: boolean;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({ 
@@ -91,7 +93,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
   icon,
   badge,
   type = "text",
-  label
+  label,
+  isAIGenerated = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
@@ -155,8 +158,9 @@ const EditableField: React.FC<EditableFieldProps> = ({
   return (
     <div className="space-y-1">
       {label && (
-        <label className="text-xs font-medium text-foreground uppercase tracking-wide">
+        <label className="text-xs font-medium text-foreground uppercase tracking-wide flex items-center gap-2">
           {label}
+          {isAIGenerated && <AIDataIndicator variant="mini" />}
         </label>
       )}
       <div 
@@ -560,6 +564,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       onSave={(value) => updateField(['pappers', 'telephone'], value)}
                       icon={<Phone className="h-4 w-4" />}
                       type="tel"
+                      isAIGenerated={!!getNestedValue(formData, ['enriched', 'contactInfo', 'phone'])}
                     />
                     <EditableField
                       label="Email"
@@ -568,6 +573,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       onSave={(value) => updateField(['pappers', 'email'], value)}
                       icon={<Mail className="h-4 w-4" />}
                       type="email"
+                      isAIGenerated={!!getNestedValue(formData, ['enriched', 'contactInfo', 'email'])}
                     />
                     <EditableField
                       label="Capital social"

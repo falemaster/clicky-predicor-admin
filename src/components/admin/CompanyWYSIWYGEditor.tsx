@@ -1,32 +1,62 @@
 import { useState, useEffect } from "react";
+import { useCompanyData } from "@/hooks/useCompanyData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   Building2, 
+  MapPin, 
   Phone, 
   Mail, 
-  Globe, 
-  MapPin, 
+  User, 
   Calendar, 
-  Users, 
-  Euro, 
-  FileText, 
-  AlertTriangle, 
-  Save, 
-  RefreshCw, 
-  AlertCircle,
-  Edit3,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Download,
+  Share,
+  Bell,
+  FileText,
+  BarChart3,
+  Shield,
+  CreditCard,
+  Search,
+  Loader2,
+  RotateCw,
+  Scale,
+  Bot,
+  Zap,
+  Info,
+  Save,
+  RefreshCw,
+  Edit,
   Check,
-  X 
+  X,
+  Globe,
+  Euro,
+  Users,
+  Crown,
+  Award,
+  Brain,
+  Target,
+  Activity,
+  LineChart as LineChartIcon,
+  Settings,
+  ArrowRight,
+  ChevronDown,
+  ChevronRight,
+  Gavel
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useCompanyData } from "@/hooks/useCompanyData";
-import { supabase } from "@/integrations/supabase/client";
 import type { CompanyFullData } from "@/types/api";
 
 interface CompanyWYSIWYGEditorProps {
@@ -34,28 +64,30 @@ interface CompanyWYSIWYGEditorProps {
 }
 
 interface EditableFieldProps {
-  value: string | undefined;
+  value: string;
   placeholder: string;
-  onSave: (value: string) => void;
+  onSave: (newValue: string) => void;
   multiline?: boolean;
   icon?: React.ReactNode;
   badge?: string;
-  type?: 'text' | 'email' | 'tel' | 'url';
+  type?: "text" | "number" | "email" | "tel" | "url";
 }
 
-function EditableField({ 
+const EditableField: React.FC<EditableFieldProps> = ({ 
   value, 
   placeholder, 
   onSave, 
   multiline = false, 
-  icon, 
-  badge, 
-  type = 'text' 
-}: EditableFieldProps) {
+  icon,
+  badge,
+  type = "text"
+}) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value || '');
+  const [editValue, setEditValue] = useState(value);
 
-  const hasValue = value && value.trim() !== '';
+  useEffect(() => {
+    setEditValue(value);
+  }, [value]);
 
   const handleSave = () => {
     onSave(editValue);
@@ -63,62 +95,960 @@ function EditableField({
   };
 
   const handleCancel = () => {
-    setEditValue(value || '');
+    setEditValue(value);
     setIsEditing(false);
   };
 
   if (isEditing) {
     return (
-      <div className="flex items-center gap-2">
-        {icon}
+      <div className="flex items-center space-x-2 w-full">
+        {icon && <div className="text-muted-foreground flex-shrink-0">{icon}</div>}
         {multiline ? (
-          <Textarea 
+          <Textarea
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
-            className="flex-1"
-            rows={3}
+            placeholder={placeholder}
+            className="flex-1 min-h-[80px]"
           />
         ) : (
-          <Input 
+          <Input
             type={type}
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
-            className="flex-1"
             placeholder={placeholder}
+            className="flex-1"
           />
         )}
-        <Button size="sm" onClick={handleSave}>
-          <Check className="h-4 w-4" />
-        </Button>
-        <Button size="sm" variant="outline" onClick={handleCancel}>
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="flex space-x-1 flex-shrink-0">
+          <Button size="sm" variant="default" onClick={handleSave}>
+            <Check className="h-3 w-3" />
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleCancel}>
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
       </div>
     );
   }
 
+  const displayValue = value || placeholder;
+  const isPlaceholder = !value;
+
   return (
     <div 
-      className={`flex items-center gap-2 group cursor-pointer hover:bg-muted/50 p-2 rounded transition-colors ${
-        !hasValue ? 'opacity-50' : ''
-      }`}
+      className="flex items-center space-x-2 cursor-pointer hover:bg-muted/50 p-2 rounded group transition-colors"
       onClick={() => setIsEditing(true)}
     >
-      {icon}
-      <span className={`flex-1 ${!hasValue ? 'text-muted-foreground bg-muted px-2 py-1 rounded blur-sm' : ''}`}>
-        {hasValue ? value : placeholder}
+      {icon && <div className="text-muted-foreground flex-shrink-0">{icon}</div>}
+      <span className={`text-sm flex-1 ${isPlaceholder ? 'text-muted-foreground bg-muted px-2 py-1 rounded blur-sm' : ''}`}>
+        {displayValue}
       </span>
       {badge && (
-        <Badge variant={hasValue ? "success" : "secondary"} className="text-xs">
-          {hasValue ? badge : "Non disponible"}
+        <Badge variant="secondary" className="text-xs flex-shrink-0">
+          {badge}
         </Badge>
       )}
-      <Edit3 className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <Edit className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
     </div>
   );
-}
+};
 
-export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
+const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) => {
+  const { data: companyData, loading, errors, refetch } = useCompanyData({ 
+    siren, 
+    autoFetch: true 
+  });
+  const { toast } = useToast();
+  
+  const [activeTab, setActiveTab] = useState("overview");
+  const [formData, setFormData] = useState<Partial<CompanyFullData>>({});
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    economic: false,
+    financial: false,
+    compliance: false,
+    fiscal: false,
+    governance: false
+  });
+
+  useEffect(() => {
+    if (companyData) {
+      setFormData(companyData);
+    }
+  }, [companyData]);
+
+  const updateField = (path: string[], value: string) => {
+    setFormData(prevData => {
+      const newData = { ...prevData };
+      let current: any = newData;
+      
+      for (let i = 0; i < path.length - 1; i++) {
+        if (!current[path[i]]) {
+          current[path[i]] = {};
+        }
+        current = current[path[i]];
+      }
+      
+      current[path[path.length - 1]] = value;
+      return newData;
+    });
+    setHasChanges(true);
+  };
+
+  const getNestedValue = (obj: any, path: string[]): string => {
+    return path.reduce((current, key) => current?.[key], obj) || '';
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const { data, error } = await supabase
+        .from('admin_companies')
+        .upsert({
+          siren: siren,
+          company_name: getNestedValue(formData, ['sirene', 'denomination']) || 'Nom inconnu',
+          siret: getNestedValue(formData, ['sirene', 'siret']),
+          naf_code: getNestedValue(formData, ['sirene', 'naf']),
+          activity: getNestedValue(formData, ['sirene', 'activitePrincipale']),
+          address: getNestedValue(formData, ['sirene', 'adresse']),
+          city: getNestedValue(formData, ['sirene', 'ville']),
+          postal_code: getNestedValue(formData, ['sirene', 'codePostal']),
+          status: getNestedValue(formData, ['sirene', 'statut']) || 'active',
+          enriched_data: formData,
+          is_manually_edited: true,
+          edited_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setHasChanges(false);
+      toast({
+        title: "Sauvegardé",
+        description: "Les modifications ont été enregistrées avec succès"
+      });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les modifications",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    await refetch();
+    toast({
+      title: "Actualisé",
+      description: "Les données ont été rechargées depuis les APIs"
+    });
+  };
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Chargement des données...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (errors.length > 0) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-destructive">Erreurs de chargement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {errors.map((error, index) => (
+              <div key={index} className="text-sm text-destructive">
+                <strong>{error.source}:</strong> {error.message}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!formData || !formData.sirene) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-center text-muted-foreground">Aucune donnée disponible</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Build display data similar to Analysis.tsx
+  const displayCompanyData = {
+    name: getNestedValue(formData, ['sirene', 'denomination']),
+    siren: getNestedValue(formData, ['sirene', 'siren']),
+    siret: getNestedValue(formData, ['sirene', 'siret']),
+    naf: getNestedValue(formData, ['sirene', 'naf']),
+    employees: getNestedValue(formData, ['sirene', 'effectifs']),
+    address: getNestedValue(formData, ['sirene', 'adresse']),
+    director: formData.pappers?.dirigeants?.[0] ? `${formData.pappers.dirigeants[0].prenom} ${formData.pappers.dirigeants[0].nom}` : '',
+    phone: getNestedValue(formData, ['enriched', 'contactInfo', 'phone']) || getNestedValue(formData, ['pappers', 'telephone']),
+    email: getNestedValue(formData, ['enriched', 'contactInfo', 'email']) || getNestedValue(formData, ['pappers', 'email']),
+    website: getNestedValue(formData, ['pappers', 'siteWeb']),
+    foundedYear: formData.sirene?.dateCreation ? new Date(formData.sirene.dateCreation).getFullYear().toString() : '',
+    status: getNestedValue(formData, ['sirene', 'statut'])
+  };
+
+  const displayScores = {
+    global: formData.predictor?.scores?.global || 6.0,
+    financial: formData.predictor?.scores?.financier || 6.0,
+    legal: formData.predictor?.scores?.legal || 7.5,
+    fiscal: formData.predictor?.scores?.fiscal || 6.8,
+    defaultRisk: formData.predictor?.probabiliteDefaut ? 
+      `${(formData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1)}%` : 
+      'Faible'
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <header className="bg-background border-b shadow-sm">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <div className="h-8 w-8 rounded bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">P</span>
+              </div>
+              <h1 className="text-xl font-semibold text-foreground">Predicor Admin</h1>
+              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                Mode Édition
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                disabled={isSaving}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Actualiser
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleSave}
+                disabled={!hasChanges || isSaving}
+                className={hasChanges ? "bg-primary hover:bg-primary/90" : ""}
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                {isSaving ? "Sauvegarde..." : hasChanges ? "Sauvegarder" : "Sauvegardé"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Company Header */}
+      <div className="bg-background border-b">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <div className="h-16 w-16 rounded-lg bg-slate-100 flex items-center justify-center">
+                <Building2 className="h-8 w-8 text-slate-600" />
+              </div>
+              <div>
+                <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-3 mb-2">
+                  <EditableField
+                    value={displayCompanyData.name}
+                    placeholder="Nom de l'entreprise"
+                    onSave={(value) => updateField(['sirene', 'denomination'], value)}
+                  />
+                  <Badge variant="secondary" className="bg-success-light text-success w-fit">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    {displayCompanyData.status || 'Actif'}
+                  </Badge>
+                </div>
+                <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-6 text-sm text-muted-foreground">
+                  <span>SIREN: {displayCompanyData.siren}</span>
+                  <span>SIRET: {displayCompanyData.siret}</span>
+                  <span>{displayCompanyData.naf}</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-center md:text-right">
+              <div className="text-2xl md:text-3xl font-bold text-primary mb-1">{displayScores.global.toFixed(1)}/10</div>
+              <div className="text-sm text-muted-foreground">Score global</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-6 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6">
+            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="study">Étude approfondie</TabsTrigger>
+            <TabsTrigger value="predictive">Analyse prédictive</TabsTrigger>
+            <TabsTrigger value="reports">Rapports & Actions</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            {/* Company Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Building2 className="h-5 w-5 mr-2" />
+                  Informations générales
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <EditableField
+                      value={displayCompanyData.address}
+                      placeholder="Adresse complète"
+                      onSave={(value) => updateField(['sirene', 'adresse'], value)}
+                      icon={<MapPin className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={displayCompanyData.director}
+                      placeholder="Nom du dirigeant"
+                      onSave={(value) => updateField(['pappers', 'dirigeants', '0', 'nom'], value)}
+                      icon={<User className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={displayCompanyData.foundedYear}
+                      placeholder="Année de création"
+                      onSave={(value) => updateField(['sirene', 'dateCreation'], value)}
+                      icon={<Calendar className="h-4 w-4" />}
+                      type="number"
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <EditableField
+                      value={displayCompanyData.phone}
+                      placeholder="+33 X XX XX XX XX"
+                      onSave={(value) => updateField(['pappers', 'telephone'], value)}
+                      icon={<Phone className="h-4 w-4" />}
+                      type="tel"
+                    />
+                    <EditableField
+                      value={displayCompanyData.email}
+                      placeholder="contact@entreprise.com"
+                      onSave={(value) => updateField(['pappers', 'email'], value)}
+                      icon={<Mail className="h-4 w-4" />}
+                      type="email"
+                    />
+                    <EditableField
+                      value={displayCompanyData.employees}
+                      placeholder="Nombre d'employés"
+                      onSave={(value) => updateField(['sirene', 'effectifs'], value)}
+                      icon={<Users className="h-4 w-4" />}
+                      type="number"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Badges and Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Statuts et certifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  <Badge variant="secondary" className="bg-success-light text-success">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Entreprise {displayCompanyData.status || 'Active'}
+                  </Badge>
+                  
+                  {formData.rubyPayeur && (
+                    <Badge variant="secondary" className={
+                      formData.rubyPayeur.scoreGlobal >= 7 
+                        ? "bg-success-light text-success" 
+                        : formData.rubyPayeur.scoreGlobal >= 5 
+                        ? "bg-warning-light text-warning"
+                        : "bg-destructive-light text-destructive"
+                    }>
+                      {formData.rubyPayeur.scoreGlobal >= 7 ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
+                      Score RubyPayeur: {formData.rubyPayeur.scoreGlobal}/10
+                    </Badge>
+                  )}
+                  
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                    <RotateCw className="h-3 w-3 mr-1" />
+                    INSEE/SIRENE
+                  </Badge>
+                  
+                  <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                    <BarChart3 className="h-3 w-3 mr-1" />
+                    Pappers
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Score Cards */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="bg-gradient-to-br from-success-light to-success/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <TrendingUp className="h-5 w-5 mr-2 text-success" />
+                    Santé Financière
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-success mb-2">{displayScores.financial.toFixed(1)}/10</div>
+                  <p className="text-sm text-success-dark">Performance financière solide avec des indicateurs positifs</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-primary-light to-primary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <Shield className="h-5 w-5 mr-2 text-primary" />
+                    Conformité Légale
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-primary mb-2">{displayScores.legal.toFixed(1)}/10</div>
+                  <p className="text-sm text-primary-dark">Conformité réglementaire excellente</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-warning-light to-warning/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <AlertTriangle className="h-5 w-5 mr-2 text-warning" />
+                    Risque Prédictif
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-warning mb-2">{displayScores.defaultRisk}</div>
+                  <p className="text-sm text-warning-dark">Probabilité de défaut sur 12 mois</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* AI Analysis */}
+            <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/10">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Bot className="h-5 w-5 mr-2 text-primary" />
+                  Analyse IA Globale
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <EditableField
+                  value={getNestedValue(formData, ['enriched', 'aiAnalysis', 'summary'])}
+                  placeholder="L'entreprise présente un profil avec une performance correcte dans son secteur. Les indicateurs montrent une santé financière stable avec des opportunités d'amélioration identifiées."
+                  onSave={(value) => updateField(['enriched', 'aiAnalysis', 'summary'], value)}
+                  multiline
+                  badge="IA GPT-5"
+                />
+                <Separator />
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center">
+                    <Target className="h-4 w-4 mr-2" />
+                    Recommandations prioritaires
+                  </h4>
+                  <EditableField
+                    value={getNestedValue(formData, ['enriched', 'aiAnalysis', 'recommendations'])}
+                    placeholder="• Améliorer la trésorerie à court terme\n• Diversifier le portefeuille client\n• Renforcer les processus de conformité"
+                    onSave={(value) => updateField(['enriched', 'aiAnalysis', 'recommendations'], value)}
+                    multiline
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Enriched AI Data Section */}
+            <div className="space-y-6">
+              <h3 className="text-xl font-semibold flex items-center">
+                <Zap className="h-5 w-5 mr-2 text-primary" />
+                Données Enrichies par IA
+              </h3>
+
+              {/* Contact Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    Coordonnées
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <EditableField
+                    value={displayCompanyData.phone}
+                    placeholder="+33 X XX XX XX XX"
+                    onSave={(value) => updateField(['pappers', 'telephone'], value)}
+                    icon={<Phone className="h-4 w-4" />}
+                    badge="Pappers"
+                    type="tel"
+                  />
+                  <EditableField
+                    value={displayCompanyData.email}
+                    placeholder="contact@entreprise.com"
+                    onSave={(value) => updateField(['pappers', 'email'], value)}
+                    icon={<Mail className="h-4 w-4" />}
+                    badge="Pappers"
+                    type="email"
+                  />
+                  <EditableField
+                    value={displayCompanyData.website}
+                    placeholder="www.entreprise.com"
+                    onSave={(value) => updateField(['pappers', 'siteWeb'], value)}
+                    icon={<Globe className="h-4 w-4" />}
+                    badge="Pappers"
+                    type="url"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Legal Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Informations Juridiques
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <EditableField
+                      value={getNestedValue(formData, ['infogreffe', 'formeJuridique'])}
+                      placeholder="SAS, SARL, SA..."
+                      onSave={(value) => updateField(['infogreffe', 'formeJuridique'], value)}
+                      badge="Infogreffe"
+                    />
+                    <EditableField
+                      value={getNestedValue(formData, ['infogreffe', 'capitalSocial'])}
+                      placeholder="Capital social (€)"
+                      onSave={(value) => updateField(['infogreffe', 'capitalSocial'], value)}
+                      icon={<Euro className="h-4 w-4" />}
+                      badge="Infogreffe"
+                      type="number"
+                    />
+                    <EditableField
+                      value={getNestedValue(formData, ['infogreffe', 'numeroRcs'])}
+                      placeholder="Numéro RCS"
+                      onSave={(value) => updateField(['infogreffe', 'numeroRcs'], value)}
+                      badge="Infogreffe"
+                    />
+                    <EditableField
+                      value={getNestedValue(formData, ['infogreffe', 'greffe'])}
+                      placeholder="Greffe d'immatriculation"
+                      onSave={(value) => updateField(['infogreffe', 'greffe'], value)}
+                      badge="Infogreffe"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Payment Behavior */}
+              {formData.rubyPayeur && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Comportement de Paiement
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">{formData.rubyPayeur.scoreGlobal}/10</div>
+                        <div className="text-sm text-muted-foreground">Score Global</div>
+                        <Badge variant="success" className="text-xs mt-1">RubyPayeur</Badge>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">{formData.rubyPayeur.scorePaiement}/10</div>
+                        <div className="text-sm text-muted-foreground">Score Paiement</div>
+                        <Badge variant="success" className="text-xs mt-1">RubyPayeur</Badge>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-warning">{formData.rubyPayeur.retardsMoyens}j</div>
+                        <div className="text-sm text-muted-foreground">Retards Moyens</div>
+                        <Badge variant="success" className="text-xs mt-1">RubyPayeur</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Financial Data */}
+              {formData.pappers?.bilans && formData.pappers.bilans.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Euro className="h-5 w-5" />
+                      Données Financières Récentes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <EditableField
+                          value={formData.pappers.bilans[0].chiffreAffaires?.toString() || ''}
+                          placeholder="Chiffre d'Affaires (€)"
+                          onSave={(value) => updateField(['pappers', 'bilans', '0', 'chiffreAffaires'], value)}
+                          type="number"
+                        />
+                        <div className="text-sm text-muted-foreground mt-1">Chiffre d'Affaires</div>
+                        <Badge variant="success" className="text-xs mt-1">Pappers</Badge>
+                      </div>
+                      <div className="text-center">
+                        <EditableField
+                          value={formData.pappers.bilans[0].resultatNet?.toString() || ''}
+                          placeholder="Résultat Net (€)"
+                          onSave={(value) => updateField(['pappers', 'bilans', '0', 'resultatNet'], value)}
+                          type="number"
+                        />
+                        <div className="text-sm text-muted-foreground mt-1">Résultat Net</div>
+                        <Badge variant="success" className="text-xs mt-1">Pappers</Badge>
+                      </div>
+                      <div className="text-center">
+                        <EditableField
+                          value={formData.pappers.bilans[0].fondsPropresBruts?.toString() || ''}
+                          placeholder="Fonds Propres (€)"
+                          onSave={(value) => updateField(['pappers', 'bilans', '0', 'fondsPropresBruts'], value)}
+                          type="number"
+                        />
+                        <div className="text-sm text-muted-foreground mt-1">Fonds Propres</div>
+                        <Badge variant="success" className="text-xs mt-1">Pappers</Badge>
+                      </div>
+                      <div className="text-center">
+                        <EditableField
+                          value={formData.pappers.bilans[0].dettes?.toString() || ''}
+                          placeholder="Dettes (€)"
+                          onSave={(value) => updateField(['pappers', 'bilans', '0', 'dettes'], value)}
+                          type="number"
+                        />
+                        <div className="text-sm text-muted-foreground mt-1">Dettes</div>
+                        <Badge variant="success" className="text-xs mt-1">Pappers</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Legal Information Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Gavel className="h-5 w-5 mr-2" />
+                  Informations juridiques
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <EditableField
+                    value={getNestedValue(formData, ['infogreffe', 'formeJuridique'])}
+                    placeholder="Forme juridique"
+                    onSave={(value) => updateField(['infogreffe', 'formeJuridique'], value)}
+                  />
+                  <EditableField
+                    value={getNestedValue(formData, ['infogreffe', 'capitalSocial'])}
+                    placeholder="Capital social"
+                    onSave={(value) => updateField(['infogreffe', 'capitalSocial'], value)}
+                    type="number"
+                  />
+                  <EditableField
+                    value={getNestedValue(formData, ['infogreffe', 'numeroRcs'])}
+                    placeholder="Numéro RCS"
+                    onSave={(value) => updateField(['infogreffe', 'numeroRcs'], value)}
+                  />
+                  <EditableField
+                    value={getNestedValue(formData, ['infogreffe', 'dateImmatriculation'])}
+                    placeholder="Date d'immatriculation"
+                    onSave={(value) => updateField(['infogreffe', 'dateImmatriculation'], value)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Activity Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart3 className="h-5 w-5 mr-2" />
+                  Activité et secteur
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <EditableField
+                  value={getNestedValue(formData, ['sirene', 'activitePrincipale'])}
+                  placeholder="Description de l'activité principale"
+                  onSave={(value) => updateField(['sirene', 'activitePrincipale'], value)}
+                  multiline
+                />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <EditableField
+                    value={getNestedValue(formData, ['sirene', 'naf'])}
+                    placeholder="Code NAF"
+                    onSave={(value) => updateField(['sirene', 'naf'], value)}
+                  />
+                  <EditableField
+                    value={getNestedValue(formData, ['sirene', 'effectifs'])}
+                    placeholder="Nombre d'employés"
+                    onSave={(value) => updateField(['sirene', 'effectifs'], value)}
+                    type="number"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="study" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Étude Approfondie - Mode Édition</CardTitle>
+                <CardDescription>Configuration avancée des analyses sectorielles</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  
+                  {/* Economic Analysis Section */}
+                  <Card>
+                    <Collapsible 
+                      open={openSections.economic} 
+                      onOpenChange={() => toggleSection('economic')}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <TrendingUp className="h-5 w-5 text-primary" />
+                              <div>
+                                <CardTitle className="text-lg">Analyse Économique et Commerciale</CardTitle>
+                                <CardDescription>Configuration des données de marché</CardDescription>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="default" className="bg-success text-success-foreground">
+                                Excellent {displayScores.global.toFixed(1)}/10
+                              </Badge>
+                              {openSections.economic ? 
+                                <ChevronDown className="h-4 w-4" /> : 
+                                <ChevronRight className="h-4 w-4" />
+                              }
+                            </div>
+                          </div>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      
+                      <CollapsibleContent>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <EditableField
+                              value={getNestedValue(formData, ['enriched', 'economic', 'marketShare'])}
+                              placeholder="Part de marché (%)"
+                              onSave={(value) => updateField(['enriched', 'economic', 'marketShare'], value)}
+                              type="number"
+                            />
+                            <EditableField
+                              value={getNestedValue(formData, ['enriched', 'economic', 'competitivePosition'])}
+                              placeholder="Position concurrentielle"
+                              onSave={(value) => updateField(['enriched', 'economic', 'competitivePosition'], value)}
+                            />
+                          </div>
+                          <EditableField
+                            value={getNestedValue(formData, ['enriched', 'economic', 'analysis'])}
+                            placeholder="Analyse économique et commerciale détaillée..."
+                            onSave={(value) => updateField(['enriched', 'economic', 'analysis'], value)}
+                            multiline
+                          />
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+
+                  {/* Financial Analysis Section */}
+                  <Card>
+                    <Collapsible 
+                      open={openSections.financial} 
+                      onOpenChange={() => toggleSection('financial')}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <Euro className="h-5 w-5 text-success" />
+                              <div>
+                                <CardTitle className="text-lg">Situation Financière</CardTitle>
+                                <CardDescription>Analyse des ratios et performance</CardDescription>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary" className="bg-success text-success-foreground">
+                                Bon {displayScores.financial.toFixed(1)}/10
+                              </Badge>
+                              {openSections.financial ? 
+                                <ChevronDown className="h-4 w-4" /> : 
+                                <ChevronRight className="h-4 w-4" />
+                              }
+                            </div>
+                          </div>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      
+                      <CollapsibleContent>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-3 gap-4">
+                            <EditableField
+                              value={getNestedValue(formData, ['enriched', 'financial', 'liquidity'])}
+                              placeholder="Ratio de liquidité"
+                              onSave={(value) => updateField(['enriched', 'financial', 'liquidity'], value)}
+                              type="number"
+                            />
+                            <EditableField
+                              value={getNestedValue(formData, ['enriched', 'financial', 'debt'])}
+                              placeholder="Ratio d'endettement"
+                              onSave={(value) => updateField(['enriched', 'financial', 'debt'], value)}
+                              type="number"
+                            />
+                            <EditableField
+                              value={getNestedValue(formData, ['enriched', 'financial', 'profitability'])}
+                              placeholder="Rentabilité (%)"
+                              onSave={(value) => updateField(['enriched', 'financial', 'profitability'], value)}
+                              type="number"
+                            />
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+
+                  {/* Add similar collapsible sections for compliance, fiscal, and governance */}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="predictive" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Analyse Prédictive - Mode Édition</CardTitle>
+                <CardDescription>Configuration des modèles et paramètres prédictifs</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Risque 3 mois (%)</label>
+                    <EditableField
+                      value={formData.predictor?.probabiliteDefaut?.mois3 ? (formData.predictor.probabiliteDefaut.mois3 * 100).toFixed(1) : ''}
+                      placeholder="2.1"
+                      onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois3'], (parseFloat(value) / 100).toString())}
+                      type="number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Risque 6 mois (%)</label>
+                    <EditableField
+                      value={formData.predictor?.probabiliteDefaut?.mois6 ? (formData.predictor.probabiliteDefaut.mois6 * 100).toFixed(1) : ''}
+                      placeholder="3.8"
+                      onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois6'], (parseFloat(value) / 100).toString())}
+                      type="number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Risque 12 mois (%)</label>
+                    <EditableField
+                      value={formData.predictor?.probabiliteDefaut?.mois12 ? (formData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1) : ''}
+                      placeholder="4.9"
+                      onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois12'], (parseFloat(value) / 100).toString())}
+                      type="number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Confiance IA (%)</label>
+                    <EditableField
+                      value={getNestedValue(formData, ['predictor', 'confidence'])}
+                      placeholder="85"
+                      onSave={(value) => updateField(['predictor', 'confidence'], value)}
+                      type="number"
+                    />
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Facteurs prédictifs personnalisés</h4>
+                  <EditableField
+                    value={getNestedValue(formData, ['predictor', 'customFactors'])}
+                    placeholder="Configuration des facteurs discriminants spécifiques à cette entreprise..."
+                    onSave={(value) => updateField(['predictor', 'customFactors'], value)}
+                    multiline
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Rapports & Actions - Mode Édition</CardTitle>
+                <CardDescription>Configuration des rapports et actions disponibles</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-semibold flex items-center">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Configuration des rapports
+                    </h4>
+                    <EditableField
+                      value={getNestedValue(formData, ['enriched', 'reports', 'executiveSummary'])}
+                      placeholder="Résumé exécutif personnalisé..."
+                      onSave={(value) => updateField(['enriched', 'reports', 'executiveSummary'], value)}
+                      multiline
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="font-semibold flex items-center">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Alertes et notifications
+                    </h4>
+                    <EditableField
+                      value={getNestedValue(formData, ['enriched', 'alerts', 'settings'])}
+                      placeholder="Configuration des seuils d'alerte..."
+                      onSave={(value) => updateField(['enriched', 'alerts', 'settings'], value)}
+                      multiline
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export { CompanyWYSIWYGEditor };
   const { toast } = useToast();
   const { data, loading, refetch } = useCompanyData({ siren, autoFetch: true });
   const [formData, setFormData] = useState<CompanyFullData | null>(null);

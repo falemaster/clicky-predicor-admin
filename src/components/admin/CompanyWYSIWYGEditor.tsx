@@ -335,7 +335,11 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     email: getNestedValue(formData, ['enriched', 'contactInfo', 'email']) || getNestedValue(formData, ['pappers', 'email']),
     website: getNestedValue(formData, ['pappers', 'siteWeb']),
     foundedYear: formData.sirene?.dateCreation ? new Date(formData.sirene.dateCreation).getFullYear().toString() : '',
-    status: getNestedValue(formData, ['sirene', 'statut'])
+    status: getNestedValue(formData, ['sirene', 'statut']),
+    capitalSocial: getNestedValue(formData, ['enriched', 'legalInfo', 'socialCapital']) || 
+                  formData.pappers?.capitalSocial?.toLocaleString() + ' €' ||
+                  formData.infogreffe?.capitalSocial?.toLocaleString() + ' €' || 
+                  ''
   };
 
   const displayScores = {
@@ -541,11 +545,10 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       type="email"
                     />
                     <EditableField
-                      value={displayCompanyData.employees}
-                      placeholder="Nombre d'employés"
-                      onSave={(value) => updateField(['sirene', 'effectifs'], value)}
+                      value={displayCompanyData.capitalSocial}
+                      placeholder="Capital social (€)"
+                      onSave={(value) => updateField(['enriched', 'legalInfo', 'socialCapital'], value)}
                       icon={<Users className="h-4 w-4" />}
-                      type="number"
                     />
                   </div>
                 </div>

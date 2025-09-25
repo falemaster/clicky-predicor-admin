@@ -531,7 +531,7 @@ const Analysis = () => {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Capital social :</span>
-                      <div className="font-medium">150 000,00 €</div>
+                      <div className="font-medium">Non renseigné</div>
                     </div>
                   </div>
                   

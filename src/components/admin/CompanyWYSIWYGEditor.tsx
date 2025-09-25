@@ -646,6 +646,285 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       </CollapsibleContent>
                     </Collapsible>
                   </Card>
+
+                  {/* Financial Analysis Section */}
+                  <Card>
+                    <Collapsible 
+                      open={openSections.financial} 
+                      onOpenChange={() => toggleSection('financial')}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <CreditCard className="h-5 w-5 text-primary" />
+                              <div>
+                                <CardTitle className="text-lg">Situation Financière</CardTitle>
+                                <CardDescription>Santé financière et ratios de gestion</CardDescription>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary" className="bg-primary-light text-primary">
+                                Solide {displayScores.financial.toFixed(1)}/10
+                              </Badge>
+                              {openSections.financial ? 
+                                <ChevronDown className="h-4 w-4" /> : 
+                                <ChevronRight className="h-4 w-4" />
+                              }
+                            </div>
+                          </div>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      
+                      <CollapsibleContent>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-3 gap-4">
+                            <EditableField
+                              value={getNestedValue(formData, ['enriched', 'financial', 'liquidityRatio'])}
+                              placeholder="Ratio liquidité"
+                              onSave={(value) => updateField(['enriched', 'financial', 'liquidityRatio'], value)}
+                              type="number"
+                            />
+                            <EditableField
+                              value={getNestedValue(formData, ['enriched', 'financial', 'profitabilityRate'])}
+                              placeholder="Rentabilité nette (%)"
+                              onSave={(value) => updateField(['enriched', 'financial', 'profitabilityRate'], value)}
+                              type="number"
+                            />
+                            <EditableField
+                              value={getNestedValue(formData, ['enriched', 'financial', 'debtRatio'])}
+                              placeholder="Taux endettement (%)"
+                              onSave={(value) => updateField(['enriched', 'financial', 'debtRatio'], value)}
+                              type="number"
+                            />
+                          </div>
+                          <EditableField
+                            value={getNestedValue(formData, ['enriched', 'financial', 'analysis'])}
+                            placeholder="Analyse financière détaillée des ratios, flux de trésorerie et performance..."
+                            onSave={(value) => updateField(['enriched', 'financial', 'analysis'], value)}
+                            multiline
+                          />
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+
+                  {/* Compliance Section */}
+                  <Card>
+                    <Collapsible 
+                      open={openSections.compliance} 
+                      onOpenChange={() => toggleSection('compliance')}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <Shield className="h-5 w-5 text-primary" />
+                              <div>
+                                <CardTitle className="text-lg">Conformités et Obligations Légales</CardTitle>
+                                <CardDescription>Respect des réglementations et audits de conformité</CardDescription>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="default" className="bg-success text-success-foreground">
+                                Excellent {displayScores.legal.toFixed(1)}/10
+                              </Badge>
+                              {openSections.compliance ? 
+                                <ChevronDown className="h-4 w-4" /> : 
+                                <ChevronRight className="h-4 w-4" />
+                              }
+                            </div>
+                          </div>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      
+                      <CollapsibleContent>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-4">
+                              <h4 className="font-semibold">Obligations Fiscales</h4>
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'compliance', 'fiscalStatus'])}
+                                placeholder="TVA, IS, CET - À jour"
+                                onSave={(value) => updateField(['enriched', 'compliance', 'fiscalStatus'], value)}
+                              />
+                              <h4 className="font-semibold">Obligations Sociales</h4>
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'compliance', 'socialStatus'])}
+                                placeholder="URSSAF, Retraite, Mutuelle - À jour"
+                                onSave={(value) => updateField(['enriched', 'compliance', 'socialStatus'], value)}
+                              />
+                            </div>
+                            <div className="space-y-4">
+                              <h4 className="font-semibold">Certifications</h4>
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'compliance', 'certifications'])}
+                                placeholder="ISO 27001, RGPD, Qualiopi"
+                                onSave={(value) => updateField(['enriched', 'compliance', 'certifications'], value)}
+                              />
+                              <h4 className="font-semibold">Contentieux</h4>
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'compliance', 'litigation'])}
+                                placeholder="Statut des litiges et procédures"
+                                onSave={(value) => updateField(['enriched', 'compliance', 'litigation'], value)}
+                              />
+                            </div>
+                          </div>
+                          <EditableField
+                            value={getNestedValue(formData, ['enriched', 'compliance', 'analysis'])}
+                            placeholder="Analyse détaillée de la conformité réglementaire et des risques juridiques..."
+                            onSave={(value) => updateField(['enriched', 'compliance', 'analysis'], value)}
+                            multiline
+                          />
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+
+                  {/* Fiscal Mitigation Section */}
+                  <Card>
+                    <Collapsible 
+                      open={openSections.fiscal} 
+                      onOpenChange={() => toggleSection('fiscal')}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <CreditCard className="h-5 w-5 text-primary" />
+                              <div>
+                                <CardTitle className="text-lg">Mitigation Fiscale</CardTitle>
+                                <CardDescription>Optimisation et stratégies de gestion fiscale</CardDescription>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="default" className="bg-primary text-primary-foreground">
+                                Performant {displayScores.fiscal.toFixed(1)}/10
+                              </Badge>
+                              {openSections.fiscal ? 
+                                <ChevronDown className="h-4 w-4" /> : 
+                                <ChevronRight className="h-4 w-4" />
+                              }
+                            </div>
+                          </div>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      
+                      <CollapsibleContent>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-4">
+                              <h4 className="font-semibold">Optimisation Actuelle</h4>
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'fiscal', 'currentOptimization'])}
+                                placeholder="Taux IS effectif, CIR, CVAE économisée"
+                                onSave={(value) => updateField(['enriched', 'fiscal', 'currentOptimization'], value)}
+                              />
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'fiscal', 'totalSavings'])}
+                                placeholder="Économies totales 2023 (K€)"
+                                onSave={(value) => updateField(['enriched', 'fiscal', 'totalSavings'], value)}
+                                type="number"
+                              />
+                            </div>
+                            <div className="space-y-4">
+                              <h4 className="font-semibold">Potentiel d'Optimisation</h4>
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'fiscal', 'optimizationPotential'])}
+                                placeholder="Report déficitaire, optimisation TVA"
+                                onSave={(value) => updateField(['enriched', 'fiscal', 'optimizationPotential'], value)}
+                              />
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'fiscal', 'potentialSavings'])}
+                                placeholder="Potentiel total (K€)"
+                                onSave={(value) => updateField(['enriched', 'fiscal', 'potentialSavings'], value)}
+                                type="number"
+                              />
+                            </div>
+                          </div>
+                          <EditableField
+                            value={getNestedValue(formData, ['enriched', 'fiscal', 'recommendations'])}
+                            placeholder="Stratégies de mitigation recommandées et plan d'action fiscal..."
+                            onSave={(value) => updateField(['enriched', 'fiscal', 'recommendations'], value)}
+                            multiline
+                          />
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+
+                  {/* Governance Section */}
+                  <Card>
+                    <Collapsible 
+                      open={openSections.governance} 
+                      onOpenChange={() => toggleSection('governance')}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <Crown className="h-5 w-5 text-primary" />
+                              <div>
+                                <CardTitle className="text-lg">Structuration, Gouvernance et Management</CardTitle>
+                                <CardDescription>Organisation, processus de décision et management</CardDescription>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary" className="bg-primary-light text-primary">
+                                Solide 8.2/10
+                              </Badge>
+                              {openSections.governance ? 
+                                <ChevronDown className="h-4 w-4" /> : 
+                                <ChevronRight className="h-4 w-4" />
+                              }
+                            </div>
+                          </div>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      
+                      <CollapsibleContent>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-4">
+                              <h4 className="font-semibold">Structure de Gouvernance</h4>
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'governance', 'boardMembers'])}
+                                placeholder="Nombre de membres CA"
+                                onSave={(value) => updateField(['enriched', 'governance', 'boardMembers'], value)}
+                                type="number"
+                              />
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'governance', 'committees'])}
+                                placeholder="Comités spécialisés (Audit, RH, Tech)"
+                                onSave={(value) => updateField(['enriched', 'governance', 'committees'], value)}
+                              />
+                            </div>
+                            <div className="space-y-4">
+                              <h4 className="font-semibold">Indicateurs Management</h4>
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'governance', 'autonomyLevel'])}
+                                placeholder="Autonomie équipes (%)"
+                                onSave={(value) => updateField(['enriched', 'governance', 'autonomyLevel'], value)}
+                                type="number"
+                              />
+                              <EditableField
+                                value={getNestedValue(formData, ['enriched', 'governance', 'processQuality'])}
+                                placeholder="Processus documentés (%)"
+                                onSave={(value) => updateField(['enriched', 'governance', 'processQuality'], value)}
+                                type="number"
+                              />
+                            </div>
+                          </div>
+                          <EditableField
+                            value={getNestedValue(formData, ['enriched', 'governance', 'analysis'])}
+                            placeholder="Analyse des risques organisationnels, points forts et axes d'amélioration..."
+                            onSave={(value) => updateField(['enriched', 'governance', 'analysis'], value)}
+                            multiline
+                          />
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
                 </div>
               </CardContent>
             </Card>

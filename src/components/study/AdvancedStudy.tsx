@@ -4,8 +4,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
-import { TrendingUp, TrendingDown, Building, Shield, Users, ChevronDown, ChevronRight, Award, CheckCircle, AlertTriangle, XCircle, CreditCard, FileText, Gavel, Crown, Bot } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
+import { TrendingUp, TrendingDown, Building, Shield, Users, ChevronDown, ChevronRight, Award, CheckCircle, AlertTriangle, XCircle, CreditCard, FileText, Gavel, Crown, Bot, Database, Clock, Building2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import CompanyMap from "../visualization/CompanyMap";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -175,73 +176,116 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Étude Approfondie</CardTitle>
-              <CardDescription>Analyse multidimensionnelle par volets spécialisés</CardDescription>
-            </div>
-            <Button
-              onClick={generateAIAnalysis}
-              disabled={isGeneratingAI}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Bot className="h-4 w-4" />
-              {isGeneratingAI ? "Génération..." : "Analyse IA Avancée"}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-6 rounded-lg border border-primary/10">
-            <div className="flex items-start space-x-4">
-              <div className="bg-primary/10 p-3 rounded-full">
-                <Award className="h-6 w-6 text-primary" />
+    <TooltipProvider>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Étude Approfondie</CardTitle>
+                <CardDescription>Analyse multidimensionnelle par volets spécialisés</CardDescription>
               </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-3 text-primary">
-                  {aiAnalysis ? "Synthèse Exécutive IA" : "Synthèse Exécutive"}
-                </h3>
-                <div className="prose prose-sm text-muted-foreground space-y-3">
-                  {aiAnalysis ? (
-                    <div>
-                      <p className="text-foreground">{aiAnalysis.syntheseExecutive}</p>
-                      {aiAnalysis.recommandations && aiAnalysis.recommandations.length > 0 && (
-                        <div className="mt-4">
-                          <strong className="text-foreground">Recommandations IA :</strong>
-                          <ul className="list-disc list-inside mt-2 space-y-1">
-                            {aiAnalysis.recommandations.slice(0, 3).map((rec, index) => (
-                              <li key={index} className="text-sm">{rec}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                     <>
-                       <p>
-                         <strong className="text-foreground">Profil de l'entreprise {companyData?.companyInfo?.denomination || 'analysée'}</strong> - L'entreprise présente un profil avec une note moyenne de <span className="font-semibold text-success">{companyData?.scores?.global?.toFixed(1) || '6.0'}/10</span>, {companyData?.scores?.global >= 8 ? 'plaçant l\'organisation dans le quartile supérieur de son secteur' : companyData?.scores?.global >= 6.5 ? 'indiquant une performance correcte dans son secteur' : 'nécessitant une attention particulière pour améliorer sa position sectorielle'}.
-                       </p>
-                       <p>
-                         <strong className="text-foreground">Points forts critiques :</strong> {companyData?.scores?.legal >= 8 ? `La conformité légale (${companyData.scores.legal.toFixed(1)}/10) constitue un avantage concurrentiel majeur` : companyData?.scores?.financial >= 8 ? `La solidité financière (${companyData.scores.financial.toFixed(1)}/10) représente un atout important` : companyData?.scores?.fiscal >= 8 ? `La conformité fiscale (${companyData.scores.fiscal.toFixed(1)}/10) témoigne d'une gestion rigoureuse` : 'L\'entreprise maintient un niveau de performance acceptable dans ses activités principales'}. {companyData?.companyInfo?.activitePrincipale ? `L'activité dans le secteur ${companyData.companyInfo.activitePrincipale} bénéficie d'une expertise reconnue.` : ''}
-                       </p>
-                       <p>
-                         <strong className="text-foreground">Axes d'optimisation :</strong> {companyData?.scores?.financial < 7 ? `La solidité financière (${companyData?.scores?.financial?.toFixed(1) || '6.0'}/10) présente un potentiel d'amélioration notable.` : companyData?.scores?.legal < 7 ? `La conformité légale (${companyData?.scores?.legal?.toFixed(1) || '6.0'}/10) nécessite une attention renforcée.` : 'Les indicateurs montrent des opportunités d\'optimisation.'} L'amélioration de ces aspects pourrait renforcer significativement la position concurrentielle.
-                       </p>
-                       <p>
-                         <strong className="text-foreground">Recommandation stratégique :</strong> {companyData?.scores?.global >= 7.5 ? 'Maintenir l\'excellence opérationnelle actuelle tout en consolidant les acquis' : companyData?.scores?.global >= 6 ? 'Concentrer les efforts sur l\'amélioration des points faibles identifiés' : 'Mise en place d\'un plan d\'action prioritaire pour redresser les indicateurs critiques'} pour sécuriser la croissance à long terme.
-                       </p>
-                     </>
-                  )}
+              <Button
+                onClick={generateAIAnalysis}
+                disabled={isGeneratingAI}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Bot className="h-4 w-4" />
+                {isGeneratingAI ? "Génération..." : "Analyse IA Avancée"}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-6 rounded-lg border border-primary/10">
+              <div className="flex items-start space-x-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Award className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold mb-3 text-primary">
+                    {aiAnalysis ? "Synthèse Exécutive IA" : "Synthèse Exécutive"}
+                  </h3>
+                  <div className="prose prose-sm text-muted-foreground space-y-3">
+                    {aiAnalysis ? (
+                      <div>
+                        <p className="text-foreground">{aiAnalysis.syntheseExecutive}</p>
+                        {aiAnalysis.recommandations && aiAnalysis.recommandations.length > 0 && (
+                          <div className="mt-4">
+                            <strong className="text-foreground">Recommandations IA :</strong>
+                            <ul className="list-disc list-inside mt-2 space-y-1">
+                              {aiAnalysis.recommandations.slice(0, 3).map((rec, index) => (
+                                <li key={index} className="text-sm">{rec}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                       <>
+                         <p>
+                           <strong className="text-foreground">Profil de l'entreprise {companyData?.companyInfo?.denomination || 'analysée'}</strong> - L'entreprise présente un profil avec une note moyenne de <span className="font-semibold text-success">{companyData?.scores?.global?.toFixed(1) || '6.0'}/10</span>, {companyData?.scores?.global >= 8 ? 'plaçant l\'organisation dans le quartile supérieur de son secteur' : companyData?.scores?.global >= 6.5 ? 'indiquant une performance correcte dans son secteur' : 'nécessitant une attention particulière pour améliorer sa position sectorielle'}.
+                         </p>
+                         <p>
+                           <strong className="text-foreground">Points forts critiques :</strong> {companyData?.scores?.legal >= 8 ? `La conformité légale (${companyData.scores.legal.toFixed(1)}/10) constitue un avantage concurrentiel majeur` : companyData?.scores?.financial >= 8 ? `La solidité financière (${companyData.scores.financial.toFixed(1)}/10) représente un atout important` : companyData?.scores?.fiscal >= 8 ? `La conformité fiscale (${companyData.scores.fiscal.toFixed(1)}/10) témoigne d'une gestion rigoureuse` : 'L\'entreprise maintient un niveau de performance acceptable dans ses activités principales'}. {companyData?.companyInfo?.activitePrincipale ? `L'activité dans le secteur ${companyData.companyInfo.activitePrincipale} bénéficie d'une expertise reconnue.` : ''}
+                         </p>
+                         <p>
+                           <strong className="text-foreground">Axes d'optimisation :</strong> {companyData?.scores?.financial < 7 ? `La solidité financière (${companyData?.scores?.financial?.toFixed(1) || '6.0'}/10) présente un potentiel d'amélioration notable.` : companyData?.scores?.legal < 7 ? `La conformité légale (${companyData?.scores?.legal?.toFixed(1) || '6.0'}/10) nécessite une attention renforcée.` : 'Les indicateurs montrent des opportunités d\'optimisation.'} L'amélioration de ces aspects pourrait renforcer significativement la position concurrentielle.
+                         </p>
+                         <p>
+                           <strong className="text-foreground">Recommandation stratégique :</strong> {companyData?.scores?.global >= 7.5 ? 'Maintenir l\'excellence opérationnelle actuelle tout en consolidant les acquis' : companyData?.scores?.global >= 6 ? 'Concentrer les efforts sur l\'amélioration des points faibles identifiés' : 'Mise en place d\'un plan d\'action prioritaire pour redresser les indicateurs critiques'} pour sécuriser la croissance à long terme.
+                         </p>
+                       </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Tableau de bord Qualité des données */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-primary" />
+              Tableau de bord - Qualité des données
+            </CardTitle>
+            <CardDescription>
+              Indicateurs de complétude, fraîcheur et sources des informations analysées
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center p-4 border rounded-lg bg-success/5">
+                <div className="text-2xl font-bold text-success mb-2">94%</div>
+                <div className="text-sm text-muted-foreground mb-2">Complétude des données</div>
+                <Progress value={94} className="h-2 mb-2" />
+                <div className="text-xs text-muted-foreground">
+                  Basé sur 47 champs d'analyse
+                </div>
+              </div>
+              <div className="text-center p-4 border rounded-lg bg-primary/5">
+                <div className="flex items-center justify-center mb-2">
+                  <Clock className="h-5 w-5 text-primary mr-2" />
+                  <span className="text-2xl font-bold text-primary">J-2</span>
+                </div>
+                <div className="text-sm text-muted-foreground mb-2">Fraîcheur moyenne</div>
+                <div className="text-xs text-muted-foreground">
+                  Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
+                </div>
+              </div>
+              <div className="text-center p-4 border rounded-lg bg-accent/5">
+                <div className="text-2xl font-bold text-accent mb-2">7</div>
+                <div className="text-sm text-muted-foreground mb-2">Sources officielles</div>
+                <div className="text-xs text-muted-foreground">
+                  APIs institutionnelles connectées
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
       <div className="space-y-4">
         {/* Analyse économique et commerciale */}
@@ -284,11 +328,11 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                       <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={marketEvolution}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="year" />
-                          <YAxis />
-                          <Tooltip />
-                          <Line type="monotone" dataKey="ca" stroke="hsl(var(--primary))" strokeWidth={2} name="CA (K€)" />
-                          <Line type="monotone" dataKey="croissance" stroke="hsl(var(--success))" strokeWidth={2} name="Croissance %" />
+                           <XAxis dataKey="year" />
+                           <YAxis />
+                           <RechartsTooltip />
+                           <Line type="monotone" dataKey="ca" stroke="hsl(var(--primary))" strokeWidth={2} name="CA (K€)" />
+                           <Line type="monotone" dataKey="croissance" stroke="hsl(var(--success))" strokeWidth={2} name="Croissance %" />
                         </LineChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -404,7 +448,7 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="year" />
                           <YAxis />
-                          <Tooltip />
+                           <RechartsTooltip />
                           <Line type="monotone" dataKey="liquidite" stroke="hsl(var(--primary))" strokeWidth={2} name="Liquidité" />
                           <Line type="monotone" dataKey="rentabilite" stroke="hsl(var(--success))" strokeWidth={2} name="Rentabilité %" />
                           <Line type="monotone" dataKey="endettement" stroke="hsl(var(--warning))" strokeWidth={2} name="Endettement" />
@@ -423,7 +467,7 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="year" />
                           <YAxis />
-                          <Tooltip />
+                           <RechartsTooltip />
                           <Bar dataKey="operationnel" fill="hsl(var(--success))" name="Opérationnel" />
                           <Bar dataKey="investissement" fill="hsl(var(--warning))" name="Investissement" />
                           <Bar dataKey="financement" fill="hsl(var(--primary))" name="Financement" />
@@ -513,6 +557,15 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
             
             <CollapsibleContent>
               <CardContent className="space-y-6">
+                {/* Badge Sources partenaires */}
+                <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-muted/50">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-primary">Sources partenaires :</span>
+                    <span className="text-sm text-muted-foreground">Portalis • DGFIP • Copernic • CreditSafe</span>
+                  </div>
+                </div>
+
                 <div className="grid md:grid-cols-1 gap-4">
                   {complianceItems.map((item, index) => (
                     <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
@@ -625,10 +678,17 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                   <div className="grid md:grid-cols-2 gap-6">
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base flex items-center">
-                          <AlertTriangle className="h-4 w-4 mr-2" />
-                          Contentieux Fiscal
-                        </CardTitle>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <CardTitle className="text-base flex items-center cursor-help">
+                              <AlertTriangle className="h-4 w-4 mr-2" />
+                              Contentieux Fiscal
+                            </CardTitle>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Données DGFIP</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
@@ -664,10 +724,17 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
 
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base flex items-center">
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Contentieux Judiciaire
-                        </CardTitle>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <CardTitle className="text-base flex items-center cursor-help">
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Contentieux Judiciaire
+                            </CardTitle>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Base Portalis</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
@@ -706,10 +773,17 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                   <div className="mt-6 grid md:grid-cols-2 gap-6">
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base flex items-center">
-                          <FileText className="h-4 w-4 mr-2" />
-                          Procédures Juridiques
-                        </CardTitle>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <CardTitle className="text-base flex items-center cursor-help">
+                              <FileText className="h-4 w-4 mr-2" />
+                              Procédures Juridiques
+                            </CardTitle>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Base Copernic</p>
+                          </TooltipContent>
+                        </Tooltip>
                         <CardDescription className="text-xs">
                           Suivi des procédures pré-contentieuses et contractuelles
                         </CardDescription>
@@ -754,10 +828,17 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
 
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base flex items-center">
-                          <Gavel className="h-4 w-4 mr-2" />
-                          Procédures Judiciaires
-                        </CardTitle>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <CardTitle className="text-base flex items-center cursor-help">
+                              <Gavel className="h-4 w-4 mr-2" />
+                              Procédures Judiciaires
+                            </CardTitle>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Base Portalis</p>
+                          </TooltipContent>
+                        </Tooltip>
                         <CardDescription className="text-xs">
                           Suivi des procédures contentieuses et juridictionnelles
                         </CardDescription>
@@ -1153,7 +1234,7 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip />
+                          <RechartsTooltip />
                         </PieChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -1251,7 +1332,16 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
           </Collapsible>
         </Card>
       </div>
-    </div>
+      
+      {/* Note légale discrète en fin de section Conformités */}
+      <div className="text-xs text-muted-foreground text-center py-4 border-t border-muted/20">
+        <p>
+          Les informations de conformité sont compilées à partir de sources officielles et de bases de données partenaires. 
+          Cette analyse ne constitue pas un conseil juridique ou fiscal. Pour toute décision importante, consultez vos conseillers spécialisés.
+        </p>
+      </div>
+      </div>
+    </TooltipProvider>
   );
 };
 

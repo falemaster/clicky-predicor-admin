@@ -80,6 +80,7 @@ interface EditableFieldProps {
   icon?: React.ReactNode;
   badge?: string;
   type?: "text" | "number" | "email" | "tel" | "url";
+  label?: string;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({ 
@@ -89,7 +90,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
   multiline = false, 
   icon,
   badge,
-  type = "text"
+  type = "text",
+  label
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
@@ -110,31 +112,38 @@ const EditableField: React.FC<EditableFieldProps> = ({
 
   if (isEditing) {
     return (
-      <div className="flex items-center space-x-2 w-full">
-        {icon && <div className="text-muted-foreground flex-shrink-0">{icon}</div>}
-        {multiline ? (
-          <Textarea
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            placeholder={placeholder}
-            className="flex-1 min-h-[80px]"
-          />
-        ) : (
-          <Input
-            type={type}
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            placeholder={placeholder}
-            className="flex-1"
-          />
+      <div className="space-y-1">
+        {label && (
+          <label className="text-xs font-medium text-foreground uppercase tracking-wide">
+            {label}
+          </label>
         )}
-        <div className="flex space-x-1 flex-shrink-0">
-          <Button size="sm" variant="default" onClick={handleSave}>
-            <Check className="h-3 w-3" />
-          </Button>
-          <Button size="sm" variant="outline" onClick={handleCancel}>
-            <X className="h-3 w-3" />
-          </Button>
+        <div className="flex items-center space-x-2 w-full">
+          {icon && <div className="text-muted-foreground flex-shrink-0">{icon}</div>}
+          {multiline ? (
+            <Textarea
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              placeholder={placeholder}
+              className="flex-1 min-h-[80px]"
+            />
+          ) : (
+            <Input
+              type={type}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              placeholder={placeholder}
+              className="flex-1"
+            />
+          )}
+          <div className="flex space-x-1 flex-shrink-0">
+            <Button size="sm" variant="default" onClick={handleSave}>
+              <Check className="h-3 w-3" />
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleCancel}>
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -144,20 +153,27 @@ const EditableField: React.FC<EditableFieldProps> = ({
   const isPlaceholder = !value;
 
   return (
-    <div 
-      className="flex items-center space-x-2 cursor-pointer hover:bg-muted/50 p-2 rounded group transition-colors"
-      onClick={() => setIsEditing(true)}
-    >
-      {icon && <div className="text-muted-foreground flex-shrink-0">{icon}</div>}
-      <span className={`text-sm flex-1 ${isPlaceholder ? 'text-muted-foreground bg-muted px-2 py-1 rounded blur-sm' : ''}`}>
-        {displayValue}
-      </span>
-      {badge && (
-        <Badge variant="secondary" className="text-xs flex-shrink-0">
-          {badge}
-        </Badge>
+    <div className="space-y-1">
+      {label && (
+        <label className="text-xs font-medium text-foreground uppercase tracking-wide">
+          {label}
+        </label>
       )}
-      <Edit className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+      <div 
+        className="flex items-center space-x-2 cursor-pointer hover:bg-muted/50 p-2 rounded group transition-colors"
+        onClick={() => setIsEditing(true)}
+      >
+        {icon && <div className="text-muted-foreground flex-shrink-0">{icon}</div>}
+        <span className={`text-sm flex-1 ${isPlaceholder ? 'text-muted-foreground bg-muted px-2 py-1 rounded blur-sm' : ''}`}>
+          {displayValue}
+        </span>
+        {badge && (
+          <Badge variant="secondary" className="text-xs flex-shrink-0">
+            {badge}
+          </Badge>
+        )}
+        <Edit className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+      </div>
     </div>
   );
 };
@@ -514,18 +530,21 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <EditableField
+                      label="Adresse"
                       value={displayCompanyData.address}
                       placeholder="Adresse complète"
                       onSave={(value) => updateField(['sirene', 'adresse'], value)}
                       icon={<MapPin className="h-4 w-4" />}
                     />
                     <EditableField
+                      label="Dirigeant"
                       value={displayCompanyData.director}
                       placeholder="Nom du dirigeant"
                       onSave={(value) => updateField(['pappers', 'dirigeants', '0', 'nom'], value)}
                       icon={<User className="h-4 w-4" />}
                     />
                     <EditableField
+                      label="Année de création"
                       value={displayCompanyData.foundedYear}
                       placeholder="Année de création"
                       onSave={(value) => updateField(['sirene', 'dateCreation'], value)}
@@ -535,6 +554,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                   </div>
                   <div className="space-y-4">
                     <EditableField
+                      label="Téléphone"
                       value={displayCompanyData.phone}
                       placeholder="+33 X XX XX XX XX"
                       onSave={(value) => updateField(['pappers', 'telephone'], value)}
@@ -542,6 +562,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       type="tel"
                     />
                     <EditableField
+                      label="Email"
                       value={displayCompanyData.email}
                       placeholder="contact@entreprise.com"
                       onSave={(value) => updateField(['pappers', 'email'], value)}
@@ -549,6 +570,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       type="email"
                     />
                     <EditableField
+                      label="Capital social"
                       value={displayCompanyData.capitalSocial}
                       placeholder="Capital social (€)"
                       onSave={(value) => updateField(['pappers', 'capitalSocial'], value)}

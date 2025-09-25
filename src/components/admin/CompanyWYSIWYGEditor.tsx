@@ -433,6 +433,15 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
               <Button 
                 variant="outline" 
                 size="sm" 
+                onClick={() => window.open(`/analysis?siren=${siren}`, '_blank')}
+                className="text-primary border-primary hover:bg-primary/10"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Voir côté utilisateur
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
                 onClick={handleRefresh}
                 disabled={isSaving}
               >

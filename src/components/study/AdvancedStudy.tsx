@@ -9,6 +9,7 @@ import { TrendingUp, TrendingDown, Building, Shield, Users, ChevronDown, Chevron
 import CompanyMap from "../visualization/CompanyMap";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { ExecutiveSummary } from "@/components/admin/ExecutiveSummary";
 
 interface AdvancedStudyProps {
   companyData?: {
@@ -195,50 +196,23 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-6 rounded-lg border border-primary/10">
-            <div className="flex items-start space-x-4">
-              <div className="bg-primary/10 p-3 rounded-full">
-                <Award className="h-6 w-6 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-3 text-primary">
-                  {aiAnalysis ? "Synthèse Exécutive IA" : "Synthèse Exécutive"}
-                </h3>
-                <div className="prose prose-sm text-muted-foreground space-y-3">
-                  {aiAnalysis ? (
-                    <div>
-                      <p className="text-foreground">{aiAnalysis.syntheseExecutive}</p>
-                      {aiAnalysis.recommandations && aiAnalysis.recommandations.length > 0 && (
-                        <div className="mt-4">
-                          <strong className="text-foreground">Recommandations IA :</strong>
-                          <ul className="list-disc list-inside mt-2 space-y-1">
-                            {aiAnalysis.recommandations.slice(0, 3).map((rec, index) => (
-                              <li key={index} className="text-sm">{rec}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                     <>
-                       <p>
-                         <strong className="text-foreground">Profil de l'entreprise {companyData?.companyInfo?.denomination || 'analysée'}</strong> - L'entreprise présente un profil avec une note moyenne de <span className="font-semibold text-success">{companyData?.scores?.global?.toFixed(1) || '6.0'}/10</span>, {companyData?.scores?.global >= 8 ? 'plaçant l\'organisation dans le quartile supérieur de son secteur' : companyData?.scores?.global >= 6.5 ? 'indiquant une performance correcte dans son secteur' : 'nécessitant une attention particulière pour améliorer sa position sectorielle'}.
-                       </p>
-                       <p>
-                         <strong className="text-foreground">Points forts critiques :</strong> {companyData?.scores?.legal >= 8 ? `La conformité légale (${companyData.scores.legal.toFixed(1)}/10) constitue un avantage concurrentiel majeur` : companyData?.scores?.financial >= 8 ? `La solidité financière (${companyData.scores.financial.toFixed(1)}/10) représente un atout important` : companyData?.scores?.fiscal >= 8 ? `La conformité fiscale (${companyData.scores.fiscal.toFixed(1)}/10) témoigne d'une gestion rigoureuse` : 'L\'entreprise maintient un niveau de performance acceptable dans ses activités principales'}. {companyData?.companyInfo?.activitePrincipale ? `L'activité dans le secteur ${companyData.companyInfo.activitePrincipale} bénéficie d'une expertise reconnue.` : ''}
-                       </p>
-                       <p>
-                         <strong className="text-foreground">Axes d'optimisation :</strong> {companyData?.scores?.financial < 7 ? `La solidité financière (${companyData?.scores?.financial?.toFixed(1) || '6.0'}/10) présente un potentiel d'amélioration notable.` : companyData?.scores?.legal < 7 ? `La conformité légale (${companyData?.scores?.legal?.toFixed(1) || '6.0'}/10) nécessite une attention renforcée.` : 'Les indicateurs montrent des opportunités d\'optimisation.'} L'amélioration de ces aspects pourrait renforcer significativement la position concurrentielle.
-                       </p>
-                       <p>
-                         <strong className="text-foreground">Recommandation stratégique :</strong> {companyData?.scores?.global >= 7.5 ? 'Maintenir l\'excellence opérationnelle actuelle tout en consolidant les acquis' : companyData?.scores?.global >= 6 ? 'Concentrer les efforts sur l\'amélioration des points faibles identifiés' : 'Mise en place d\'un plan d\'action prioritaire pour redresser les indicateurs critiques'} pour sécuriser la croissance à long terme.
-                       </p>
-                     </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ExecutiveSummary
+            scores={{
+              economic: companyData?.scores?.global || 8.4,
+              financial: companyData?.scores?.financial || 7.7,
+              legal: companyData?.scores?.legal || 9.2,
+              fiscal: companyData?.scores?.fiscal || 8.1,
+              global: companyData?.scores?.global || 8.0
+            }}
+            companyName={companyData?.companyInfo?.denomination || "L'entreprise"}
+            existingSummary={{
+              profile: companyData?.rawData?.enriched?.executiveSummary?.profile,
+              strengths: companyData?.rawData?.enriched?.executiveSummary?.strengths,
+              optimizationAreas: companyData?.rawData?.enriched?.executiveSummary?.optimizationAreas,
+              strategicRecommendation: companyData?.rawData?.enriched?.executiveSummary?.strategicRecommendation
+            }}
+            editable={false}
+          />
         </CardContent>
       </Card>
 
@@ -261,7 +235,7 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="default" className="bg-success text-success-foreground">
-                      Excellent 8.4/10
+                      Excellent {(companyData?.scores?.global || 8.4).toFixed(1)}/10
                     </Badge>
                     {openSections.economic ? 
                       <ChevronDown className="h-4 w-4" /> : 

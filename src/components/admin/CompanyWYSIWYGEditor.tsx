@@ -59,6 +59,7 @@ import {
 } from "lucide-react";
 import { ScoreEditorModal } from "./ScoreEditorModal";
 import { AlertBadge } from "./AlertBadge";
+import { ExecutiveSummary } from "./ExecutiveSummary";
 import { calculateAlert, getGlobalAlertLevel, countAlertsByLevel } from "@/utils/alertUtils";
 import type { CompanyFullData } from "@/types/api";
 
@@ -659,7 +660,32 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                 <CardTitle>Étude Approfondie - Mode Édition</CardTitle>
                 <CardDescription>Configuration avancée des analyses sectorielles</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
+                {/* Executive Summary */}
+                <ExecutiveSummary
+                  scores={{
+                    economic: displayScores.economic,
+                    financial: displayScores.financial,
+                    legal: displayScores.legal,
+                    fiscal: displayScores.fiscal,
+                    global: displayScores.global
+                  }}
+                  companyName={displayCompanyData.name}
+                  existingSummary={{
+                    profile: getNestedValue(formData, ['enriched', 'executiveSummary', 'profile']),
+                    strengths: getNestedValue(formData, ['enriched', 'executiveSummary', 'strengths']),
+                    optimizationAreas: getNestedValue(formData, ['enriched', 'executiveSummary', 'optimizationAreas']),
+                    strategicRecommendation: getNestedValue(formData, ['enriched', 'executiveSummary', 'strategicRecommendation'])
+                  }}
+                  onSummaryChange={(summary) => {
+                    updateField(['enriched', 'executiveSummary', 'profile'], summary.profile);
+                    updateField(['enriched', 'executiveSummary', 'strengths'], summary.strengths);
+                    updateField(['enriched', 'executiveSummary', 'optimizationAreas'], summary.optimizationAreas);
+                    updateField(['enriched', 'executiveSummary', 'strategicRecommendation'], summary.strategicRecommendation);
+                  }}
+                  editable={true}
+                />
+
                 <div className="space-y-4">
                   {/* Economic Analysis Section */}
                   <Card>

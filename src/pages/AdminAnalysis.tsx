@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import AdvancedStudy from "@/components/study/AdvancedStudy";
 import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
 import { useAnalysisData } from "@/hooks/useAnalysisData";
+import { useCompanyData } from "@/hooks/useCompanyData";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,6 +59,9 @@ const AdminAnalysis = () => {
   // Utiliser les données depuis le hook ou fallback vers les données par défaut
   const companyData = data.companyInfo;
   const scores = data.scores;
+  
+  // Récupérer les vraies données de l'API
+  const { data: realData } = useCompanyData({ siren: companyData.siren, autoFetch: true });
 
   // État temporaire pour l'édition
   const [tempData, setTempData] = useState(data);
@@ -81,10 +85,14 @@ const AdminAnalysis = () => {
       inscriptionRCS: "INSCRIT (au greffe de PARIS, le 15/03/2015)",
       inscriptionRNE: "INSCRIT (le 15/03/2015)",
       numeroRCS: `${companyData.siren} R.C.S. Paris`,
-      capitalSocial: "150 000,00 €"
+      capitalSocial: realData?.pappers?.capitalSocial ? 
+        `${realData.pappers.capitalSocial.toLocaleString()} €` : 
+        "150 000,00 €"
     },
     activity: {
-      activitePrincipale: "Conseil en systèmes et logiciels informatiques, développement de solutions digitales sur mesure",
+      activitePrincipale: realData?.pappers?.libelleNaf || 
+        realData?.sirene?.naf || 
+        "Conseil en systèmes et logiciels informatiques, développement de solutions digitales sur mesure",
       codeNAF: "6202A",
       categoryNAF: "Commerce",
       descriptionNAF: "(Conseil en systèmes et logiciels informatiques)",

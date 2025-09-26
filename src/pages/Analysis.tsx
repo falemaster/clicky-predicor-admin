@@ -286,14 +286,7 @@ const Analysis = () => {
                 <span className="hidden sm:inline">Nouvelle recherche</span>
                 <span className="sm:hidden">Recherche</span>
               </Button>
-              <Link to="/admin-analysis">
-                <Badge variant="outline" className="text-success border-success hover:bg-success/10 cursor-pointer transition-colors">Admin</Badge>
-              </Link>
-              <Button variant="outline" size="sm">
-                <User className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">J. Martin</span>
-                <span className="sm:hidden">JM</span>
-              </Button>
+              {/* User authentication will be implemented here */}
             </div>
           </div>
         </div>

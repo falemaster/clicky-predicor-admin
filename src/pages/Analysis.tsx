@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ import { useAnalysisData } from "@/hooks/useAnalysisData";
 import { useCompanyData } from "@/hooks/useCompanyData";
 import { getScoreTheme } from "@/utils/scoreUtils";
 import { CompanySearch } from "@/components/search/CompanySearch";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import EnrichedDataDisplayAI from "@/components/analysis/EnrichedDataDisplayAI";
 import LoadingProgress from "@/components/analysis/LoadingProgress";
 import AnalysisSkeleton from "@/components/analysis/AnalysisSkeleton";
@@ -48,12 +48,23 @@ const Analysis = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedSiren, setSelectedSiren] = useState<string>("");
   const [showSearch, setShowSearch] = useState(true);
+  const [searchParams] = useSearchParams();
   
   // Hook pour les données mockées (fallback)
   const { data: mockData } = useAnalysisData();
   
   // Hook pour les vraies données API
   const { data: realData, loading, errors, fetchCompanyData, isInitialLoad, updateData } = useCompanyData();
+
+  // Effet pour gérer l'auto-chargement depuis l'URL
+  useEffect(() => {
+    const sirenFromUrl = searchParams.get('siren');
+    if (sirenFromUrl && !realData && !loading) {
+      setSelectedSiren(sirenFromUrl);
+      setShowSearch(false);
+      fetchCompanyData(sirenFromUrl, 'siren');
+    }
+  }, [searchParams, realData, loading, fetchCompanyData]);
 
   // Déterminer l'état de l'application
   const hasRealData = realData && realData.sirene;

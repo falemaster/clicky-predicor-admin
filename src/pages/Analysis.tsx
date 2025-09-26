@@ -17,6 +17,7 @@ import EnrichedDataDisplayAI from "@/components/analysis/EnrichedDataDisplayAI";
 import LoadingProgress from "@/components/analysis/LoadingProgress";
 import AnalysisSkeleton from "@/components/analysis/AnalysisSkeleton";
 import { SourceBadge } from "@/components/ui/source-badge";
+import { DataWithSource } from "@/components/ui/data-with-source";
 import { DirigeantModal } from "@/components/analysis/DirigeantModal";
 import { CollectiveProcedureAlert } from "@/components/analysis/CollectiveProcedureAlert";
 import { 
@@ -653,23 +654,26 @@ const Analysis = () => {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">SIREN :</span>
-                      <div className="font-medium flex items-center">
-                        {companyData.siren}
-                        <SourceBadge source="INSEE" className="ml-2" />
+                      <div className="font-medium">
+                        <DataWithSource source="INSEE">
+                          {companyData.siren}
+                        </DataWithSource>
                       </div>
                     </div>
                     <div>
                       <span className="text-muted-foreground">SIRET (siège) :</span>
-                      <div className="font-medium flex items-center">
-                        {companyData.siret}
-                        <SourceBadge source="INSEE" className="ml-2" />
+                      <div className="font-medium">
+                        <DataWithSource source="INSEE">
+                          {companyData.siret}
+                        </DataWithSource>
                       </div>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Forme juridique :</span>
-                      <div className="font-medium flex items-center">
-                        {realData?.infogreffe?.formeJuridique || 'SAS, société par actions simplifiée'}
-                        {realData?.infogreffe && <SourceBadge source="INFOGREFFE" className="ml-2" />}
+                      <div className="font-medium">
+                        <DataWithSource source="INFOGREFFE">
+                          {realData?.infogreffe?.formeJuridique || 'SAS, société par actions simplifiée'}
+                        </DataWithSource>
                       </div>
                     </div>
                     <div>
@@ -678,25 +682,28 @@ const Analysis = () => {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Inscription RCS :</span>
-                      <div className="font-medium text-success flex items-center">
+                      <div className="font-medium text-success">
                         <CheckCircle className="h-3 w-3 inline mr-1" />
-                        {realData?.infogreffe?.dateImmatriculation ? 
-                          `INSCRIT (le ${new Date(realData.infogreffe.dateImmatriculation).toLocaleDateString('fr-FR')})` :
-                          realData?.pappers?.dateCreation ? 
-                            `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
-                            'INSCRIT (au greffe de PARIS, le 15/03/2015)'
-                        }
-                        {realData?.infogreffe && <SourceBadge source="INFOGREFFE" className="ml-2" />}
+                        <DataWithSource source="INFOGREFFE">
+                          {realData?.infogreffe?.dateImmatriculation ? 
+                            `INSCRIT (le ${new Date(realData.infogreffe.dateImmatriculation).toLocaleDateString('fr-FR')})` :
+                            realData?.pappers?.dateCreation ? 
+                              `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
+                              'INSCRIT (au greffe de PARIS, le 15/03/2015)'
+                          }
+                        </DataWithSource>
                       </div>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Inscription RNE :</span>
                       <div className="font-medium text-success">
                         <CheckCircle className="h-3 w-3 inline mr-1" />
-                        {realData?.pappers?.dateCreation ? 
-                          `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
-                          'INSCRIT (le 15/03/2015)'
-                        }
+                        <DataWithSource source="PAPPERS">
+                          {realData?.pappers?.dateCreation ? 
+                            `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
+                            'INSCRIT (le 15/03/2015)'
+                          }
+                        </DataWithSource>
                       </div>
                     </div>
                     <div>
@@ -705,14 +712,21 @@ const Analysis = () => {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Capital social :</span>
-                      <div className="font-medium flex items-center">
-                        {(realData?.infogreffe?.capitalSocial ? realData.infogreffe.capitalSocial.toLocaleString() + ' €' : '') ||
-                         (realData?.pappers?.capitalSocial ? realData.pappers.capitalSocial.toLocaleString() + ' €' : '') || 
-                         'Non renseigné'}
-                        {realData?.infogreffe?.capitalSocial && <SourceBadge source="INFOGREFFE" className="ml-2" />}
-                        {!realData?.infogreffe?.capitalSocial && realData?.pappers?.capitalSocial && <SourceBadge source="PAPPERS" className="ml-2" />}
+                      <div className="font-medium">
+                        <DataWithSource source={realData?.infogreffe?.capitalSocial ? "INFOGREFFE" : "PAPPERS"}>
+                          {(realData?.infogreffe?.capitalSocial ? realData.infogreffe.capitalSocial.toLocaleString() + ' €' : '') ||
+                           (realData?.pappers?.capitalSocial ? realData.pappers.capitalSocial.toLocaleString() + ' €' : '') || 
+                           'Non renseigné'}
+                        </DataWithSource>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Sources des données */}
+                  <div className="mt-6 pt-4 border-t">
+                    <p className="text-xs text-muted-foreground">
+                      Sources : INSEE (identité), Infogreffe (juridique), Pappers (compléments)
+                    </p>
                   </div>
 
                   {/* Dirigeants interactifs */}

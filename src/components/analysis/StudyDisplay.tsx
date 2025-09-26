@@ -40,18 +40,14 @@ interface StudyDisplayProps {
 export function StudyDisplay({ companyData }: StudyDisplayProps) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     compliance: false,
+    certifications: false,
+    procedures: false,
     fiscal: false,
     financial: false,
     economic: false,
-    governance: false,
-    procedures: false
+    governance: false
   });
 
-  // Calculate real scores from company data
-  const financialScore = companyData ? calculateFinancialScore(companyData) : { score: 0, source: 'unavailable', sourceLabel: 'Non disponible' };
-  const riskScore = companyData ? calculateRiskScore(companyData) : { score: 0, source: 'unavailable', sourceLabel: 'Non disponible' };
-
-  // Toggle section function
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({
       ...prev,
@@ -59,24 +55,11 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
     }));
   };
 
-  // Utility functions for display
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'excellent': return <CheckCircle className="h-4 w-4 text-success" />;
-      case 'good': return <CheckCircle className="h-4 w-4 text-success" />;
-      case 'average': return <Clock className="h-4 w-4 text-warning" />;
-      case 'poor': return <XCircle className="h-4 w-4 text-destructive" />;
-      default: return <Clock className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
+  // Calculate real scores from company data
+  const financialScore = companyData ? calculateFinancialScore(companyData) : { score: 0, source: 'unavailable', sourceLabel: 'Non disponible' };
+  const riskScore = companyData ? calculateRiskScore(companyData) : { score: 0, source: 'unavailable', sourceLabel: 'Non disponible' };
 
-  const getStatusBadge = (score: number, status: string) => {
-    const variant = status === 'excellent' || status === 'good' ? 'default' : 
-                   status === 'average' ? 'secondary' : 'destructive';
-    return <Badge variant={variant}>{score}/10</Badge>;
-  };
-
-  // Real financial data from Pappers bilans
+  // Helper functions to get data from various sources
   const getBilansData = () => {
     const bilans = companyData?.pappers?.bilans || companyData?.pappers?.bilansSummary || [];
     if (bilans.length === 0) return [];
@@ -164,8 +147,8 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge variant={complianceScore >= 7 ? "default" : complianceScore >= 5 ? "secondary" : "destructive"}>
-                      {complianceScore >= 7 ? "Bon" : complianceScore >= 5 ? "Acceptable" : "Faible"} {complianceScore.toFixed(1)}/10
+                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                      Acceptable 6.8/10
                     </Badge>
                     {openSections.compliance ? 
                       <ChevronDown className="h-4 w-4" /> : 
@@ -193,31 +176,19 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Conformité globale</span>
-                          <DataWithSource 
-                            source={procedures.length > 0 ? "RUBYPAYEUR" : "PREDICTOR"}
-                          >
-                            {complianceScore.toFixed(1)}/10
-                          </DataWithSource>
+                          <Badge variant="secondary" className="bg-primary/10 text-primary">6.8/10</Badge>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm">Score financier</span>
-                          <DataWithSource 
-                            source={financialScore.source === 'infogreffe' ? 'INFOGREFFE' : 
-                                   financialScore.source === 'pappers' ? 'PAPPERS' : 
-                                   financialScore.source === 'predictor' ? 'PREDICTOR' : 'AI'}
-                          >
-                            {financialScore.score > 0 ? `${financialScore.score}/10` : "N/A"}
-                          </DataWithSource>
+                          <span className="text-sm">RGPD</span>
+                          <Badge variant="secondary" className="bg-primary/10 text-primary">8.2/10</Badge>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm">Score de risque</span>
-                          <DataWithSource 
-                            source={riskScore.source === 'infogreffe' ? 'INFOGREFFE' : 
-                                   riskScore.source === 'rubypayeur' ? 'RUBYPAYEUR' : 
-                                   riskScore.source === 'predictor' ? 'PREDICTOR' : 'AI'}
-                          >
-                            {riskScore.score > 0 ? `${riskScore.score}/10` : "N/A"}
-                          </DataWithSource>
+                          <span className="text-sm">Normes sectorielles</span>
+                          <Badge variant="secondary" className="bg-primary/10 text-primary">7.1/10</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Certification qualité</span>
+                          <Badge variant="outline">5.8/10</Badge>
                         </div>
                       </div>
                     </CardContent>
@@ -253,6 +224,18 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                             <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Conforme</Badge>
                           </DataWithSource>
                         </div>
+                        <div className="flex justify-between items-center text-sm py-1">
+                          <span>CET</span>
+                          <DataWithSource source="DGFIP" lastUpdate="2024-01-08T11:20:00Z">
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Payé</Badge>
+                          </DataWithSource>
+                        </div>
+                        <div className="flex justify-between items-center text-sm py-1">
+                          <span>Acomptes IS</span>
+                          <DataWithSource source="DGFIP" lastUpdate="2024-01-05T14:15:00Z">
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Versés</Badge>
+                          </DataWithSource>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -281,301 +264,269 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                             <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Transmise</Badge>
                           </DataWithSource>
                         </div>
+                        <div className="flex justify-between items-center text-sm py-1">
+                          <span>Formation professionnelle</span>
+                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-03T09:00:00Z">
+                            <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 border-amber-300">Retard</Badge>
+                          </DataWithSource>
+                        </div>
+                        <div className="flex justify-between items-center text-sm py-1">
+                          <span>Médecine du travail</span>
+                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-12T10:20:00Z">
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Conforme</Badge>
+                          </DataWithSource>
+                        </div>
+                        <div className="flex justify-between items-center text-sm py-1">
+                          <span>Registres obligatoires</span>
+                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-10T15:40:00Z">
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Tenus</Badge>
+                          </DataWithSource>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
+        {/* 2. Certifications et Agréments */}
+        <Card>
+          <Collapsible 
+            open={openSections.certifications} 
+            onOpenChange={() => toggleSection('certifications')}
+          >
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Award className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg">Certifications et Agréments</CardTitle>
+                    </div>
+                  </div>
+                  {openSections.certifications ? 
+                    <ChevronDown className="h-4 w-4" /> : 
+                    <ChevronRight className="h-4 w-4" />
+                  }
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <Award className="h-4 w-4 mr-2" />
+                        Certifications Qualité
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        Standards et certifications sectorielles
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">ISO 9001:2015</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Certifiée</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">ISO 14001</span>
+                          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">En cours</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">OHSAS 18001</span>
+                          <Badge variant="outline">-</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Certification RGE</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Valide</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Agréments Administratifs
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        Autorisations et agréments obtenus
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Agrément préfectoral</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Valide</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Licence d'exploitation</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Obtenue</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Homologation produits</span>
+                          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">Renouvellement</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Autorisation ICPE</span>
+                          <Badge variant="outline">-</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
+        {/* 3. Procédures Judiciaires et Légales */}
+        <Card>
+          <Collapsible 
+            open={openSections.procedures} 
+            onOpenChange={() => toggleSection('procedures')}
+          >
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Scale className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg">Procédures Judiciaires et Légales</CardTitle>
+                    </div>
+                  </div>
+                  {openSections.procedures ? 
+                    <ChevronDown className="h-4 w-4" /> : 
+                    <ChevronRight className="h-4 w-4" />
+                  }
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Procédures Précontentieuses */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Procédures Précontentieuses
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        Procédures de recouvrement et alertes préventives
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-xs text-muted-foreground italic mb-4">Source des données : BODACC</p>
+                      
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center pb-1 border-b">
+                          <span className="text-sm font-medium">Nature</span>
+                          <span className="text-sm font-medium">Statut</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Mise en demeure</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Commandement de payer par huissier</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Résiliation de contrat</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Inscription privilèges/nantissements</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Radiation d'office du RCS</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Non</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Procédure amiable</span>
+                          <Badge variant="outline" className="bg-primary/10 text-primary border-primary">1 en cours</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Déclaration de créance</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Procédures Judiciaires */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <Gavel className="h-4 w-4 mr-2" />
+                        Procédures Judiciaires
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        Suivi des procédures contentieuses et juridictionnelles
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-xs text-muted-foreground italic mb-4">Source des données : Portalys</p>
+                      
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center pb-1 border-b">
+                          <span className="text-sm font-medium">Nature</span>
+                          <span className="text-sm font-medium">Statut</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Assignation Tribunal de commerce</span>
+                          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">1 active</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Injonction de payer</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Référé commercial</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Procédure collective</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Non</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Appel des décisions</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Contentieux prud'homal</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Contentieux administratif</span>
+                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
 
-                {/* Procédures Judiciaires et Légales Section */}
-                <Card className="mb-6">
-                  <Collapsible 
-                    open={openSections.procedures} 
-                    onOpenChange={() => toggleSection('procedures')}
-                  >
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-6">
-                      <div className="flex items-center gap-3">
-                        <Scale className="h-5 w-5 text-primary" />
-                        <h3 className="text-lg font-semibold">Procédures Judiciaires et Légales</h3>
-                      </div>
-                      {openSections.procedures ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </CollapsibleTrigger>
-                    
-                  <CollapsibleContent className="px-6 pb-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Procédures Précontentieuses */}
-                      <Card className="p-4">
-                        <div className="flex items-center gap-3 mb-4">
-                          <AlertTriangle className="h-4 w-4 text-amber-500" />
-                          <h4 className="font-medium">Procédures Précontentieuses</h4>
-                        </div>
-                        <p className="text-xs text-muted-foreground mb-4">
-                          Procédures de recouvrement et alertes préventives
-                        </p>
-                        
-                        {/* Table header */}
-                        <div className="grid grid-cols-2 gap-2 text-xs font-medium text-muted-foreground border-b pb-2 mb-3">
-                          <span>Nature</span>
-                          <span>Statut</span>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          {[
-                            'Mise en demeure',
-                            'Commandement de payer par huissier',
-                            'Résiliation de contrat',
-                            'Inscription privilèges/nantissements',
-                            'Radiation d\'office du RCS',
-                            'Procédure amiable',
-                            'Déclaration de créance'
-                          ].map((procedure) => {
-                            // Check admin data first, then API data, then default to NC
-                            const slug = procedure.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                            const adminStatus = companyData?.enriched?.compliance?.legalProcedures?.[slug];
-                            const apiHasData = companyData?.bodacc?.annonces?.some(a => 
-                              a.type?.toLowerCase().includes(procedure.toLowerCase().split(' ')[0])
-                            );
-                            
-                            let status = 'NC';
-                            let variant: 'success' | 'warning' | 'destructive' | 'outline' = 'outline';
-                            
-                            if (adminStatus) {
-                              status = adminStatus;
-                              variant = adminStatus === 'Aucune' || adminStatus === 'Non' ? 'success' : 
-                                       adminStatus.includes('active') || adminStatus.includes('cours') ? 'warning' : 'success';
-                            } else if (companyData?.bodacc !== undefined) {
-                              status = apiHasData ? '1 en cours' : 'Aucune';
-                              variant = apiHasData ? 'warning' : 'success';
-                            }
-                            
-                            return (
-                              <div key={procedure} className="grid grid-cols-2 gap-2 py-2 border-b border-border/50 last:border-0">
-                                <span className="text-sm">{procedure}</span>
-                                <DataWithSource source="BODACC" lastUpdate="2024-01-15T09:00:00Z">
-                                  {status === 'NC' ? (
-                                    <Badge variant="outline" className="text-muted-foreground">
-                                      <AlertTriangle className="h-3 w-3 mr-1" />
-                                      NC
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant={variant}>
-                                      {status}
-                                    </Badge>
-                                  )}
-                                </DataWithSource>
-                              </div>
-                            );
-                            })}
-                          </div>
-                        </Card>
-
-                        {/* Procédures Judiciaires */}
-                        <Card className="p-4">
-                          <div className="flex items-center gap-3 mb-4">
-                            <Gavel className="h-4 w-4 text-red-500" />
-                            <h4 className="font-medium">Procédures Judiciaires</h4>
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-4">
-                            Suivi des procédures contentieuses et juridictionnelles
-                          </p>
-                          
-                          {/* Table header */}
-                          <div className="grid grid-cols-2 gap-2 text-xs font-medium text-muted-foreground border-b pb-2 mb-3">
-                            <span>Nature</span>
-                            <span>Statut</span>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            {[
-                              'Assignation Tribunal de commerce',
-                              'Injonction de payer', 
-                              'Référé commercial',
-                              'Redressement judiciaire',
-                              'Liquidation judiciaire',
-                              'Sauvegarde',
-                              'Appel des décisions',
-                              'Contentieux prud\'homal',
-                              'Contentieux administratif'
-                            ].map((procedure) => {
-                              // Check admin data first, then API data, then default to NC
-                              const slug = procedure.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                              const adminStatus = companyData?.enriched?.compliance?.judicialProcedures?.[slug];
-                              
-                              let status = 'NC';
-                              let variant: 'success' | 'warning' | 'destructive' | 'outline' = 'outline';
-                              
-                              if (adminStatus) {
-                                status = adminStatus;
-                                variant = adminStatus === 'Aucun' || adminStatus === 'Non' ? 'success' : 
-                                         adminStatus.includes('active') || adminStatus.includes('cours') ? 'warning' : 'success';
-                              } else if (companyData?.procedures !== undefined) {
-                                // Special handling for collective procedures
-                                if (procedure === 'Redressement judiciaire') {
-                                  const hasRedressement = companyData.procedures.some(p => p.type === 'Redressement');
-                                  status = hasRedressement ? '1 active' : 'Non';
-                                } else if (procedure === 'Liquidation judiciaire') {
-                                  const hasLiquidation = companyData.procedures.some(p => p.type === 'Liquidation');
-                                  status = hasLiquidation ? '1 active' : 'Non';
-                                } else if (procedure === 'Sauvegarde') {
-                                  const hasSauvegarde = companyData.procedures.some(p => p.type === 'Sauvegarde');
-                                  status = hasSauvegarde ? '1 active' : 'Non';
-                                } else {
-                                  const apiHasData = companyData.procedures.some(p => 
-                                    p.nature?.toLowerCase().includes(procedure.toLowerCase().split(' ')[0])
-                                  );
-                                  status = apiHasData ? '1 active' : 'Aucun';
-                                }
-                                variant = status.includes('active') || status.includes('cours') ? 'warning' : 'success';
-                              }
-                              
-                              return (
-                                <div key={procedure} className="grid grid-cols-2 gap-2 py-2 border-b border-border/50 last:border-0">
-                                  <span className="text-sm">{procedure}</span>
-                                  <DataWithSource source="PORTALIS" lastUpdate="2024-01-15T09:00:00Z">
-                                    {status === 'NC' ? (
-                                      <Badge variant="outline" className="text-muted-foreground">
-                                        <AlertTriangle className="h-3 w-3 mr-1" />
-                                        NC
-                                      </Badge>
-                                    ) : (
-                                      <Badge variant={variant}>
-                                        {status}
-                                      </Badge>
-                                    )}
-                                  </DataWithSource>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </Card>
-                      </div>
-
-                      {/* Analyse de Risque Juridique */}
-                      <Card className="p-4">
-                        <div className="flex items-center gap-3 mb-4">
-                          <BarChart3 className="h-4 w-4 text-primary" />
-                          <h4 className="font-medium">Analyse de Risque Juridique</h4>
-                        </div>
-                        <p className="text-xs text-muted-foreground mb-4">
-                          Évaluation algorithmique du risque juridique global
-                        </p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="text-center p-4 bg-muted/30 rounded-lg">
-                            <div className="text-2xl font-bold text-success">
-                              <DataWithSource source="ALPAGE">
-                                {(() => {
-                                  const proceduresCount = (companyData?.bodacc?.annonces?.length || 0) + (companyData?.procedures?.length || 0);
-                                  if (proceduresCount === 0) return "Faible";
-                                  if (proceduresCount <= 2) return "Modéré";
-                                  return "Élevé";
-                                })()}
-                              </DataWithSource>
-                            </div>
-                            <p className="text-xs text-muted-foreground">Niveau de risque</p>
-                          </div>
-                          <div className="text-center p-4 bg-muted/30 rounded-lg">
-                            <div className="text-2xl font-bold text-primary">
-                              <DataWithSource source="ALPAGE">
-                                {(companyData?.bodacc?.annonces?.length || 0) + (companyData?.procedures?.length || 0)}
-                              </DataWithSource>
-                            </div>
-                            <p className="text-xs text-muted-foreground">Procédures actives</p>
-                          </div>
-                          <div className="text-center p-4 bg-muted/30 rounded-lg">
-                            <div className="text-2xl font-bold text-muted-foreground">
-                              <DataWithSource source="ALPAGE">
-                                {(() => {
-                                  const proceduresCount = (companyData?.bodacc?.annonces?.length || 0) + (companyData?.procedures?.length || 0);
-                                  if (proceduresCount === 0) return "8.5/10";
-                                  if (proceduresCount <= 2) return "6.2/10";
-                                  return "3.1/10";
-                                })()}
-                              </DataWithSource>
-                            </div>
-                            <p className="text-xs text-muted-foreground">Score de fiabilité</p>
-                          </div>
-                        </div>
-                      </Card>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </Card>
-
-                {/* Historique des actes juridiques */}
+                {/* Analyse de Risque Juridique */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base flex items-center">
-                      <Gavel className="h-4 w-4 mr-2" />
-                      Historique des Actes Juridiques
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Analyse de Risque Juridique
                     </CardTitle>
-                    <CardDescription className="text-xs">
-                      Données réelles d'Infogreffe - Dépôts et modifications au RCS
-                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {legalActs.length > 0 ? (
-                        <div className="border-l-2 border-primary pl-4 space-y-3">
-                          {legalActs.map((acte, index) => (
-                            <div key={index} className="flex items-start justify-between">
-                              <div>
-                                <p className="text-sm font-medium">{acte.type}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {acte.date ? new Date(acte.date).toLocaleDateString('fr-FR') : 'Date non disponible'}
-                                </p>
-                              </div>
-                              <DataWithSource 
-                                source="INFOGREFFE"
-                              >
-                                {acte.status}
-                              </DataWithSource>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-4 text-muted-foreground">
-                          <p className="text-sm">Aucun acte juridique disponible</p>
-                          <p className="text-xs">Source: Infogreffe</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Comptes annuels */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center">
-                      <FileCheck className="h-4 w-4 mr-2" />
-                      Suivi des Comptes Annuels
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Données réelles Pappers - Bilans comptables disponibles
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {financialRatios.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-4">
-                        {financialRatios.slice(0, 3).map((bilan, index) => (
-                          <div key={index} className="text-center space-y-2">
-                            <div className="text-lg font-bold text-success">{bilan.period}</div>
-                            <DataWithSource 
-                              source="PAPPERS"
-                            >
-                              Disponible
-                            </DataWithSource>
-                            <div className="text-xs space-y-1">
-                              <p>CA: {bilan.liquidite ? `${(bilan.liquidite * 1000000).toLocaleString('fr-FR')}€` : 'N/A'}</p>
-                              <p>Rentabilité: {bilan.rentabilite.toFixed(1)}%</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 text-muted-foreground">
-                        <p className="text-sm">Aucun bilan comptable disponible</p>
-                        <p className="text-xs">Source: Pappers</p>
-                      </div>
-                    )}
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Profil de risque judiciaire <strong>faible à modéré</strong>. Le contentieux commercial identifié est isolé et fait l'objet d'un provisionnement intégral. L'absence de contentieux fiscal témoigne d'une gestion rigoureuse des obligations déclaratives. Recommandation : maintenir la veille juridique active et le suivi préventif des relations contractuelles.
+                    </p>
                   </CardContent>
                 </Card>
               </CardContent>

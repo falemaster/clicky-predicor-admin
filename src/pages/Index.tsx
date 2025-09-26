@@ -85,11 +85,11 @@ const Index = () => {
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="space-y-4">
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                L'intelligence artificielle au service de{' '}
-                <span className="text-primary">vos décisions stratégiques</span>
+                Analyse prédictive dédiée aux{' '}
+                <span className="text-primary">acteurs financiers et aux environnements régulés</span>
               </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Solution professionnelle de référence utilisée par les banques, organismes de crédit et établissements agréés pour l'évaluation des risques d'entreprise
+            Outil d'analyse prédictive conçu pour accompagner les acteurs financiers dans l'évaluation et l'anticipation des risques d'entreprise.
           </p>
             </div>
 

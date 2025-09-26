@@ -623,13 +623,12 @@ const Analysis = () => {
                       Informations juridiques
                     </CardTitle>
                     <div className="flex items-center space-x-2">
-                      {realData?.infogreffe && (
-                        <SourceBadge 
-                          source="INFOGREFFE" 
-                          lastUpdate={realData.infogreffe.lastUpdate}
-                          className="mr-2"
-                        />
-                      )}
+                       {realData?.infogreffe && (
+                         <SourceBadge 
+                           source="INFOGREFFE" 
+                           className="mr-2"
+                         />
+                       )}
                       <Button size="sm" variant="outline">
                         <FileText className="h-4 w-4 mr-1" />
                         Avis situation SIRENE
@@ -638,13 +637,18 @@ const Analysis = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Alertes procédures collectives */}
-                  {realData?.infogreffe?.proceduresCollectives && realData.infogreffe.proceduresCollectives.length > 0 && (
-                    <CollectiveProcedureAlert 
-                      procedures={realData.infogreffe.proceduresCollectives}
-                      className="mb-4"
-                    />
-                  )}
+                   {/* Alertes procédures collectives */}
+                   {realData?.infogreffe?.procedures && realData.infogreffe.procedures.length > 0 && (
+                     <CollectiveProcedureAlert 
+                       procedures={realData.infogreffe.procedures.map(proc => ({
+                         type: proc.type,
+                         status: proc.statut,
+                         dateDebut: proc.date,
+                         description: `Tribunal: ${proc.tribunal}`
+                       }))}
+                       className="mb-4"
+                     />
+                   )}
                   
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>

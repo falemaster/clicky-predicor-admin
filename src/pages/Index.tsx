@@ -88,9 +88,9 @@ const Index = () => {
                 L'intelligence artificielle au service de{' '}
                 <span className="text-primary">vos décisions stratégiques</span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Première plateforme d'analyse prédictive nouvelle génération, propulsée par l'IA GPT et les algorithmes les plus avancés du marché
-              </p>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Solution professionnelle de référence utilisée par les banques, organismes de crédit et établissements agréés pour l'évaluation des risques d'entreprise
+          </p>
             </div>
 
             {/* Integrated Search */}

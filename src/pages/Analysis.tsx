@@ -300,7 +300,7 @@ const Analysis = () => {
       </header>
 
       {/* Company Header */}
-      <div className="bg-background border-b">
+      <div className="sticky top-0 z-10 bg-background border-b">
         <div className="container mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
             <div className="flex items-center space-x-4">

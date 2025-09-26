@@ -1,10 +1,17 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Initialize Supabase client for calling other edge functions
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
 
 const SIRENE_API_BASE = 'https://api.insee.fr/entreprises/sirene/V3.11';
 
@@ -18,18 +25,6 @@ serve(async (req) => {
     const { query, type = 'name', limit = 10 } = await req.json();
 
     if (!query || query.trim().length < 3) {
-      // Retourner des données de démonstration pour les requêtes courtes
-      if (type === 'name' && query && query.trim().length >= 1) {
-        const mockResults = generateMockResults(query);
-        return new Response(JSON.stringify({ 
-          results: mockResults,
-          source: 'mock',
-          message: 'Données de démonstration (requête trop courte)'
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      
       return new Response(JSON.stringify({ 
         error: { 
           code: 'QUERY_TOO_SHORT', 
@@ -66,17 +61,23 @@ serve(async (req) => {
     if (!response.ok) {
       console.error(`SIRENE API error: ${response.status} ${response.statusText}`);
       
-      // Si l'API SIRENE ne fonctionne pas, retourner des données de démonstration
-      if (type === 'name' && (response.status === 429 || response.status === 400)) {
-        // Limite de taux atteinte ou requête rejetée - données de démonstration
-        const mockResults = generateMockResults(query);
-        return new Response(JSON.stringify({ 
-          results: mockResults,
-          source: 'mock',
-          message: response.status === 429 ? 'Données de démonstration (limite API atteinte)' : 'Données de démonstration (requête rejetée par l\'API)'
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      // Si l'API publique échoue pour une recherche par nom, essayer l'API INSEE
+      if (type === 'name') {
+        console.log(`Fallback to INSEE API for query: "${query}"`);
+        try {
+          const inseeResults = await callInseeApiSearch(query);
+          if (inseeResults.length > 0) {
+            console.log(`INSEE API returned ${inseeResults.length} results`);
+            return new Response(JSON.stringify({ 
+              results: inseeResults, 
+              source: 'insee' 
+            }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+        } catch (inseeError) {
+          console.error('INSEE API fallback failed:', inseeError);
+        }
       }
 
       return new Response(JSON.stringify({ 
@@ -96,18 +97,22 @@ serve(async (req) => {
       const results = Array.isArray(data.results) ? data.results.slice(0, limit) : [];
       console.log(`Recherche-Entreprises response: ${results.length} results`);
       
-      // Si aucun résultat trouvé pour une recherche de nom, utiliser les données mockées
+      // Si aucun résultat trouvé pour une recherche de nom, essayer l'API INSEE
       if (type === 'name' && results.length === 0 && query.trim().length >= 3) {
-        const mockResults = generateMockResults(query);
-        if (mockResults.length > 0) {
-          console.log(`Using mock results as fallback for "${query}"`);
-          return new Response(JSON.stringify({ 
-            results: mockResults,
-            source: 'mock',
-            message: 'Données de démonstration (aucun résultat API)'
-          }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
+        console.log(`No results from gouvernement API, trying INSEE API for: "${query}"`);
+        try {
+          const inseeResults = await callInseeApiSearch(query);
+          if (inseeResults.length > 0) {
+            console.log(`INSEE API returned ${inseeResults.length} results as fallback`);
+            return new Response(JSON.stringify({ 
+              results: inseeResults, 
+              source: 'insee' 
+            }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+        } catch (inseeError) {
+          console.error('INSEE API fallback failed:', inseeError);
         }
       }
       
@@ -157,23 +162,6 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in sirene-search function:', error);
-    
-    // En cas d'erreur, essayer de retourner des données de démonstration
-    try {
-      const { query, type } = await req.json().catch(() => ({ query: '', type: 'name' }));
-      if (type === 'name' && query) {
-        const mockResults = generateMockResults(query);
-        return new Response(JSON.stringify({ 
-          results: mockResults,
-          source: 'mock',
-          message: 'Données de démonstration (erreur API)',
-          error: error instanceof Error ? error.message : 'Erreur inconnue'
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    } catch {}
-
     return new Response(JSON.stringify({ 
       error: { 
         code: 'SIRENE_INTERNAL_ERROR', 
@@ -221,64 +209,60 @@ function formatAdresse(adresse: any): string {
   return parts.join(' ');
 }
 
-function generateMockResults(query: string): any[] {
-  const mockCompanies = [
-    {
-      siren: '552120222',
-      siret: '55212022200023',
-      denomination: 'APPLE FRANCE',
-      naf: '4651Z - Commerce de gros d\'ordinateurs',
-      effectifs: '200 à 249 salariés',
-      adresse: '19-21 Boulevard Malesherbes, 75008 Paris',
-      statut: 'Actif',
-      dateCreation: '1981-01-28'
-    },
-    {
-      siren: '542051180',
-      siret: '54205118000031',
-      denomination: 'MICROSOFT FRANCE',
-      naf: '6202A - Conseil en systèmes et logiciels informatiques',
-      effectifs: '500 à 999 salariés',
-      adresse: '37 Quai du Président Roosevelt, 92130 Issy-les-Moulineaux',
-      statut: 'Actif',
-      dateCreation: '1985-03-15'
-    },
-    {
-      siren: '552032534',
-      siret: '55203253400024',
-      denomination: 'TOTAL ENERGIES SE',
-      naf: '0610Z - Extraction de pétrole brut',
-      effectifs: '10000 salariés et plus',
-      adresse: '2 Place Jean Millier, 92400 Courbevoie',
-      statut: 'Actif',
-      dateCreation: '1924-03-28'
-    },
-    {
-      siren: '775665101',
-      siret: '77566510100045',
-      denomination: 'SOCIETE GENERALE',
-      naf: '6419Z - Autres intermédiations monétaires',
-      effectifs: '10000 salariés et plus',
-      adresse: '29 Boulevard Haussmann, 75009 Paris',
-      statut: 'Actif',
-      dateCreation: '1864-05-04'
-    },
-    {
-      siren: '542107596',
-      siret: '54210759600047',
-      denomination: 'L\'OREAL',
-      naf: '2042Z - Fabrication de parfums et de produits pour la toilette',
-      effectifs: '10000 salariés et plus',
-      adresse: '14 Rue Royale, 75008 Paris',
-      statut: 'Actif',
-      dateCreation: '1909-07-30'
-    }
-  ];
+// Appeler l'API INSEE via notre edge function existante
+async function callInseeApiSearch(query: string): Promise<any[]> {
+  try {
+    const { data, error } = await supabase.functions.invoke('insee-api', {
+      body: {
+        endpoint: 'search',
+        query: query
+      }
+    });
 
-  // Filtrer les entreprises qui correspondent à la recherche
-  const searchTerm = query.toLowerCase();
-  return mockCompanies.filter(company => 
-    company.denomination.toLowerCase().includes(searchTerm) ||
-    company.denomination.toLowerCase().startsWith(searchTerm)
-  ).slice(0, 5);
+    if (error) {
+      console.error('Error calling INSEE API:', error);
+      return [];
+    }
+
+    // Transformer les données INSEE au format attendu
+    return mapInseeToExpectedFormat(data);
+  } catch (error) {
+    console.error('Exception in callInseeApiSearch:', error);
+    return [];
+  }
+}
+
+// Transformer les données INSEE au format attendu par le frontend
+function mapInseeToExpectedFormat(inseeData: any): any[] {
+  if (!inseeData?.etablissements || !Array.isArray(inseeData.etablissements)) {
+    return [];
+  }
+
+  // Dédupliquer par SIREN et transformer
+  const seenSirens = new Set();
+  const results = inseeData.etablissements
+    .filter((etablissement: any) => {
+      const siren = etablissement.uniteLegale?.siren;
+      if (!siren || seenSirens.has(siren)) return false;
+      seenSirens.add(siren);
+      return true;
+    })
+    .map((etablissement: any) => {
+      const uniteLegale = etablissement.uniteLegale;
+      return {
+        siren: uniteLegale.siren,
+        siret: etablissement.siret,
+        denomination: uniteLegale.denominationUniteLegale || 
+                    uniteLegale.denominationUsuelle1UniteLegale ||
+                    `${uniteLegale.prenom1UniteLegale || ''} ${uniteLegale.nomUniteLegale || ''}`.trim(),
+        naf: etablissement.activitePrincipaleEtablissement,
+        effectifs: mapEffectifs(uniteLegale.trancheEffectifsUniteLegale),
+        adresse: formatAdresse(etablissement.adresseEtablissement),
+        statut: etablissement.etatAdministratifEtablissement === 'A' ? 'Actif' : 'Cessé',
+        dateCreation: uniteLegale.dateCreationUniteLegale
+      };
+    })
+    .slice(0, 8); // Limiter à 8 résultats comme l'API gouvernementale
+
+  return results;
 }

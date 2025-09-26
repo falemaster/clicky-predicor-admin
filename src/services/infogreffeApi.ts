@@ -224,6 +224,97 @@ export class InfogreffeApiService {
     }
   }
 
+  // Nouvelles méthodes pour les scores financiers NOTAPME et AFDCC
+  async getNotapmePerformance(siren: string, millesime?: number): Promise<{ data: any | null; error: ApiError | null }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('infogreffe-api', {
+        body: { siren, endpoint: 'notapme-performance', millesime }
+      });
+
+      if (error || data?.error) {
+        return {
+          data: null,
+          error: {
+            code: 'INFOGREFFE_NOTAPME_ERROR',
+            message: error?.message || data?.error?.message || 'Erreur lors de la récupération des données NOTAPME Performance',
+            source: 'INFOGREFFE'
+          }
+        };
+      }
+
+      return { data: data.Data || data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          code: 'INFOGREFFE_NOTAPME_NETWORK_ERROR',
+          message: `Erreur réseau NOTAPME: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+          source: 'INFOGREFFE'
+        }
+      };
+    }
+  }
+
+  async getNotapmeEssentiel(siren: string, millesime?: number): Promise<{ data: any | null; error: ApiError | null }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('infogreffe-api', {
+        body: { siren, endpoint: 'notapme-essentiel', millesime }
+      });
+
+      if (error || data?.error) {
+        return {
+          data: null,
+          error: {
+            code: 'INFOGREFFE_NOTAPME_ESSENTIEL_ERROR',
+            message: error?.message || data?.error?.message || 'Erreur lors de la récupération des données NOTAPME Essentiel',
+            source: 'INFOGREFFE'
+          }
+        };
+      }
+
+      return { data: data.Data || data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          code: 'INFOGREFFE_NOTAPME_ESSENTIEL_NETWORK_ERROR',
+          message: `Erreur réseau NOTAPME Essentiel: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+          source: 'INFOGREFFE'
+        }
+      };
+    }
+  }
+
+  async getAfdccScore(siren: string, millesime?: number): Promise<{ data: any | null; error: ApiError | null }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('infogreffe-api', {
+        body: { siren, endpoint: 'afdcc', millesime }
+      });
+
+      if (error || data?.error) {
+        return {
+          data: null,
+          error: {
+            code: 'INFOGREFFE_AFDCC_ERROR',
+            message: error?.message || data?.error?.message || 'Erreur lors de la récupération du score AFDCC',
+            source: 'INFOGREFFE'
+          }
+        };
+      }
+
+      return { data: data.Data || data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          code: 'INFOGREFFE_AFDCC_NETWORK_ERROR',
+          message: `Erreur réseau AFDCC: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+          source: 'INFOGREFFE'
+        }
+      };
+    }
+  }
+
   private parseCapitalSocial(value: any): number | undefined {
     if (!value) return undefined;
     const parsed = typeof value === 'string' ? parseFloat(value.replace(/[^\d.,]/g, '').replace(',', '.')) : parseFloat(value);

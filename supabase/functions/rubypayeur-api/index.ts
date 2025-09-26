@@ -36,20 +36,17 @@ serve(async (req) => {
     if (!RUBYPAYEUR_API_KEY) {
       console.log('RubyPayeur API key not configured, using mock data');
       
-      // Données simulées si pas de clé API
+      // Service indisponible - pas de clé API configurée
       const { siren } = await req.json();
-      const mockData = {
+      const unavailableData = {
         siren,
-        scoreGlobal: Math.floor(Math.random() * 10) + 1,
-        scorePaiement: Math.floor(Math.random() * 10) + 1,
-        retardsMoyens: Math.floor(Math.random() * 30),
-        nbIncidents: Math.floor(Math.random() * 5),
-        tendance: ['Amélioration', 'Stable', 'Dégradation'][Math.floor(Math.random() * 3)],
+        serviceStatus: 'indisponible',
+        message: 'Service RubyPayeur temporairement indisponible - Clé API non configurée',
         derniereMAJ: new Date().toISOString(),
-        alertes: []
+        source: 'service_unavailable'
       };
 
-      return new Response(JSON.stringify(mockData), {
+      return new Response(JSON.stringify(unavailableData), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -115,22 +112,20 @@ serve(async (req) => {
     }
 
     if (!data) {
-      console.error('All RubyPayeur endpoints failed, using mock data');
+      console.error('All RubyPayeur endpoints failed - Service unavailable');
       
-      // Fallback avec données simulées
-      const mockData = {
+      // Service indisponible - toutes les API ont échoué
+      const unavailableData = {
         siren,
-        scoreGlobal: Math.floor(Math.random() * 10) + 1,
-        scorePaiement: Math.floor(Math.random() * 10) + 1,
-        retardsMoyens: Math.floor(Math.random() * 30),
-        nbIncidents: Math.floor(Math.random() * 5),
-        tendance: ['Amélioration', 'Stable', 'Dégradation'][Math.floor(Math.random() * 3)],
+        serviceStatus: 'indisponible',
+        message: 'Service RubyPayeur temporairement indisponible - Toutes les API ont échoué',
         derniereMAJ: new Date().toISOString(),
-        alertes: [],
-        source: 'mock' // Indiquer que ce sont des données simulées
+        source: 'api_unavailable',
+        testedEndpoints: ENDPOINTS.length,
+        testedUrls: ALTERNATIVE_BASE_URLS.length
       };
 
-      return new Response(JSON.stringify(mockData), {
+      return new Response(JSON.stringify(unavailableData), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -162,22 +157,18 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in rubypayeur-api function:', error);
     
-    // En cas d'erreur, retourner des données simulées
+    // En cas d'erreur globale, retourner service indisponible
     const { siren } = await req.json().catch(() => ({ siren: 'unknown' }));
-    const fallbackData = {
+    const errorData = {
       siren,
-      scoreGlobal: 6,
-      scorePaiement: 6,
-      retardsMoyens: 10,
-      nbIncidents: 1,
-      tendance: 'Stable',
+      serviceStatus: 'erreur',
+      message: 'Erreur technique dans le service RubyPayeur',
       derniereMAJ: new Date().toISOString(),
-      alertes: [],
-      source: 'fallback',
-      error: 'API temporairement indisponible'
+      source: 'technical_error',
+      error: error instanceof Error ? error.message : 'Erreur technique inconnue'
     };
 
-    return new Response(JSON.stringify(fallbackData), {
+    return new Response(JSON.stringify(errorData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

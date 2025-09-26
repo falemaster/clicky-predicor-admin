@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExecutiveSummary } from "@/components/admin/ExecutiveSummary";
+import { calculateFinancialScore, calculateRiskScore, getRubyPayeurStatus } from "@/utils/scoreCalculator";
 import { 
   Building2, 
   MapPin, 
@@ -15,7 +16,9 @@ import {
   Globe,
   Briefcase,
   Users,
-  Building
+  Building,
+  AlertTriangle,
+  CheckCircle
 } from "lucide-react";
 
 interface OverviewDisplayProps {
@@ -25,6 +28,11 @@ interface OverviewDisplayProps {
 
 export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
   if (!companyData) return null;
+
+  // Calculer les nouveaux scores basés sur la prioritisation Infogreffe
+  const financialScore = calculateFinancialScore(companyData);
+  const riskScore = calculateRiskScore(companyData);
+  const rubyPayeurStatus = getRubyPayeurStatus(companyData);
 
   return (
     <div className="space-y-6">
@@ -116,39 +124,101 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
                 <span className="text-sm font-medium">Financier</span>
               </div>
               <div className="text-2xl font-bold text-primary mb-1">
-                {scores?.financial || '6.0'}/10
+                {financialScore.score > 0 ? `${financialScore.score}/10` : 'N/A'}
               </div>
-              <Badge variant="secondary" className="text-xs">
-                {scores?.financial >= 7 ? 'Bon' : scores?.financial >= 5 ? 'Moyen' : 'Faible'}
-              </Badge>
+              <div className="flex flex-col items-center space-y-1">
+                <Badge variant="secondary" className="text-xs">
+                  {financialScore.score >= 7 ? 'Bon' : financialScore.score >= 5 ? 'Moyen' : financialScore.score > 0 ? 'Faible' : 'N/A'}
+                </Badge>
+                <div className="flex items-center space-x-1">
+                  {financialScore.source === 'infogreffe' ? (
+                    <CheckCircle className="h-3 w-3 text-success" />
+                  ) : financialScore.source === 'unavailable' ? (
+                    <AlertTriangle className="h-3 w-3 text-warning" />
+                  ) : null}
+                  <span className="text-xs text-muted-foreground">
+                    {financialScore.sourceLabel}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div className="text-center p-4 bg-muted/30 rounded-lg">
               <div className="flex items-center justify-center space-x-2 mb-2">
                 <Scale className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Juridique</span>
+                <span className="text-sm font-medium">Risque</span>
               </div>
               <div className="text-2xl font-bold text-primary mb-1">
-                {scores?.legal || '7.5'}/10
+                {riskScore.score > 0 ? `${riskScore.score}/10` : 'N/A'}
               </div>
-              <Badge variant="secondary" className="text-xs">
-                {scores?.legal >= 7 ? 'Bon' : scores?.legal >= 5 ? 'Moyen' : 'Faible'}
-              </Badge>
+              <div className="flex flex-col items-center space-y-1">
+                <Badge variant="secondary" className="text-xs">
+                  {riskScore.score >= 7 ? 'Faible' : riskScore.score >= 5 ? 'Modéré' : riskScore.score > 0 ? 'Élevé' : 'N/A'}
+                </Badge>
+                <div className="flex items-center space-x-1">
+                  {riskScore.source === 'infogreffe' ? (
+                    <CheckCircle className="h-3 w-3 text-success" />
+                  ) : riskScore.source === 'unavailable' ? (
+                    <AlertTriangle className="h-3 w-3 text-warning" />
+                  ) : null}
+                  <span className="text-xs text-muted-foreground">
+                    {riskScore.sourceLabel}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div className="text-center p-4 bg-muted/30 rounded-lg">
               <div className="flex items-center justify-center space-x-2 mb-2">
                 <FileText className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Fiscal</span>
+                <span className="text-sm font-medium">RubyPayeur</span>
               </div>
-              <div className="text-2xl font-bold text-primary mb-1">
-                {scores?.fiscal || '6.8'}/10
+              <div className="text-xs text-center mb-2">
+                {rubyPayeurStatus === 'Service opérationnel' ? (
+                  <div className="flex items-center justify-center space-x-1">
+                    <CheckCircle className="h-3 w-3 text-success" />
+                    <span className="text-success">Opérationnel</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center space-x-1">
+                    <AlertTriangle className="h-3 w-3 text-warning" />
+                    <span className="text-warning">Indisponible</span>
+                  </div>
+                )}
               </div>
-              <Badge variant="secondary" className="text-xs">
-                {scores?.fiscal >= 7 ? 'Bon' : scores?.fiscal >= 5 ? 'Moyen' : 'Faible'}
+              <Badge variant="outline" className="text-xs">
+                {rubyPayeurStatus}
               </Badge>
             </div>
           </div>
+          
+          {/* Afficher les détails NOTAPME si disponibles */}
+          {financialScore.details?.notapme && (
+            <div className="mt-6 p-4 bg-success/10 border border-success/20 rounded-lg">
+              <div className="flex items-center space-x-2 mb-3">
+                <CheckCircle className="h-4 w-4 text-success" />
+                <span className="text-sm font-semibold text-success">Scores NOTAPME Infogreffe</span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                <div>
+                  <span className="font-medium">Performance:</span>
+                  <span className="ml-1">{financialScore.details.notapme.performance}/10</span>
+                </div>
+                <div>
+                  <span className="font-medium">Solvabilité:</span>
+                  <span className="ml-1">{financialScore.details.notapme.solvabilite}/10</span>
+                </div>
+                <div>
+                  <span className="font-medium">Rentabilité:</span>
+                  <span className="ml-1">{financialScore.details.notapme.rentabilite}/10</span>
+                </div>
+                <div>
+                  <span className="font-medium">Robustesse:</span>
+                  <span className="ml-1">{financialScore.details.notapme.robustesse}/10</span>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

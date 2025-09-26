@@ -134,8 +134,9 @@ export const useCompanyData = ({
         });
       }
 
-      // 4. Données Infogreffe (optionnelles) - VRAIES DONNÉES
+      // 4. Données Infogreffe (optionnelles) - VRAIES DONNÉES avec SCORES FINANCIERS
       try {
+        // Données de base de l'entreprise
         const infogreffeResult = await infogreffeService.getCompanyData(sireneResult.data.siren);
         if (infogreffeResult.data) {
           companyData.infogreffe = infogreffeResult.data;
@@ -143,6 +144,30 @@ export const useCompanyData = ({
         } else if (infogreffeResult.error) {
           allErrors.push(infogreffeResult.error);
           console.warn('⚠️ Erreur Infogreffe:', infogreffeResult.error);
+        }
+
+        // NOTAPME Performance - PRIORITAIRE pour les scores financiers
+        const notapmePerformance = await infogreffeService.getNotapmePerformance(sireneResult.data.siren);
+        if (notapmePerformance.data) {
+          if (!companyData.infogreffe) companyData.infogreffe = {} as any;
+          (companyData.infogreffe as any).notapmePerformance = notapmePerformance.data;
+          console.log('💰 Scores NOTAPME Performance récupérés (PRIORITAIRE):', notapmePerformance.data);
+        }
+
+        // NOTAPME Essentiel - Ratios clés complémentaires
+        const notapmeEssentiel = await infogreffeService.getNotapmeEssentiel(sireneResult.data.siren);
+        if (notapmeEssentiel.data) {
+          if (!companyData.infogreffe) companyData.infogreffe = {} as any;
+          (companyData.infogreffe as any).notapmeEssentiel = notapmeEssentiel.data;
+          console.log('📈 Ratios NOTAPME Essentiel récupérés:', notapmeEssentiel.data);
+        }
+
+        // Score AFDCC - Notation de risque principale
+        const afdccScore = await infogreffeService.getAfdccScore(sireneResult.data.siren);
+        if (afdccScore.data) {
+          if (!companyData.infogreffe) companyData.infogreffe = {} as any;
+          (companyData.infogreffe as any).afdccScore = afdccScore.data;
+          console.log('🎯 Score AFDCC récupéré (RISQUE PRINCIPAL):', afdccScore.data);
         }
       } catch (error) {
         allErrors.push({

@@ -762,16 +762,6 @@ const Analysis = () => {
                   
                   <Separator />
                   
-                  <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Shield className="h-4 w-4 mr-1" />
-                      Extrait INPI
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <FileText className="h-4 w-4 mr-1" />
-                      Extrait Pappers
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
 

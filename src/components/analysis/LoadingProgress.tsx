@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle, AlertTriangle, BarChart3, CreditCard, Scale, Bot, RotateCw } from "lucide-react";
+import { Loader2, CheckCircle, AlertTriangle, BarChart3, CreditCard, Scale, Bot, RotateCw, Database, Gavel, FileText, Receipt, Building2, Shield } from "lucide-react";
 
 interface LoadingStep {
   id: string;
@@ -27,6 +27,27 @@ export default function LoadingProgress({ companyName, siren }: LoadingProgressP
       status: 'loading'
     },
     {
+      id: 'sirius',
+      name: 'SIRIUS',
+      description: 'Répertoire entreprises',
+      icon: Building2,
+      status: 'pending'
+    },
+    {
+      id: 'dgfip',
+      name: 'DGFIP',
+      description: 'Finances publiques',
+      icon: Receipt,
+      status: 'pending'
+    },
+    {
+      id: 'ficoba',
+      name: 'FICOBA',
+      description: 'Fichier des comptes bancaires',
+      icon: Database,
+      status: 'pending'
+    },
+    {
       id: 'pappers',
       name: 'Pappers',
       description: 'Données financières et dirigeants',
@@ -48,6 +69,27 @@ export default function LoadingProgress({ companyName, siren }: LoadingProgressP
       status: 'pending'
     },
     {
+      id: 'portalis',
+      name: 'Portalis',
+      description: 'Données tribunaux et justice',
+      icon: Gavel,
+      status: 'pending'
+    },
+    {
+      id: 'alpage',
+      name: 'ALPAGE',
+      description: 'Administration fiscale',
+      icon: FileText,
+      status: 'pending'
+    },
+    {
+      id: 'opale',
+      name: 'OPALE',
+      description: 'Procédures administratives',
+      icon: Shield,
+      status: 'pending'
+    },
+    {
       id: 'ai-analysis',
       name: 'Analyse IA',
       description: 'Enrichissement et prédictions',
@@ -59,7 +101,7 @@ export default function LoadingProgress({ companyName, siren }: LoadingProgressP
   useEffect(() => {
     // Simuler la progression des étapes
     const simulateProgress = async () => {
-      const stepOrder = ['sirene', 'pappers', 'rubypayeur', 'infogreffe', 'ai-analysis'];
+      const stepOrder = ['sirene', 'sirius', 'dgfip', 'ficoba', 'pappers', 'rubypayeur', 'infogreffe', 'portalis', 'alpage', 'opale', 'ai-analysis'];
       
       for (let i = 0; i < stepOrder.length; i++) {
         const currentStepId = stepOrder[i];
@@ -73,17 +115,17 @@ export default function LoadingProgress({ companyName, siren }: LoadingProgressP
                 ? { ...step, status: 'loading' }
                 : step
             ));
-          }, (i + 1) * 2000);
+          }, (i + 1) * 1200);
         }
         
         // Compléter l'étape actuelle
         setTimeout(() => {
           setSteps(prev => prev.map(step => 
             step.id === currentStepId 
-              ? { ...step, status: Math.random() > 0.2 ? 'success' : 'error' }
+              ? { ...step, status: Math.random() > 0.1 ? 'success' : 'error' }
               : step
           ));
-        }, (i + 1) * 2000 + 1500);
+        }, (i + 1) * 1200 + 800);
       }
     };
 

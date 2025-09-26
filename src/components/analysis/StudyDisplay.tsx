@@ -10,6 +10,7 @@ import {
   TrendingUp, 
   TrendingDown, 
   ChevronDown, 
+  ChevronUp, 
   ChevronRight, 
   Building, 
   CreditCard, 
@@ -42,7 +43,8 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
     fiscal: false,
     financial: false,
     economic: false,
-    governance: false
+    governance: false,
+    procedures: false
   });
 
   // Calculate real scores from company data
@@ -284,167 +286,212 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                   </Card>
                 </div>
 
-                {/* Procédures Judiciaires et Légales */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  {/* Procédures Précontentieuses */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center">
-                        <AlertTriangle className="h-4 w-4 mr-2" />
-                        Procédures Précontentieuses
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        Procédures amiables et précontentieuses en cours
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {companyData.bodacc?.annonces?.length > 0 ? (
-                          companyData.bodacc.annonces
-                            .filter(annonce => annonce.type === 'Procédure collective')
-                            .map((annonce, index) => (
-                              <div key={index} className="p-3 bg-muted/30 rounded-lg">
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <p className="font-medium text-sm">{annonce.type}</p>
-                                    <p className="text-xs text-muted-foreground">{annonce.contenu}</p>
-                                    {annonce.tribunal && (
-                                      <p className="text-xs text-muted-foreground">Tribunal: {annonce.tribunal}</p>
-                                    )}
-                                  </div>
-                                  <Badge variant="warning" className="text-xs">
-                                    {new Date(annonce.date).toLocaleDateString()}
-                                  </Badge>
-                                </div>
-                              </div>
-                            ))
-                        ) : companyData.bodacc !== undefined ? (
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <CheckCircle className="h-4 w-4 mr-2 text-success" />
-                            Aucune procédure précontentieuse en cours
-                          </div>
-                        ) : (
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <AlertTriangle className="h-4 w-4 mr-2 text-warning" />
-                            <Badge variant="outline" className="text-xs">NC</Badge>
-                            <span className="ml-2">Données non communiquées</span>
-                          </div>
-                        )}
-                        <DataWithSource source="BODACC" lastUpdate="2024-01-15">
-                          <div className="flex items-center text-xs text-muted-foreground">
-                            <Shield className="h-3 w-3 mr-1" />
-                            Source officielle BODACC
-                          </div>
-                        </DataWithSource>
+                {/* Procédures Judiciaires et Légales Section */}
+                <Card className="mb-6">
+                  <Collapsible 
+                    open={openSections.procedures} 
+                    onOpenChange={() => toggleSection('procedures')}
+                  >
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-6">
+                      <div className="flex items-center gap-3">
+                        <Scale className="h-5 w-5 text-primary" />
+                        <h3 className="text-lg font-semibold">Procédures Judiciaires et Légales</h3>
                       </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Procédures Judiciaires */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center">
-                        <Scale className="h-4 w-4 mr-2" />
-                        Procédures Judiciaires
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        Procédures judiciaires et contentieux en cours
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {companyData.procedures?.length > 0 ? (
-                          companyData.procedures.map((procedure: any, index: number) => (
-                            <div key={index} className="p-3 bg-muted/30 rounded-lg">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-sm">{procedure.fields?.typeavis || 'Procédure judiciaire'}</p>
-                                  <p className="text-xs text-muted-foreground">{procedure.fields?.contenu}</p>
-                                  {procedure.fields?.tribunal && (
-                                    <p className="text-xs text-muted-foreground">Tribunal: {procedure.fields.tribunal}</p>
+                      {openSections.procedures ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent className="px-6 pb-6 space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Procédures Précontentieuses */}
+                        <Card className="p-4">
+                          <div className="flex items-center gap-3 mb-4">
+                            <AlertTriangle className="h-4 w-4 text-amber-500" />
+                            <h4 className="font-medium">Procédures Précontentieuses</h4>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-4">
+                            Procédures de recouvrement et alertes préventives
+                          </p>
+                          
+                          <div className="text-xs text-muted-foreground mb-3 italic">
+                            Source des données : BODACC
+                          </div>
+                          
+                          <div className="space-y-2">
+                            {[
+                              'Mise en demeure',
+                              'Commandement de payer par huissier',
+                              'Résiliation de contrat',
+                              'Inscription privilèges/nantissements',
+                              'Radiation d\'office du RCS',
+                              'Procédure amiable',
+                              'Déclaration de créance'
+                            ].map((procedure) => {
+                              // Check admin data first, then API data, then default to NC
+                              const adminStatus = companyData?.adminData?.enriched_data?.legal?.procedures?.[procedure];
+                              const apiHasData = companyData?.bodacc?.annonces?.some(a => 
+                                a.type?.toLowerCase().includes(procedure.toLowerCase().split(' ')[0])
+                              );
+                              
+                              let status = 'NC';
+                              let variant: 'success' | 'warning' | 'destructive' | 'outline' = 'outline';
+                              
+                              if (adminStatus) {
+                                status = adminStatus;
+                                variant = adminStatus === 'Aucune' || adminStatus === 'Non' ? 'success' : 
+                                         adminStatus.includes('active') || adminStatus.includes('cours') ? 'warning' : 'success';
+                              } else if (companyData?.bodacc !== undefined) {
+                                status = apiHasData ? '1 en cours' : 'Aucune';
+                                variant = apiHasData ? 'warning' : 'success';
+                              }
+                              
+                              return (
+                                <div key={procedure} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                                  <span className="text-sm">{procedure}</span>
+                                  {status === 'NC' ? (
+                                    <Badge variant="outline" className="text-muted-foreground">
+                                      <AlertTriangle className="h-3 w-3 mr-1" />
+                                      NC
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant={variant}>
+                                      <DataWithSource source="BODACC">
+                                        {status}
+                                      </DataWithSource>
+                                    </Badge>
                                   )}
                                 </div>
-                                <Badge variant="destructive" className="text-xs">
-                                  {procedure.fields?.dateparution ? 
-                                    new Date(procedure.fields.dateparution).toLocaleDateString() : 
-                                    'En cours'
-                                  }
-                                </Badge>
-                              </div>
-                            </div>
-                          ))
-                        ) : companyData.procedures !== undefined ? (
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <CheckCircle className="h-4 w-4 mr-2 text-success" />
-                            Aucune procédure judiciaire en cours
+                              );
+                            })}
                           </div>
-                        ) : (
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <AlertTriangle className="h-4 w-4 mr-2 text-warning" />
-                            <Badge variant="outline" className="text-xs">NC</Badge>
-                            <span className="ml-2">Données non communiquées</span>
-                          </div>
-                        )}
-                        <DataWithSource source="PORTALIS" lastUpdate="2024-01-15">
-                          <div className="flex items-center text-xs text-muted-foreground">
-                            <Shield className="h-3 w-3 mr-1" />
-                            Source PORTALIS - Ministère de la Justice
-                          </div>
-                        </DataWithSource>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                        </Card>
 
-                {/* Analyse de Risque Juridique */}
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center">
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      Analyse de Risque Juridique
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Évaluation algorithmique du risque juridique global
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="text-center p-4 bg-muted/30 rounded-lg">
-                        <div className="text-2xl font-bold text-success">
-                          {(() => {
-                            const proceduresCount = (companyData.bodacc?.annonces?.length || 0) + (companyData.procedures?.length || 0);
-                            if (proceduresCount === 0) return "Faible";
-                            if (proceduresCount <= 2) return "Modéré";
-                            return "Élevé";
-                          })()}
+                        {/* Procédures Judiciaires */}
+                        <Card className="p-4">
+                          <div className="flex items-center gap-3 mb-4">
+                            <Gavel className="h-4 w-4 text-red-500" />
+                            <h4 className="font-medium">Procédures Judiciaires</h4>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-4">
+                            Suivi des procédures contentieuses et juridictionnelles
+                          </p>
+                          
+                          <div className="border-b border-border mb-3 pb-2">
+                            <div className="grid grid-cols-2 gap-4 text-sm font-medium text-muted-foreground">
+                              <div>Nature</div>
+                              <div>Statut</div>
+                            </div>
+                          </div>
+                          
+                          <div className="text-xs text-muted-foreground mb-3 italic">
+                            Source des données : Portalis
+                          </div>
+                          
+                          <div className="space-y-2">
+                            {[
+                              'Assignation Tribunal de commerce',
+                              'Injonction de payer', 
+                              'Référé commercial',
+                              'Procédure collective',
+                              'Appel des décisions',
+                              'Contentieux prud\'homal',
+                              'Contentieux administratif'
+                            ].map((procedure) => {
+                              // Check admin data first, then API data, then default to NC
+                              const adminStatus = companyData?.adminData?.enriched_data?.legal?.procedures?.[procedure];
+                              const apiHasData = companyData?.procedures?.some(p => 
+                                p.nature?.toLowerCase().includes(procedure.toLowerCase().split(' ')[0])
+                              );
+                              
+                              let status = 'NC';
+                              let variant: 'success' | 'warning' | 'destructive' | 'outline' = 'outline';
+                              
+                              if (adminStatus) {
+                                status = adminStatus;
+                                variant = adminStatus === 'Aucun' || adminStatus === 'Non' ? 'success' : 
+                                         adminStatus.includes('active') || adminStatus.includes('cours') ? 'warning' : 'success';
+                              } else if (companyData?.procedures !== undefined) {
+                                // Special handling based on procedure type
+                                if (procedure === 'Assignation Tribunal de commerce') {
+                                  status = apiHasData ? '1 active' : 'Aucune';
+                                } else if (procedure === 'Procédure collective') {
+                                  status = apiHasData ? 'Non' : 'Non';
+                                } else {
+                                  status = apiHasData ? '1 active' : 'Aucun';
+                                }
+                                variant = apiHasData ? 'warning' : 'success';
+                              }
+                              
+                              return (
+                                <div key={procedure} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                                  <span className="text-sm">{procedure}</span>
+                                  {status === 'NC' ? (
+                                    <Badge variant="outline" className="text-muted-foreground">
+                                      <AlertTriangle className="h-3 w-3 mr-1" />
+                                      NC
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant={variant}>
+                                      <DataWithSource source="PORTALIS">
+                                        {status}
+                                      </DataWithSource>
+                                    </Badge>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </Card>
+                      </div>
+
+                      {/* Analyse de Risque Juridique */}
+                      <Card className="p-4">
+                        <div className="flex items-center gap-3 mb-4">
+                          <BarChart3 className="h-4 w-4 text-primary" />
+                          <h4 className="font-medium">Analyse de Risque Juridique</h4>
                         </div>
-                        <p className="text-xs text-muted-foreground">Niveau de risque</p>
-                      </div>
-                      <div className="text-center p-4 bg-muted/30 rounded-lg">
-                        <div className="text-2xl font-bold text-primary">
-                          {(companyData.bodacc?.annonces?.length || 0) + (companyData.procedures?.length || 0)}
+                        <p className="text-xs text-muted-foreground mb-4">
+                          Évaluation algorithmique du risque juridique global
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="text-center p-4 bg-muted/30 rounded-lg">
+                            <div className="text-2xl font-bold text-success">
+                              <DataWithSource source="ALPAGE">
+                                {(() => {
+                                  const proceduresCount = (companyData?.bodacc?.annonces?.length || 0) + (companyData?.procedures?.length || 0);
+                                  if (proceduresCount === 0) return "Faible";
+                                  if (proceduresCount <= 2) return "Modéré";
+                                  return "Élevé";
+                                })()}
+                              </DataWithSource>
+                            </div>
+                            <p className="text-xs text-muted-foreground">Niveau de risque</p>
+                          </div>
+                          <div className="text-center p-4 bg-muted/30 rounded-lg">
+                            <div className="text-2xl font-bold text-primary">
+                              <DataWithSource source="ALPAGE">
+                                {(companyData?.bodacc?.annonces?.length || 0) + (companyData?.procedures?.length || 0)}
+                              </DataWithSource>
+                            </div>
+                            <p className="text-xs text-muted-foreground">Procédures actives</p>
+                          </div>
+                          <div className="text-center p-4 bg-muted/30 rounded-lg">
+                            <div className="text-2xl font-bold text-muted-foreground">
+                              <DataWithSource source="ALPAGE">
+                                {(() => {
+                                  const proceduresCount = (companyData?.bodacc?.annonces?.length || 0) + (companyData?.procedures?.length || 0);
+                                  if (proceduresCount === 0) return "8.5/10";
+                                  if (proceduresCount <= 2) return "6.2/10";
+                                  return "3.1/10";
+                                })()}
+                              </DataWithSource>
+                            </div>
+                            <p className="text-xs text-muted-foreground">Score de fiabilité</p>
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">Procédures actives</p>
-                      </div>
-                      <div className="text-center p-4 bg-muted/30 rounded-lg">
-                        <div className="text-2xl font-bold text-muted-foreground">
-                          {(() => {
-                            const proceduresCount = (companyData.bodacc?.annonces?.length || 0) + (companyData.procedures?.length || 0);
-                            if (proceduresCount === 0) return "8.5/10";
-                            if (proceduresCount <= 2) return "6.2/10";
-                            return "3.1/10";
-                          })()}
-                        </div>
-                        <p className="text-xs text-muted-foreground">Score de fiabilité</p>
-                      </div>
-                    </div>
-                    <DataWithSource source="ALPAGE" lastUpdate="2024-01-15">
-                      <div className="flex items-center text-xs text-muted-foreground mt-3">
-                        <Shield className="h-3 w-3 mr-1" />
-                        Algorithme ALPAGE - Ministère de la Justice
-                      </div>
-                    </DataWithSource>
-                  </CardContent>
+                      </Card>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </Card>
 
                 {/* Historique des actes juridiques */}

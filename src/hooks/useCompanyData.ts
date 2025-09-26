@@ -81,8 +81,8 @@ export const useCompanyData = ({
         showDataQualityDashboard = adminDataResult.data.show_data_quality_dashboard || false;
       }
 
-      // 2. Recherche directe par SIREN/SIRET via l'API INSEE
-      console.log(`📡 Appel API INSEE pour ${type}: ${identifier}`);
+      // 2. SMART API STRATEGY: INSEE Sirene → Infogreffe → Pappers (fallback)
+      console.log(`📡 Phase 1: Appel API INSEE pour ${type}: ${identifier}`);
       let sireneResult = type === 'siren' 
         ? await sireneService.getCompanyBySiren(identifier)
         : await sireneService.getCompanyBySiret(identifier);

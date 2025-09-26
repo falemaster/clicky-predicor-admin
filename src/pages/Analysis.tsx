@@ -16,6 +16,9 @@ import { Link, useSearchParams } from "react-router-dom";
 import EnrichedDataDisplayAI from "@/components/analysis/EnrichedDataDisplayAI";
 import LoadingProgress from "@/components/analysis/LoadingProgress";
 import AnalysisSkeleton from "@/components/analysis/AnalysisSkeleton";
+import { SourceBadge } from "@/components/ui/source-badge";
+import { DirigeantModal } from "@/components/analysis/DirigeantModal";
+import { CollectiveProcedureAlert } from "@/components/analysis/CollectiveProcedureAlert";
 import { 
   Building2, 
   MapPin, 
@@ -619,25 +622,51 @@ const Analysis = () => {
                       <FileText className="h-5 w-5 mr-2" />
                       Informations juridiques
                     </CardTitle>
-                    <Button size="sm" variant="outline">
-                      <FileText className="h-4 w-4 mr-1" />
-                      Avis situation SIRENE
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                      {realData?.infogreffe && (
+                        <SourceBadge 
+                          source="INFOGREFFE" 
+                          lastUpdate={realData.infogreffe.lastUpdate}
+                          className="mr-2"
+                        />
+                      )}
+                      <Button size="sm" variant="outline">
+                        <FileText className="h-4 w-4 mr-1" />
+                        Avis situation SIRENE
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Alertes procédures collectives */}
+                  {realData?.infogreffe?.proceduresCollectives && realData.infogreffe.proceduresCollectives.length > 0 && (
+                    <CollectiveProcedureAlert 
+                      procedures={realData.infogreffe.proceduresCollectives}
+                      className="mb-4"
+                    />
+                  )}
+                  
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">SIREN :</span>
-                      <div className="font-medium">{companyData.siren}</div>
+                      <div className="font-medium flex items-center">
+                        {companyData.siren}
+                        <SourceBadge source="INSEE" className="ml-2" />
+                      </div>
                     </div>
                     <div>
                       <span className="text-muted-foreground">SIRET (siège) :</span>
-                      <div className="font-medium">{companyData.siret}</div>
+                      <div className="font-medium flex items-center">
+                        {companyData.siret}
+                        <SourceBadge source="INSEE" className="ml-2" />
+                      </div>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Forme juridique :</span>
-                      <div className="font-medium">SAS, société par actions simplifiée</div>
+                      <div className="font-medium flex items-center">
+                        {realData?.infogreffe?.formeJuridique || 'SAS, société par actions simplifiée'}
+                        {realData?.infogreffe && <SourceBadge source="INFOGREFFE" className="ml-2" />}
+                      </div>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Numéro de TVA :</span>
@@ -645,12 +674,15 @@ const Analysis = () => {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Inscription RCS :</span>
-                      <div className="font-medium text-success">
+                      <div className="font-medium text-success flex items-center">
                         <CheckCircle className="h-3 w-3 inline mr-1" />
-                        {realData?.pappers?.dateCreation ? 
-                          `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
-                          'INSCRIT (au greffe de PARIS, le 15/03/2015)'
+                        {realData?.infogreffe?.dateImmatriculation ? 
+                          `INSCRIT (le ${new Date(realData.infogreffe.dateImmatriculation).toLocaleDateString('fr-FR')})` :
+                          realData?.pappers?.dateCreation ? 
+                            `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
+                            'INSCRIT (au greffe de PARIS, le 15/03/2015)'
                         }
+                        {realData?.infogreffe && <SourceBadge source="INFOGREFFE" className="ml-2" />}
                       </div>
                     </div>
                     <div>
@@ -669,13 +701,46 @@ const Analysis = () => {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Capital social :</span>
-                      <div className="font-medium">
+                      <div className="font-medium flex items-center">
                         {(realData?.infogreffe?.capitalSocial ? realData.infogreffe.capitalSocial.toLocaleString() + ' €' : '') ||
                          (realData?.pappers?.capitalSocial ? realData.pappers.capitalSocial.toLocaleString() + ' €' : '') || 
                          'Non renseigné'}
+                        {realData?.infogreffe?.capitalSocial && <SourceBadge source="INFOGREFFE" className="ml-2" />}
+                        {!realData?.infogreffe?.capitalSocial && realData?.pappers?.capitalSocial && <SourceBadge source="PAPPERS" className="ml-2" />}
                       </div>
                     </div>
                   </div>
+
+                  {/* Dirigeants interactifs */}
+                  {((realData?.infogreffe as any)?.representants || (realData?.pappers as any)?.representants) && (
+                    <>
+                      <Separator />
+                      <div>
+                        <span className="text-sm text-muted-foreground mb-2 block">Dirigeants :</span>
+                        <div className="space-y-2">
+                          {((realData?.infogreffe as any)?.representants || (realData?.pappers as any)?.representants || []).slice(0, 2).map((dirigeant: any, index: number) => (
+                            <DirigeantModal
+                              key={index}
+                              dirigeant={{
+                                nom: dirigeant.nom || 'N/A',
+                                prenom: dirigeant.prenom || '',
+                                fonction: dirigeant.fonction || dirigeant.qualite || 'Dirigeant'
+                              }}
+                            >
+                              <button className="text-left hover:bg-muted/50 p-2 rounded-md transition-colors w-full">
+                                <div className="font-medium text-sm text-primary hover:underline">
+                                  {dirigeant.prenom} {dirigeant.nom}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {dirigeant.fonction || dirigeant.qualite || 'Dirigeant'}
+                                </div>
+                              </button>
+                            </DirigeantModal>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                   
                   <Separator />
                   

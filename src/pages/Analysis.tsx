@@ -20,6 +20,7 @@ import { SourceBadge } from "@/components/ui/source-badge";
 import { DataWithSource } from "@/components/ui/data-with-source";
 import { DirigeantModal } from "@/components/analysis/DirigeantModal";
 import { CollectiveProcedureAlert } from "@/components/analysis/CollectiveProcedureAlert";
+import { AlertSummaryBadge } from "@/components/admin/AlertSummaryBadge";
 import { 
   Building2, 
   MapPin, 
@@ -311,6 +312,16 @@ const Analysis = () => {
                     <CheckCircle className="h-3 w-3 mr-1" />
                     {companyData.status}
                   </Badge>
+                  {scores && (
+                    <AlertSummaryBadge 
+                      scores={{
+                        economic: scores.global || 5.5,
+                        financial: scores.financial || 6.0,
+                        legal: scores.legal || 7.5,
+                        fiscal: scores.fiscal || 6.8
+                      }}
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-6 text-sm text-muted-foreground">
                   <span>SIREN: {companyData.siren}</span>

@@ -791,58 +791,98 @@ const Analysis = () => {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Code NAF ou APE :</span>
-                      <div className="font-medium">
-                        6202A <Badge variant="outline" className="ml-1 text-xs">Commerce</Badge>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        (Conseil en systèmes et logiciels informatiques)
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Domaine d'activité :</span>
-                      <div className="font-medium">Services aux entreprises</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Forme d'exercice :</span>
-                      <div className="font-medium">Commerciale</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Convention collective :</span>
-                      <div className="font-medium">
-                        Syntec - IDCC 1486
-                        <Badge variant="outline" className="ml-1 text-xs">supposée</Badge>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Date de clôture exercice :</span>
-                      <div className="font-medium">31/12/2024</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Durée exercice :</span>
-                      <div className="font-medium">12 mois</div>
-                    </div>
-                  </div>
+                   <div className="grid grid-cols-2 gap-4 text-sm">
+                     <div>
+                       <span className="text-muted-foreground">Code NAF ou APE :</span>
+                       <DataWithSource source="INSEE">
+                         <div className="font-medium">
+                           {realData?.sirene?.naf || realData?.pappers?.codeNaf || 'Non renseigné'}
+                           {realData?.sirene?.naf && (
+                             <Badge variant="outline" className="ml-1 text-xs">
+                               {realData.sirene.naf.startsWith('62') ? 'Services' : 
+                                realData.sirene.naf.startsWith('70') ? 'Conseil' :
+                                realData.sirene.naf.startsWith('46') ? 'Commerce' : 'Autre'}
+                             </Badge>
+                           )}
+                         </div>
+                       </DataWithSource>
+                       <div className="text-xs text-muted-foreground mt-1">
+                         ({realData?.pappers?.libelleNaf || 'Libellé non disponible'})
+                       </div>
+                     </div>
+                     <div>
+                       <span className="text-muted-foreground">Domaine d'activité :</span>
+                       <DataWithSource source="INSEE">
+                         <div className="font-medium">
+                           {realData?.sirene?.naf?.startsWith('62') ? 'Services informatiques' :
+                            realData?.sirene?.naf?.startsWith('70') ? 'Activités spécialisées' :
+                            realData?.sirene?.naf?.startsWith('46') ? 'Commerce de gros' :
+                            'Non déterminé'}
+                         </div>
+                       </DataWithSource>
+                     </div>
+                     <div>
+                       <span className="text-muted-foreground">Forme d'exercice :</span>
+                       <DataWithSource source="INFOGREFFE">
+                         <div className="font-medium">
+                           {realData?.infogreffe?.formeJuridique?.includes('Commercial') ? 'Commerciale' :
+                            realData?.infogreffe?.formeJuridique?.includes('Civil') ? 'Civile' :
+                            realData?.pappers?.formeJuridique?.includes('SARL') ? 'Commerciale' :
+                            realData?.pappers?.formeJuridique?.includes('SAS') ? 'Commerciale' : 'Non déterminé'}
+                         </div>
+                       </DataWithSource>
+                     </div>
+                     <div>
+                       <span className="text-muted-foreground">Convention collective :</span>
+                       <div className="font-medium">
+                         {realData?.sirene?.naf?.startsWith('62') ? 'Syntec - IDCC 1486' :
+                          realData?.sirene?.naf?.startsWith('70') ? 'Bureaux d\'études techniques - IDCC 1486' :
+                          'Non déterminée'}
+                         <Badge variant="outline" className="ml-1 text-xs">supposée</Badge>
+                       </div>
+                     </div>
+                     <div>
+                       <span className="text-muted-foreground">Date de clôture exercice :</span>
+                       <DataWithSource source="INFOGREFFE">
+                         <div className="font-medium">
+                           {realData?.infogreffe?.dateClotureExercice || 'Non renseignée'}
+                         </div>
+                       </DataWithSource>
+                     </div>
+                     <div>
+                       <span className="text-muted-foreground">Durée exercice :</span>
+                       <DataWithSource source="INFOGREFFE">
+                         <div className="font-medium">
+                           {realData?.infogreffe?.dureePersonneMorale || '12 mois'}
+                         </div>
+                       </DataWithSource>
+                     </div>
+                   </div>
 
                   <Separator />
 
-                  <div>
-                    <h4 className="font-semibold mb-2">Activités secondaires</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Formation professionnelle</span>
-                        <Badge variant="outline" className="text-xs">8559A</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Maintenance informatique</span>
-                        <Badge variant="outline" className="text-xs">9511Z</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                   <div>
+                     <h4 className="font-semibold mb-2">Activités secondaires</h4>
+                     <DataWithSource source="PAPPERS">
+                       <div className="space-y-2 text-sm">
+                         {realData?.pappers?.dernieresMutations?.some(m => m.type === 'activite_secondaire') ? (
+                           realData.pappers.dernieresMutations
+                             .filter(m => m.type === 'activite_secondaire')
+                             .slice(0, 3)
+                             .map((mutation: any, index: number) => (
+                               <div key={index} className="flex justify-between">
+                                 <span>{mutation.description}</span>
+                                 <Badge variant="outline" className="text-xs">NAF</Badge>
+                               </div>
+                             ))
+                         ) : (
+                           <div className="text-muted-foreground italic">Aucune activité secondaire renseignée</div>
+                         )}
+                       </div>
+                     </DataWithSource>
+                   </div>
+                 </CardContent>
+               </Card>
             </div>
           </TabsContent>
 

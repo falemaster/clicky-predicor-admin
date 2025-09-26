@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { DataQualitySection } from "@/components/ui/data-quality-section";
+
+export default function AdminAnalysis() {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -546,29 +548,10 @@ const AdminAnalysis = () => {
               </CardContent>
             </Card>
 
-            {/* Badges and Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Statuts et certifications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-3">
-                  <Badge variant="secondary" className="bg-success-light text-success">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    <EditableField
-                      field="badge-1"
-                      value={additionalFields.badges[0]}
-                      onUpdate={(value) => {
-                        const newBadges = [...additionalFields.badges];
-                        newBadges[0] = value;
-                        updateAdditionalField('badges', newBadges);
-                      }}
-                    />
-                  </Badge>
-                  <Badge variant="secondary" className="bg-success-light text-success">
-                    <Shield className="h-3 w-3 mr-1" />
-                    <EditableField
-                      field="badge-2"
+            {/* Data Quality Section */}
+            <DataQualitySection data={companyData} />
+
+            {/* Scores */}
                       value={additionalFields.badges[1]}
                       onUpdate={(value) => {
                         const newBadges = [...additionalFields.badges];

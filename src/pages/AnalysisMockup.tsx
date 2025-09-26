@@ -292,19 +292,8 @@ const Analysis = () => {
               </CardContent>
             </Card>
 
-            {/* Badges and Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Statuts et certifications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-3">
-                  {/* Badge statut entreprise */}
-                  <Badge variant="secondary" className={
-                    companyData.status === 'Actif' 
-                      ? "bg-success-light text-success" 
-                      : "bg-destructive-light text-destructive"
-                  }>
+            {/* Data Quality Section */}
+            <DataQualitySection data={companyData} />
                     {companyData.status === 'Actif' ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
                     Entreprise {companyData.status}
                   </Badge>

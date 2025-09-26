@@ -682,7 +682,7 @@ const Analysis = () => {
                     <div>
                       <span className="text-muted-foreground">Forme juridique :</span>
                       <div className="font-medium">
-                        <DataWithSource source="INFOGREFFE">
+                        <DataWithSource source="PORTALIS">
                           {realData?.infogreffe?.formeJuridique || 'SAS, société par actions simplifiée'}
                         </DataWithSource>
                       </div>
@@ -695,7 +695,7 @@ const Analysis = () => {
                       <span className="text-muted-foreground">Inscription RCS :</span>
                       <div className="font-medium text-success">
                         <CheckCircle className="h-3 w-3 inline mr-1" />
-                        <DataWithSource source="INFOGREFFE">
+                        <DataWithSource source="ALPAGE">
                           {realData?.infogreffe?.dateImmatriculation ? 
                             `INSCRIT (le ${new Date(realData.infogreffe.dateImmatriculation).toLocaleDateString('fr-FR')})` :
                             realData?.pappers?.dateCreation ? 
@@ -794,7 +794,7 @@ const Analysis = () => {
                    <div className="grid grid-cols-2 gap-4 text-sm">
                      <div>
                        <span className="text-muted-foreground">Code NAF ou APE :</span>
-                       <DataWithSource source="INSEE">
+                       <DataWithSource source="SIRIUS">
                          <div className="font-medium">
                            {realData?.sirene?.naf || realData?.pappers?.codeNaf || 'Non renseigné'}
                            {realData?.sirene?.naf && (
@@ -812,7 +812,7 @@ const Analysis = () => {
                      </div>
                      <div>
                        <span className="text-muted-foreground">Domaine d'activité :</span>
-                       <DataWithSource source="INSEE">
+                       <DataWithSource source="SIRIUS">
                          <div className="font-medium">
                            {realData?.sirene?.naf?.startsWith('62') ? 'Services informatiques' :
                             realData?.sirene?.naf?.startsWith('70') ? 'Activités spécialisées' :
@@ -823,7 +823,7 @@ const Analysis = () => {
                      </div>
                      <div>
                        <span className="text-muted-foreground">Forme d'exercice :</span>
-                       <DataWithSource source="INFOGREFFE">
+                       <DataWithSource source="PORTALIS">
                          <div className="font-medium">
                            {realData?.infogreffe?.formeJuridique?.includes('Commercial') ? 'Commerciale' :
                             realData?.infogreffe?.formeJuridique?.includes('Civil') ? 'Civile' :
@@ -834,16 +834,18 @@ const Analysis = () => {
                      </div>
                      <div>
                        <span className="text-muted-foreground">Convention collective :</span>
-                       <div className="font-medium">
-                         {realData?.sirene?.naf?.startsWith('62') ? 'Syntec - IDCC 1486' :
-                          realData?.sirene?.naf?.startsWith('70') ? 'Bureaux d\'études techniques - IDCC 1486' :
-                          'Non déterminée'}
-                         <Badge variant="outline" className="ml-1 text-xs">supposée</Badge>
-                       </div>
+                       <DataWithSource source="SIRIUS">
+                         <div className="font-medium">
+                           {realData?.sirene?.naf?.startsWith('62') ? 'Syntec - IDCC 1486' :
+                            realData?.sirene?.naf?.startsWith('70') ? 'Bureaux d\'études techniques - IDCC 1486' :
+                            'Non déterminée'}
+                           <Badge variant="outline" className="ml-1 text-xs">supposée</Badge>
+                         </div>
+                       </DataWithSource>
                      </div>
                      <div>
                        <span className="text-muted-foreground">Date de clôture exercice :</span>
-                       <DataWithSource source="INFOGREFFE">
+                       <DataWithSource source="DGFIP">
                          <div className="font-medium">
                            {realData?.infogreffe?.dateClotureExercice || 'Non renseignée'}
                          </div>
@@ -851,7 +853,7 @@ const Analysis = () => {
                      </div>
                      <div>
                        <span className="text-muted-foreground">Durée exercice :</span>
-                       <DataWithSource source="INFOGREFFE">
+                       <DataWithSource source="DGFIP">
                          <div className="font-medium">
                            {realData?.infogreffe?.dureePersonneMorale || '12 mois'}
                          </div>

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface DataWithSourceProps {
   children: ReactNode;
-  source: 'INSEE' | 'INFOGREFFE' | 'PAPPERS' | 'PREDICTOR' | 'RUBYPAYEUR' | 'AI';
+  source: 'INSEE' | 'INFOGREFFE' | 'PAPPERS' | 'PREDICTOR' | 'RUBYPAYEUR' | 'AI' | 'ALPAGE' | 'PORTALIS' | 'SIRIUS' | 'DGFIP';
   lastUpdate?: string;
   className?: string;
 }
@@ -33,6 +33,22 @@ const sourceConfig = {
   AI: {
     label: 'IA',
     description: 'Enrichissement par intelligence artificielle'
+  },
+  ALPAGE: {
+    label: 'ALPAGE',
+    description: 'Base de données juridiques du ministère de la Justice'
+  },
+  PORTALIS: {
+    label: 'PORTALIS',
+    description: 'Registre national des procédures collectives'
+  },
+  SIRIUS: {
+    label: 'SIRIUS',
+    description: 'Système d\'information des entreprises - DGFIP'
+  },
+  DGFIP: {
+    label: 'DGFIP',
+    description: 'Direction générale des Finances publiques'
   }
 };
 

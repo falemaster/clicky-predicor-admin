@@ -79,6 +79,10 @@ export interface InfogreffeCompanyData {
   procedures?: InfogreffeProcedure[];
   actes?: InfogreffeActe[];
   comptes?: InfogreffeCompte[];
+  representants?: InfogreffeRepresentant[];
+  repartitionCapital?: InfogreffeRepartitionCapital;
+  notapmeScores?: InfogreffeNotapmeScores;
+  afdccScore?: InfogreffeAfdccScore;
 }
 
 export interface InfogreffeProcedure {
@@ -99,6 +103,71 @@ export interface InfogreffeCompte {
   dateDepot: string;
   type: 'Comptes annuels' | 'Comptes consolidés';
   statut: 'Déposé' | 'Non déposé';
+  postes?: InfogreffePosteComptable[];
+}
+
+export interface InfogreffePosteComptable {
+  code: string;
+  libelle: string;
+  valeur: number;
+}
+
+export interface InfogreffeRepresentant {
+  nom: string;
+  prenom?: string;
+  dateNaissance?: string;
+  lieuNaissance?: string;
+  nationalite?: string;
+  qualite: string;
+  dateDebut: string;
+  dateFin?: string;
+}
+
+export interface InfogreffeRepartitionCapital {
+  montant: number;
+  nombreParts: number;
+  pourcentageDetentionPP: number;
+  pourcentageDetentionPM: number;
+  detention: InfogreffeDetenteur[];
+}
+
+export interface InfogreffeDetenteur {
+  typePersonne: 'PP' | 'PM';
+  nom?: string;
+  prenom?: string;
+  denomination?: string;
+  siren?: string;
+  nombreParts: number;
+  pourcentage: number;
+}
+
+export interface InfogreffeNotapmeScores {
+  millesime: number;
+  dateCloture: string;
+  indicePerformanceFinanciere: number;
+  niveauIPF: string;
+  noteRentabilite: number;
+  niveauRentabilite: string;
+  noteSolvabilite: number;
+  niveauSolvabilite: string;
+  noteRobustesse: number;
+  niveauRobustesse: string;
+  ratios?: InfogreffeRatio[];
+}
+
+export interface InfogreffeRatio {
+  code: string;
+  libelle: string;
+  valeur: number;
+  unite: string;
+}
+
+export interface InfogreffeAfdccScore {
+  note: string;
+  niveauRisque: string;
+  millesime: number;
+  dateCloture: string;
+  typeBilan: string;
 }
 
 // RubyPayeur API

@@ -1,4 +1,3 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -6,124 +5,251 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Note: L'API Infogreffe nécessite souvent un accès payant et une authentification complexe
-// Cette implémentation fournit une structure pour intégrer l'API réelle
-const INFOGREFFE_API_KEY = Deno.env.get('INFOGREFFE_API_KEY');
-const INFOGREFFE_BASE_URL = 'https://opendata.infogreffe.com/api/v1';
-
 serve(async (req) => {
+  console.log('Infogreffe API called');
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { siren, endpoint = 'entreprise' } = await req.json();
+    const { siren, endpoint, millesime } = await req.json();
+    console.log('Infogreffe request:', { siren, endpoint, millesime });
 
-    if (!siren) {
-      return new Response(JSON.stringify({ 
-        error: { 
-          code: 'SIREN_REQUIRED', 
-          message: 'Le SIREN est requis' 
-        } 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    console.log(`Fetching Infogreffe data for SIREN: ${siren}, endpoint: ${endpoint}`);
-
-    // Si pas de clé API Infogreffe, retourner des données mock enrichies
+    const INFOGREFFE_API_KEY = Deno.env.get('INFOGREFFE_API_KEY');
+    
     if (!INFOGREFFE_API_KEY) {
-      console.log('Pas de clé API Infogreffe, utilisation des données mock');
-      
-      // Générer des données mock basées sur le SIREN
-      const mockData = generateMockInfogreffeData(siren);
-      
+      console.log('INFOGREFFE_API_KEY not found, returning mock data');
+      const mockData = generateMockInfogreffeData(siren, endpoint);
       return new Response(JSON.stringify(mockData), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Code pour l'API Infogreffe réelle (à activer avec une vraie clé API)
-    let url = '';
+    // Construct API URL based on endpoint
+    let apiUrl = '';
     switch (endpoint) {
       case 'entreprise':
-        url = `${INFOGREFFE_BASE_URL}/entreprises/${siren}`;
+      case 'ficheidentite':
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/FicheIdentite/${siren}`;
         break;
-      case 'actes':
-        url = `${INFOGREFFE_BASE_URL}/entreprises/${siren}/actes`;
+      case 'representants':
+      case 'dirigeants':
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/Representants/${siren}`;
         break;
       case 'comptes':
-        url = `${INFOGREFFE_BASE_URL}/entreprises/${siren}/comptes`;
+      case 'comptesannuels':
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/ComptesAnnuels/${siren}`;
+        if (millesime) {
+          apiUrl += `?millesime=${millesime}`;
+        }
+        break;
+      case 'procedures':
+      case 'procedurescollectives':
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/ProceduresCollectives/${siren}`;
+        break;
+      case 'repartitioncapital':
+      case 'associes':
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/RepartitionCapital?siren=${siren}&restitution=json`;
+        break;
+      case 'notapme-performance':
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/notapme/performance/${siren}`;
+        if (millesime) {
+          apiUrl += `?millesime=${millesime}`;
+        }
+        break;
+      case 'notapme-essentiel':
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/notapme/essentiel/${siren}`;
+        if (millesime) {
+          apiUrl += `?millesime=${millesime}`;
+        }
+        break;
+      case 'notapme-integral':
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/notapme/integral/${siren}`;
+        if (millesime) {
+          apiUrl += `?millesime=${millesime}`;
+        }
+        break;
+      case 'afdcc':
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/afdcc/${siren}`;
+        if (millesime) {
+          apiUrl += `?millesime=${millesime}`;
+        }
         break;
       default:
-        return new Response(JSON.stringify({ 
-          error: { 
-            code: 'INVALID_ENDPOINT', 
-            message: 'Endpoint non supporté' 
-          } 
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        apiUrl = `https://api.datainfogreffe.fr/api/v1/Entreprise/FicheIdentite/${siren}`;
     }
 
-    const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${INFOGREFFE_API_KEY}`,
-        'User-Agent': 'Predicor/1.0'
-      },
-    });
+    // Add token parameter
+    const separator = apiUrl.includes('?') ? '&' : '?';
+    apiUrl += `${separator}token=${INFOGREFFE_API_KEY}`;
 
+    console.log('Calling Infogreffe API:', apiUrl.replace(INFOGREFFE_API_KEY, '[HIDDEN]'));
+
+    const response = await fetch(apiUrl);
+    
     if (!response.ok) {
-      console.error(`Infogreffe API error: ${response.status} ${response.statusText}`);
-      
-      // En cas d'erreur API, fallback sur les données mock
-      const mockData = generateMockInfogreffeData(siren);
+      console.error('Infogreffe API error:', response.status, response.statusText);
+      // Fallback to mock data if API fails
+      const mockData = generateMockInfogreffeData(siren, endpoint);
       return new Response(JSON.stringify(mockData), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const data = await response.json();
-    console.log(`Infogreffe data fetched successfully for SIREN: ${siren}`);
+    console.log('Infogreffe API response for', endpoint, ':', {
+      ...data,
+      Data: data.Data ? '[DATA_RECEIVED]' : null,
+      Metadata: data.Metadata
+    });
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in infogreffe-api function:', error);
+    console.error('Infogreffe function error:', error);
     
-    // En cas d'erreur, essayer de retourner des données mock si SIREN disponible
-    try {
-      const { siren } = await req.clone().json();
-      if (siren) {
-        const mockData = generateMockInfogreffeData(siren);
-        return new Response(JSON.stringify(mockData), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    } catch (e) {
-      // Ignore parsing errors
+    // Extract siren from error context if available
+    const siren = req.url?.includes('siren') ? 
+      new URL(req.url).searchParams.get('siren') : null;
+    
+    if (siren) {
+      const mockData = generateMockInfogreffeData(siren, 'entreprise');
+      return new Response(JSON.stringify(mockData), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
     
-    return new Response(JSON.stringify({ 
-      error: { 
-        code: 'INFOGREFFE_INTERNAL_ERROR', 
-        message: error instanceof Error ? error.message : 'Erreur inconnue' 
-      } 
-    }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
 
-function generateMockInfogreffeData(siren: string) {
+function generateMockInfogreffeData(siren: string, endpoint: string = 'entreprise') {
+  const baseData = {
+    Metadata: {
+      CreditsUsed: 1,
+      CreditsLeft: 9999
+    }
+  };
+
+  switch (endpoint) {
+    case 'representants':
+    case 'dirigeants':
+      return {
+        ...baseData,
+        Data: {
+          CodeGreffe: "7501",
+          LibelleGreffe: "Paris",
+          Siren: siren,
+          Denomination: `ENTREPRISE ${siren}`,
+          Statut: "Active",
+          Representants: [
+            {
+              Nom: "MARTIN",
+              Prenom: "Jean",
+              DateNaissance: "1980-01-15",
+              LieuNaissance: "Paris",
+              Nationalite: "Française",
+              Qualite: "Président",
+              DateDebut: "2020-01-01",
+              DateFin: null
+            }
+          ]
+        }
+      };
+      
+    case 'comptes':
+    case 'comptesannuels':
+      return {
+        ...baseData,
+        Data: {
+          CodeGreffe: "7501",
+          Siren: siren,
+          Denomination: `ENTREPRISE ${siren}`,
+          Millesime: 2023,
+          TypeComptes: "Comptes annuels",
+          Liasse: "2050",
+          Devise: "EUR",
+          DateCloture: "2023-12-31",
+          DureeExo: 12,
+          DureeExoPrecedent: 12,
+          Postes: [
+            { Code: "FL", Libelle: "Chiffre d'affaires net", Valeur: 1500000 },
+            { Code: "FM", Libelle: "Production stockée", Valeur: 0 },
+            { Code: "FN", Libelle: "Production immobilisée", Valeur: 0 }
+          ]
+        }
+      };
+      
+    case 'procedures':
+    case 'procedurescollectives':
+      return {
+        ...baseData,
+        Data: {
+          CodeGreffe: "7501",
+          Siren: siren,
+          Denomination: `ENTREPRISE ${siren}`,
+          ExistenceProcedure: false,
+          Procedures: []
+        }
+      };
+      
+    case 'repartitioncapital':
+    case 'associes':
+      return {
+        ...baseData,
+        Data: {
+          ReferentielGreffe: {
+            CodeGreffe: "7501",
+            NomGreffe: "Paris",
+            Adresse: "1 Quai de la Corse, 75001 Paris"
+          },
+          SocieteInfos: {
+            Denomination: `ENTREPRISE ${siren}`,
+            Siren: siren,
+            Registre: "RCS Paris",
+            LibelleGreffe: "Paris",
+            Adresse: "123 Rue de la Paix, 75001 Paris",
+            LibelleFormeJuridique: "SAS"
+          },
+          CapitalSocial: {
+            Montant: 50000,
+            NbrParts: 5000,
+            PourcentageDetentionPP: 80,
+            PourcentageDetentionPM: 20
+          },
+          CapitalDetention: [
+            {
+              TypePersonne: "PP",
+              Nom: "MARTIN",
+              Prenom: "Jean",
+              NombreParts: 4000,
+              Pourcentage: 80
+            },
+            {
+              TypePersonne: "PM",
+              Denomination: "HOLDING MARTIN",
+              Siren: "123456789",
+              NombreParts: 1000,
+              Pourcentage: 20
+            }
+          ]
+        }
+      };
+      
+    default:
+      // entreprise/ficheidentite endpoint
+      return generateDefaultMockData(siren);
+  }
+}
+
+function generateDefaultMockData(siren: string) {
   const formes = ['SAS', 'SARL', 'SA', 'SCI', 'EURL', 'SASU'];
   const greffes = ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Nantes', 'Strasbourg'];
   const activites = [

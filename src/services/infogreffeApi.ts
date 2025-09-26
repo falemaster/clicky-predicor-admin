@@ -1,40 +1,13 @@
-import type { ApiError } from '@/types/api';
+import type { 
+  ApiError, 
+  InfogreffeCompanyData,
+  InfogreffeRepresentant, 
+  InfogreffeRepartitionCapital,
+  InfogreffeCompte,
+  InfogreffePosteComptable
+} from '@/types/api';
 import { supabase } from '@/integrations/supabase/client';
 
-export interface InfogreffeCompanyData {
-  siren: string;
-  formeJuridique?: string;
-  capitalSocial?: number;
-  dateImmatriculation?: string;
-  numeroRcs?: string;
-  greffe?: string;
-  activitePrincipale?: string;
-  dureePersonneMorale?: string;
-  dateClotureExercice?: string;
-  procedures?: InfogreffeProcedure[];
-  actes?: InfogreffeActe[];
-  comptes?: InfogreffeCompte[];
-}
-
-export interface InfogreffeProcedure {
-  type: 'Redressement' | 'Liquidation' | 'Sauvegarde';
-  date: string;
-  tribunal: string;
-  statut: string;
-}
-
-export interface InfogreffeActe {
-  date: string;
-  type: string;
-  description: string;
-}
-
-export interface InfogreffeCompte {
-  annee: number;
-  dateDepot: string;
-  type: 'Comptes annuels' | 'Comptes consolidés';
-  statut: 'Déposé' | 'Non déposé';
-}
 
 export class InfogreffeApiService {
   private static instance: InfogreffeApiService;
@@ -50,7 +23,7 @@ export class InfogreffeApiService {
     try {
       // Appel via edge function pour gérer l'authentification Infogreffe
       const { data, error } = await supabase.functions.invoke('infogreffe-api', {
-        body: { siren, endpoint: 'entreprise' }
+        body: { siren, endpoint: 'ficheidentite' }
       });
 
       if (error) {
@@ -75,29 +48,30 @@ export class InfogreffeApiService {
         };
       }
 
-      // Mapper les données Infogreffe
+      // Mapper les données Infogreffe selon le format de réponse API
+      const apiData = data.Data || data;
       const companyData: InfogreffeCompanyData = {
-        siren: data.siren || siren,
-        formeJuridique: data.forme_juridique,
-        capitalSocial: data.capital_social ? parseFloat(data.capital_social) : undefined,
-        dateImmatriculation: data.date_immatriculation,
-        numeroRcs: data.numero_rcs,
-        greffe: data.greffe,
-        activitePrincipale: data.activite_principale,
-        dureePersonneMorale: data.duree_personne_morale,
-        dateClotureExercice: data.date_cloture_exercice,
-        procedures: data.procedures?.map((proc: any) => ({
+        siren: apiData.siren || apiData.Siren || siren,
+        formeJuridique: apiData.forme_juridique || apiData.FormeJuridique || apiData.LibelleFormeJuridique,
+        capitalSocial: this.parseCapitalSocial(apiData.capital_social || apiData.CapitalSocial),
+        dateImmatriculation: apiData.date_immatriculation || apiData.DateImmatriculation,
+        numeroRcs: apiData.numero_rcs || apiData.NumeroRcs,
+        greffe: apiData.greffe || apiData.LibelleGreffe,
+        activitePrincipale: apiData.activite_principale || apiData.CodeNaf,
+        dureePersonneMorale: apiData.duree_personne_morale,
+        dateClotureExercice: apiData.date_cloture_exercice,
+        procedures: apiData.procedures?.map((proc: any) => ({
           type: proc.type,
           date: proc.date,
           tribunal: proc.tribunal,
           statut: proc.statut
         })) || [],
-        actes: data.actes?.map((acte: any) => ({
+        actes: apiData.actes?.map((acte: any) => ({
           date: acte.date,
           type: acte.type,
           description: acte.description
         })) || [],
-        comptes: data.comptes?.map((compte: any) => ({
+        comptes: apiData.comptes?.map((compte: any) => ({
           annee: compte.annee,
           dateDepot: compte.date_depot,
           type: compte.type,
@@ -116,6 +90,144 @@ export class InfogreffeApiService {
         }
       };
     }
+  }
+
+  async getRepresentants(siren: string): Promise<{ data: InfogreffeRepresentant[] | null; error: ApiError | null }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('infogreffe-api', {
+        body: { siren, endpoint: 'representants' }
+      });
+
+      if (error || data?.error) {
+        return {
+          data: null,
+          error: {
+            code: 'INFOGREFFE_REPRESENTANTS_ERROR',
+            message: error?.message || data?.error?.message || 'Erreur lors de la récupération des représentants',
+            source: 'INFOGREFFE'
+          }
+        };
+      }
+
+      const apiData = data.Data || data;
+      const representants = apiData.Representants?.map((rep: any) => ({
+        nom: rep.Nom,
+        prenom: rep.Prenom,
+        dateNaissance: rep.DateNaissance,
+        lieuNaissance: rep.LieuNaissance,
+        nationalite: rep.Nationalite,
+        qualite: rep.Qualite,
+        dateDebut: rep.DateDebut,
+        dateFin: rep.DateFin
+      })) || [];
+
+      return { data: representants, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          code: 'INFOGREFFE_REPRESENTANTS_NETWORK_ERROR',
+          message: `Erreur réseau: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+          source: 'INFOGREFFE'
+        }
+      };
+    }
+  }
+
+  async getComptesAnnuels(siren: string, millesime?: number): Promise<{ data: InfogreffeCompte | null; error: ApiError | null }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('infogreffe-api', {
+        body: { siren, endpoint: 'comptesannuels', millesime }
+      });
+
+      if (error || data?.error) {
+        return {
+          data: null,
+          error: {
+            code: 'INFOGREFFE_COMPTES_ERROR',
+            message: error?.message || data?.error?.message || 'Erreur lors de la récupération des comptes',
+            source: 'INFOGREFFE'
+          }
+        };
+      }
+
+      const apiData = data.Data || data;
+      const compteData: InfogreffeCompte = {
+        annee: apiData.Millesime || millesime || new Date().getFullYear() - 1,
+        dateDepot: apiData.DateCloture,
+        type: apiData.TypeComptes || 'Comptes annuels',
+        statut: 'Déposé',
+        postes: apiData.Postes?.map((poste: any) => ({
+          code: poste.Code,
+          libelle: poste.Libelle,
+          valeur: poste.Valeur
+        })) || []
+      };
+
+      return { data: compteData, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          code: 'INFOGREFFE_COMPTES_NETWORK_ERROR',
+          message: `Erreur réseau: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+          source: 'INFOGREFFE'
+        }
+      };
+    }
+  }
+
+  async getRepartitionCapital(siren: string): Promise<{ data: InfogreffeRepartitionCapital | null; error: ApiError | null }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('infogreffe-api', {
+        body: { siren, endpoint: 'repartitioncapital' }
+      });
+
+      if (error || data?.error) {
+        return {
+          data: null,
+          error: {
+            code: 'INFOGREFFE_REPARTITION_ERROR',
+            message: error?.message || data?.error?.message || 'Erreur lors de la récupération de la répartition du capital',
+            source: 'INFOGREFFE'
+          }
+        };
+      }
+
+      const apiData = data.Data || data;
+      const repartition: InfogreffeRepartitionCapital = {
+        montant: apiData.CapitalSocial?.Montant || 0,
+        nombreParts: apiData.CapitalSocial?.NbrParts || 0,
+        pourcentageDetentionPP: apiData.CapitalSocial?.PourcentageDetentionPP || 0,
+        pourcentageDetentionPM: apiData.CapitalSocial?.PourcentageDetentionPM || 0,
+        detention: apiData.CapitalDetention?.map((det: any) => ({
+          typePersonne: det.TypePersonne,
+          nom: det.Nom,
+          prenom: det.Prenom,
+          denomination: det.Denomination,
+          siren: det.Siren,
+          nombreParts: det.NombreParts,
+          pourcentage: det.Pourcentage
+        })) || []
+      };
+
+      return { data: repartition, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          code: 'INFOGREFFE_REPARTITION_NETWORK_ERROR',
+          message: `Erreur réseau: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+          source: 'INFOGREFFE'
+        }
+      };
+    }
+  }
+
+  private parseCapitalSocial(value: any): number | undefined {
+    if (!value) return undefined;
+    const parsed = typeof value === 'string' ? parseFloat(value.replace(/[^\d.,]/g, '').replace(',', '.')) : parseFloat(value);
+    return isNaN(parsed) ? undefined : parsed;
   }
 
   async getMockData(siren: string): Promise<{ data: InfogreffeCompanyData | null; error: ApiError | null }> {

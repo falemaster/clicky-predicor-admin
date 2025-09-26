@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -201,7 +202,8 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     financial: false,
     compliance: false,
     fiscal: false,
-    governance: false
+    governance: false,
+    procedures: false
   });
 
   useEffect(() => {
@@ -921,13 +923,136 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       </CollapsibleTrigger>
                       
                       <CollapsibleContent>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-6">
                           <EditableField
                             value={getNestedValue(formData, ['enriched', 'compliance', 'analysis']) || ''}
                             placeholder="Analyse de conformité réglementaire..."
                             onSave={(value) => updateField(['enriched', 'compliance', 'analysis'], value)}
                             multiline
                           />
+                          
+                          {/* Procédures Judiciaires et Légales */}
+                          <Card>
+                            <Collapsible 
+                              open={openSections.procedures} 
+                              onOpenChange={() => toggleSection('procedures')}
+                            >
+                              <CollapsibleTrigger asChild>
+                                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                      <Scale className="h-5 w-5 text-primary" />
+                                      <div>
+                                        <CardTitle className="text-lg">Procédures Judiciaires et Légales</CardTitle>
+                                        <CardDescription>Gestion des procédures précontentieuses et judiciaires</CardDescription>
+                                      </div>
+                                    </div>
+                                    {openSections.procedures ? 
+                                      <ChevronDown className="h-4 w-4" /> : 
+                                      <ChevronRight className="h-4 w-4" />
+                                    }
+                                  </div>
+                                </CardHeader>
+                              </CollapsibleTrigger>
+                              
+                              <CollapsibleContent>
+                                <CardContent className="space-y-6">
+                                  <div className="grid md:grid-cols-2 gap-6">
+                                    {/* Procédures Précontentieuses */}
+                                    <Card>
+                                      <CardHeader>
+                                        <CardTitle className="text-base flex items-center">
+                                          <AlertTriangle className="h-4 w-4 mr-2 text-amber-500" />
+                                          Procédures Précontentieuses
+                                        </CardTitle>
+                                        <CardDescription>Source affichée: BODACC</CardDescription>
+                                      </CardHeader>
+                                      <CardContent>
+                                        <div className="space-y-3">
+                                          {[
+                                            { label: 'Mise en demeure', slug: 'mise_en_demeure' },
+                                            { label: 'Commandement de payer par huissier', slug: 'commandement_de_payer_par_huissier' },
+                                            { label: 'Résiliation de contrat', slug: 'resiliation_de_contrat' },
+                                            { label: 'Inscription privilèges/nantissements', slug: 'inscription_privileges_nantissements' },
+                                            { label: 'Radiation d\'office du RCS', slug: 'radiation_doffice_du_rcs' },
+                                            { label: 'Procédure amiable', slug: 'procedure_amiable' },
+                                            { label: 'Déclaration de créance', slug: 'declaration_de_creance' }
+                                          ].map(({ label, slug }) => (
+                                            <div key={slug} className="flex items-center justify-between space-x-2">
+                                              <span className="text-sm font-medium flex-1">{label}</span>
+                                              <Select
+                                                value={getNestedValue(formData, ['enriched', 'compliance', 'legalProcedures', slug]) || 'NC'}
+                                                onValueChange={(value) => updateField(['enriched', 'compliance', 'legalProcedures', slug], value)}
+                                              >
+                                                <SelectTrigger className="w-32">
+                                                  <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  <SelectItem value="NC">NC</SelectItem>
+                                                  <SelectItem value="Aucune">Aucune</SelectItem>
+                                                  <SelectItem value="1 en cours">1 en cours</SelectItem>
+                                                  <SelectItem value="1 active">1 active</SelectItem>
+                                                  <SelectItem value="2 actives">2 actives</SelectItem>
+                                                  <SelectItem value="3+ actives">3+ actives</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                    
+                                    {/* Procédures Judiciaires */}
+                                    <Card>
+                                      <CardHeader>
+                                        <CardTitle className="text-base flex items-center">
+                                          <Gavel className="h-4 w-4 mr-2 text-red-500" />
+                                          Procédures Judiciaires
+                                        </CardTitle>
+                                        <CardDescription>Source affichée: PORTALIS</CardDescription>
+                                      </CardHeader>
+                                      <CardContent>
+                                        <div className="space-y-3">
+                                          {[
+                                            { label: 'Assignation Tribunal de commerce', slug: 'assignation_tribunal_de_commerce' },
+                                            { label: 'Injonction de payer', slug: 'injonction_de_payer' },
+                                            { label: 'Référé commercial', slug: 'refere_commercial' },
+                                            { label: 'Redressement judiciaire', slug: 'redressement_judiciaire' },
+                                            { label: 'Liquidation judiciaire', slug: 'liquidation_judiciaire' },
+                                            { label: 'Sauvegarde', slug: 'sauvegarde' },
+                                            { label: 'Appel des décisions', slug: 'appel_des_decisions' },
+                                            { label: 'Contentieux prud\'homal', slug: 'contentieux_prudhomal' },
+                                            { label: 'Contentieux administratif', slug: 'contentieux_administratif' }
+                                          ].map(({ label, slug }) => (
+                                            <div key={slug} className="flex items-center justify-between space-x-2">
+                                              <span className="text-sm font-medium flex-1">{label}</span>
+                                              <Select
+                                                value={getNestedValue(formData, ['enriched', 'compliance', 'judicialProcedures', slug]) || 'NC'}
+                                                onValueChange={(value) => updateField(['enriched', 'compliance', 'judicialProcedures', slug], value)}
+                                              >
+                                                <SelectTrigger className="w-32">
+                                                  <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  <SelectItem value="NC">NC</SelectItem>
+                                                  <SelectItem value="Aucun">Aucun</SelectItem>
+                                                  <SelectItem value="Non">Non</SelectItem>
+                                                  <SelectItem value="1 en cours">1 en cours</SelectItem>
+                                                  <SelectItem value="1 active">1 active</SelectItem>
+                                                  <SelectItem value="2 actives">2 actives</SelectItem>
+                                                  <SelectItem value="3+ actives">3+ actives</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  </div>
+                                </CardContent>
+                              </CollapsibleContent>
+                            </Collapsible>
+                          </Card>
                         </CardContent>
                       </CollapsibleContent>
                     </Collapsible>

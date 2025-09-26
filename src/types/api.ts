@@ -264,6 +264,10 @@ export interface EnrichedData {
     growthTrend: string;
     riskFactors: string[];
   };
+  compliance?: {
+    legalProcedures?: Record<string, string>;
+    judicialProcedures?: Record<string, string>;
+  };
   metadata: {
     dataQuality: string;
     sources: string;

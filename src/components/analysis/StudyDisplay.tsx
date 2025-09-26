@@ -300,53 +300,57 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       {openSections.procedures ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </CollapsibleTrigger>
                     
-                    <CollapsibleContent className="px-6 pb-6 space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Procédures Précontentieuses */}
-                        <Card className="p-4">
-                          <div className="flex items-center gap-3 mb-4">
-                            <AlertTriangle className="h-4 w-4 text-amber-500" />
-                            <h4 className="font-medium">Procédures Précontentieuses</h4>
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-4">
-                            Procédures de recouvrement et alertes préventives
-                          </p>
-                          
-                          <div className="text-xs text-muted-foreground mb-3 italic">
-                            Source des données : BODACC
-                          </div>
-                          
-                          <div className="space-y-2">
-                            {[
-                              'Mise en demeure',
-                              'Commandement de payer par huissier',
-                              'Résiliation de contrat',
-                              'Inscription privilèges/nantissements',
-                              'Radiation d\'office du RCS',
-                              'Procédure amiable',
-                              'Déclaration de créance'
-                            ].map((procedure) => {
-                              // Check admin data first, then API data, then default to NC
-                              const adminStatus = companyData?.adminData?.enriched_data?.legal?.procedures?.[procedure];
-                              const apiHasData = companyData?.bodacc?.annonces?.some(a => 
-                                a.type?.toLowerCase().includes(procedure.toLowerCase().split(' ')[0])
-                              );
-                              
-                              let status = 'NC';
-                              let variant: 'success' | 'warning' | 'destructive' | 'outline' = 'outline';
-                              
-                              if (adminStatus) {
-                                status = adminStatus;
-                                variant = adminStatus === 'Aucune' || adminStatus === 'Non' ? 'success' : 
-                                         adminStatus.includes('active') || adminStatus.includes('cours') ? 'warning' : 'success';
-                              } else if (companyData?.bodacc !== undefined) {
-                                status = apiHasData ? '1 en cours' : 'Aucune';
-                                variant = apiHasData ? 'warning' : 'success';
-                              }
-                              
-                              return (
-                                <div key={procedure} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                                  <span className="text-sm">{procedure}</span>
+                  <CollapsibleContent className="px-6 pb-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Procédures Précontentieuses */}
+                      <Card className="p-4">
+                        <div className="flex items-center gap-3 mb-4">
+                          <AlertTriangle className="h-4 w-4 text-amber-500" />
+                          <h4 className="font-medium">Procédures Précontentieuses</h4>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-4">
+                          Procédures de recouvrement et alertes préventives
+                        </p>
+                        
+                        {/* Table header */}
+                        <div className="grid grid-cols-2 gap-2 text-xs font-medium text-muted-foreground border-b pb-2 mb-3">
+                          <span>Nature</span>
+                          <span>Statut</span>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {[
+                            'Mise en demeure',
+                            'Commandement de payer par huissier',
+                            'Résiliation de contrat',
+                            'Inscription privilèges/nantissements',
+                            'Radiation d\'office du RCS',
+                            'Procédure amiable',
+                            'Déclaration de créance'
+                          ].map((procedure) => {
+                            // Check admin data first, then API data, then default to NC
+                            const slug = procedure.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                            const adminStatus = companyData?.enriched?.compliance?.legalProcedures?.[slug];
+                            const apiHasData = companyData?.bodacc?.annonces?.some(a => 
+                              a.type?.toLowerCase().includes(procedure.toLowerCase().split(' ')[0])
+                            );
+                            
+                            let status = 'NC';
+                            let variant: 'success' | 'warning' | 'destructive' | 'outline' = 'outline';
+                            
+                            if (adminStatus) {
+                              status = adminStatus;
+                              variant = adminStatus === 'Aucune' || adminStatus === 'Non' ? 'success' : 
+                                       adminStatus.includes('active') || adminStatus.includes('cours') ? 'warning' : 'success';
+                            } else if (companyData?.bodacc !== undefined) {
+                              status = apiHasData ? '1 en cours' : 'Aucune';
+                              variant = apiHasData ? 'warning' : 'success';
+                            }
+                            
+                            return (
+                              <div key={procedure} className="grid grid-cols-2 gap-2 py-2 border-b border-border/50 last:border-0">
+                                <span className="text-sm">{procedure}</span>
+                                <DataWithSource source="BODACC" lastUpdate="2024-01-15T09:00:00Z">
                                   {status === 'NC' ? (
                                     <Badge variant="outline" className="text-muted-foreground">
                                       <AlertTriangle className="h-3 w-3 mr-1" />
@@ -354,13 +358,12 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                                     </Badge>
                                   ) : (
                                     <Badge variant={variant}>
-                                      <DataWithSource source="BODACC">
-                                        {status}
-                                      </DataWithSource>
+                                      {status}
                                     </Badge>
                                   )}
-                                </div>
-                              );
+                                </DataWithSource>
+                              </div>
+                            );
                             })}
                           </div>
                         </Card>
@@ -375,15 +378,10 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                             Suivi des procédures contentieuses et juridictionnelles
                           </p>
                           
-                          <div className="border-b border-border mb-3 pb-2">
-                            <div className="grid grid-cols-2 gap-4 text-sm font-medium text-muted-foreground">
-                              <div>Nature</div>
-                              <div>Statut</div>
-                            </div>
-                          </div>
-                          
-                          <div className="text-xs text-muted-foreground mb-3 italic">
-                            Source des données : Portalis
+                          {/* Table header */}
+                          <div className="grid grid-cols-2 gap-2 text-xs font-medium text-muted-foreground border-b pb-2 mb-3">
+                            <span>Nature</span>
+                            <span>Statut</span>
                           </div>
                           
                           <div className="space-y-2">
@@ -391,16 +389,16 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                               'Assignation Tribunal de commerce',
                               'Injonction de payer', 
                               'Référé commercial',
-                              'Procédure collective',
+                              'Redressement judiciaire',
+                              'Liquidation judiciaire',
+                              'Sauvegarde',
                               'Appel des décisions',
                               'Contentieux prud\'homal',
                               'Contentieux administratif'
                             ].map((procedure) => {
                               // Check admin data first, then API data, then default to NC
-                              const adminStatus = companyData?.adminData?.enriched_data?.legal?.procedures?.[procedure];
-                              const apiHasData = companyData?.procedures?.some(p => 
-                                p.nature?.toLowerCase().includes(procedure.toLowerCase().split(' ')[0])
-                              );
+                              const slug = procedure.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                              const adminStatus = companyData?.enriched?.compliance?.judicialProcedures?.[slug];
                               
                               let status = 'NC';
                               let variant: 'success' | 'warning' | 'destructive' | 'outline' = 'outline';
@@ -410,32 +408,40 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                                 variant = adminStatus === 'Aucun' || adminStatus === 'Non' ? 'success' : 
                                          adminStatus.includes('active') || adminStatus.includes('cours') ? 'warning' : 'success';
                               } else if (companyData?.procedures !== undefined) {
-                                // Special handling based on procedure type
-                                if (procedure === 'Assignation Tribunal de commerce') {
-                                  status = apiHasData ? '1 active' : 'Aucune';
-                                } else if (procedure === 'Procédure collective') {
-                                  status = apiHasData ? 'Non' : 'Non';
+                                // Special handling for collective procedures
+                                if (procedure === 'Redressement judiciaire') {
+                                  const hasRedressement = companyData.procedures.some(p => p.type === 'Redressement');
+                                  status = hasRedressement ? '1 active' : 'Non';
+                                } else if (procedure === 'Liquidation judiciaire') {
+                                  const hasLiquidation = companyData.procedures.some(p => p.type === 'Liquidation');
+                                  status = hasLiquidation ? '1 active' : 'Non';
+                                } else if (procedure === 'Sauvegarde') {
+                                  const hasSauvegarde = companyData.procedures.some(p => p.type === 'Sauvegarde');
+                                  status = hasSauvegarde ? '1 active' : 'Non';
                                 } else {
+                                  const apiHasData = companyData.procedures.some(p => 
+                                    p.nature?.toLowerCase().includes(procedure.toLowerCase().split(' ')[0])
+                                  );
                                   status = apiHasData ? '1 active' : 'Aucun';
                                 }
-                                variant = apiHasData ? 'warning' : 'success';
+                                variant = status.includes('active') || status.includes('cours') ? 'warning' : 'success';
                               }
                               
                               return (
-                                <div key={procedure} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                                <div key={procedure} className="grid grid-cols-2 gap-2 py-2 border-b border-border/50 last:border-0">
                                   <span className="text-sm">{procedure}</span>
-                                  {status === 'NC' ? (
-                                    <Badge variant="outline" className="text-muted-foreground">
-                                      <AlertTriangle className="h-3 w-3 mr-1" />
-                                      NC
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant={variant}>
-                                      <DataWithSource source="PORTALIS">
+                                  <DataWithSource source="PORTALIS" lastUpdate="2024-01-15T09:00:00Z">
+                                    {status === 'NC' ? (
+                                      <Badge variant="outline" className="text-muted-foreground">
+                                        <AlertTriangle className="h-3 w-3 mr-1" />
+                                        NC
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant={variant}>
                                         {status}
-                                      </DataWithSource>
-                                    </Badge>
-                                  )}
+                                      </Badge>
+                                    )}
+                                  </DataWithSource>
                                 </div>
                               );
                             })}

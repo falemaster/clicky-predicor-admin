@@ -95,6 +95,22 @@ serve(async (req) => {
     if (type === 'name' || type === 'siren' || type === 'siret') {
       const results = Array.isArray(data.results) ? data.results.slice(0, limit) : [];
       console.log(`Recherche-Entreprises response: ${results.length} results`);
+      
+      // Si aucun résultat trouvé pour une recherche de nom, utiliser les données mockées
+      if (type === 'name' && results.length === 0 && query.trim().length >= 3) {
+        const mockResults = generateMockResults(query);
+        if (mockResults.length > 0) {
+          console.log(`Using mock results as fallback for "${query}"`);
+          return new Response(JSON.stringify({ 
+            results: mockResults,
+            source: 'mock',
+            message: 'Données de démonstration (aucun résultat API)'
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+      
       return new Response(JSON.stringify({ results, source: 'recherche-entreprises' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

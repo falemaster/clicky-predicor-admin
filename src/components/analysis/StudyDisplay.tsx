@@ -235,15 +235,21 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-2">
                         <div className="flex justify-between items-center text-sm py-1">
                           <span>Déclarations TVA</span>
-                          <Badge variant="outline" className="text-xs bg-success-light text-success border-success">À jour</Badge>
+                          <DataWithSource source="DGFIP" lastUpdate="2024-01-15T10:30:00Z">
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">À jour</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1">
                           <span>IS 2023</span>
-                          <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Déposé</Badge>
+                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-10T14:20:00Z">
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Déposé</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1">
                           <span>CVAE</span>
-                          <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Conforme</Badge>
+                          <DataWithSource source="DGFIP" lastUpdate="2024-01-12T09:15:00Z">
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Conforme</Badge>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -263,11 +269,15 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-2">
                         <div className="flex justify-between items-center text-sm py-1">
                           <span>Déclarations URSSAF</span>
-                          <Badge variant="outline" className="text-xs bg-success-light text-success border-success">À jour</Badge>
+                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-08T16:45:00Z">
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">À jour</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1">
                           <span>DSN</span>
-                          <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Transmise</Badge>
+                          <DataWithSource source="DGFIP" lastUpdate="2024-01-05T11:30:00Z">
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Transmise</Badge>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -397,11 +407,15 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-sm">Taux effectif</span>
-                          <span className="text-sm font-medium">18.2%</span>
+                          <DataWithSource source="DGFIP" lastUpdate="2024-01-10T08:30:00Z">
+                            <span className="text-sm font-medium">18.2%</span>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Crédit de TVA</span>
-                          <span className="text-sm font-medium text-success">+12K€</span>
+                          <DataWithSource source="DGFIP" lastUpdate="2024-01-10T08:30:00Z">
+                            <span className="text-sm font-medium text-success">+12K€</span>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -415,11 +429,15 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-sm">Taux effectif</span>
-                          <span className="text-sm font-medium">24.8%</span>
+                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-12T14:15:00Z">
+                            <span className="text-sm font-medium">24.8%</span>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Économie réalisée</span>
-                          <span className="text-sm font-medium text-success">+45K€</span>
+                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-12T14:15:00Z">
+                            <span className="text-sm font-medium text-success">+45K€</span>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -471,11 +489,15 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-sm">Ratio de liquidité générale</span>
-                          <Badge variant="default">2.1</Badge>
+                          <DataWithSource source="PAPPERS" lastUpdate="2024-01-01T12:00:00Z">
+                            <Badge variant="default">2.1</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Ratio de liquidité réduite</span>
-                          <Badge variant="default">1.8</Badge>
+                          <DataWithSource source="PAPPERS" lastUpdate="2024-01-01T12:00:00Z">
+                            <Badge variant="default">1.8</Badge>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -489,11 +511,15 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-sm">Marge nette</span>
-                          <Badge variant="default">14.2%</Badge>
+                          <DataWithSource source="PAPPERS" lastUpdate="2024-01-01T12:00:00Z">
+                            <Badge variant="default">14.2%</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">ROE</span>
-                          <Badge variant="default">18.5%</Badge>
+                          <DataWithSource source="PAPPERS" lastUpdate="2024-01-01T12:00:00Z">
+                            <Badge variant="default">18.5%</Badge>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -507,11 +533,15 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-sm">Ratio d'endettement</span>
-                          <Badge variant="secondary">28.5%</Badge>
+                          <DataWithSource source="PAPPERS" lastUpdate="2024-01-01T12:00:00Z">
+                            <Badge variant="secondary">28.5%</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Couverture des intérêts</span>
-                          <Badge variant="default">12.3x</Badge>
+                          <DataWithSource source="PAPPERS" lastUpdate="2024-01-01T12:00:00Z">
+                            <Badge variant="default">12.3x</Badge>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -534,20 +564,23 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Capital social</span>
-                          <div className="flex items-center space-x-2">
+                          <DataWithSource source="PORTALIS" lastUpdate="2023-12-31T12:00:00Z">
                             <span className="font-medium">
                               {companyData?.infogreffe?.capitalSocial?.toLocaleString() || '50 000'} €
                             </span>
-                            {/* <SourceBadge source="INFOGREFFE" className="text-xs" /> */}
-                          </div>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Nombre d'actions</span>
-                          <span className="font-medium">5 000</span>
+                          <DataWithSource source="PORTALIS" lastUpdate="2023-12-31T12:00:00Z">
+                            <span className="font-medium">5 000</span>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Valeur nominale</span>
-                          <span className="font-medium">10 €</span>
+                          <DataWithSource source="PORTALIS" lastUpdate="2023-12-31T12:00:00Z">
+                            <span className="font-medium">10 €</span>
+                          </DataWithSource>
                         </div>
                       </div>
                       <div className="space-y-3">
@@ -630,15 +663,21 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-sm">Croissance CA</span>
-                          <Badge variant="default" className="bg-success text-success-foreground">+12.5%</Badge>
+                          <DataWithSource source="INSEE" lastUpdate="2024-01-05T09:00:00Z">
+                            <Badge variant="default" className="bg-success text-success-foreground">+12.5%</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Part de marché</span>
-                          <Badge variant="default">8.2%</Badge>
+                          <DataWithSource source="INSEE" lastUpdate="2024-01-05T09:00:00Z">
+                            <Badge variant="default">8.2%</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Taux de fidélisation</span>
-                          <Badge variant="default" className="bg-success text-success-foreground">89%</Badge>
+                          <DataWithSource source="AI" lastUpdate="2024-01-10T15:20:00Z">
+                            <Badge variant="default" className="bg-success text-success-foreground">89%</Badge>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -652,11 +691,15 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-sm">Rang secteur</span>
-                          <Badge variant="default">#3/20</Badge>
+                          <DataWithSource source="INSEE" lastUpdate="2024-01-05T09:00:00Z">
+                            <Badge variant="default">#3/20</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Avantage concurrentiel</span>
-                          <Badge variant="default" className="bg-success text-success-foreground">Fort</Badge>
+                          <DataWithSource source="AI" lastUpdate="2024-01-10T15:20:00Z">
+                            <Badge variant="default" className="bg-success text-success-foreground">Fort</Badge>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -737,9 +780,11 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                             <p className="text-xs text-muted-foreground">Président</p>
                             <p className="text-xs text-muted-foreground">Depuis le 15/01/2020</p>
                           </div>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">
-                            Actif
-                          </Badge>
+                          <DataWithSource source="PORTALIS" lastUpdate="2023-12-31T12:00:00Z">
+                            <Badge variant="outline" className="bg-success-light text-success border-success">
+                              Actif
+                            </Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex items-start justify-between p-3 border rounded-lg">
                           <div>
@@ -747,9 +792,11 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                             <p className="text-xs text-muted-foreground">Directrice Générale</p>
                             <p className="text-xs text-muted-foreground">Depuis le 22/03/2021</p>
                           </div>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">
-                            Actif
-                          </Badge>
+                          <DataWithSource source="PORTALIS" lastUpdate="2023-12-31T12:00:00Z">
+                            <Badge variant="outline" className="bg-success-light text-success border-success">
+                              Actif
+                            </Badge>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>
@@ -769,17 +816,23 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Séparation des pouvoirs</span>
-                          <Badge variant="default">Oui</Badge>
+                          <DataWithSource source="ALPAGE" lastUpdate="2024-01-15T10:30:00Z">
+                            <Badge variant="default">Oui</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Comités spécialisés</span>
-                          <Badge variant="secondary">2</Badge>
+                          <DataWithSource source="ALPAGE" lastUpdate="2024-01-15T10:30:00Z">
+                            <Badge variant="secondary">2</Badge>
+                          </DataWithSource>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Contrôle interne</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">
-                            Conforme
-                          </Badge>
+                          <DataWithSource source="ALPAGE" lastUpdate="2024-01-15T10:30:00Z">
+                            <Badge variant="outline" className="bg-success-light text-success border-success">
+                              Conforme
+                            </Badge>
+                          </DataWithSource>
                         </div>
                       </div>
                     </CardContent>

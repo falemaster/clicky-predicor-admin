@@ -71,8 +71,8 @@ const Index = () => {
               <Badge variant="outline" className="hidden sm:flex">
                 APIs Intégrées
               </Badge>
-              <Button>
-                S'inscrire Premium - 299€/mois HT
+              <Button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+                Souscrire Premium
               </Button>
             </div>
           </div>
@@ -642,10 +642,10 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Tarification simple et transparente
+              Solution premium sur-mesure
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Un seul plan, toutes les fonctionnalités incluses
+              Accompagnement personnalisé et onboarding dédié pour les établissements financiers
             </p>
           </div>
 
@@ -656,11 +656,11 @@ const Index = () => {
               </div>
               <CardHeader className="pt-12 text-center">
                 <div className="text-4xl font-bold text-foreground mb-2">
-                  299€
-                  <span className="text-lg font-normal text-muted-foreground">/mois HT</span>
+                  À partir de 2990€
+                  <span className="text-lg font-normal text-muted-foreground"> HT</span>
                 </div>
                 <CardDescription>
-                  Essai gratuit 14 jours • Sans engagement
+                  Solution entreprise avec accompagnement personnalisé
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -695,13 +695,13 @@ const Index = () => {
                   </div>
                 </div>
 
-                <Button className="w-full" size="lg">
-                  <Clock className="mr-2 h-5 w-5" />
-                  Commencer l'essai gratuit
+                <Button className="w-full" size="lg" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
+                  <Users className="mr-2 h-5 w-5" />
+                  Nous contacter
                 </Button>
 
                 <p className="text-xs text-muted-foreground text-center">
-                  Sans engagement • Résiliation à tout moment • Support inclus
+                  Devis personnalisé • Formation incluse • Onboarding dédié
                 </p>
               </CardContent>
             </Card>

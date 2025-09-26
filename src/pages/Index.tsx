@@ -83,7 +83,7 @@ const Index = () => {
             <div className="space-y-4">
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
                 Analyse prédictive dédiée aux{' '}
-                <span className="text-primary">etablissements financiers et non acteurs</span>
+                <span className="text-primary">acteurs financiers et aux environnements régulés</span>
               </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Outil d'analyse prédictive conçu pour accompagner les acteurs financiers dans l'évaluation et l'anticipation des risques d'entreprise.

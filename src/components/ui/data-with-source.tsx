@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface DataWithSourceProps {
   children: ReactNode;
-  source: 'INSEE' | 'INFOGREFFE' | 'PAPPERS' | 'PREDICTOR' | 'RUBYPAYEUR' | 'AI' | 'ALPAGE' | 'PORTALIS' | 'SIRIUS' | 'DGFIP';
+  source: 'INSEE' | 'INFOGREFFE' | 'PAPPERS' | 'PREDICTOR' | 'RUBYPAYEUR' | 'AI' | 'ALPAGE' | 'PORTALIS' | 'SIRIUS' | 'DGFIP' | 'BODACC';
   lastUpdate?: string;
   className?: string;
 }
@@ -49,6 +49,10 @@ const sourceConfig = {
   DGFIP: {
     label: 'DGFIP',
     description: 'Direction générale des Finances publiques'
+  },
+  BODACC: {
+    label: 'BODACC',
+    description: 'Bulletin officiel des annonces civiles et commerciales'
   }
 };
 

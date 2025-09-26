@@ -285,6 +285,7 @@ export interface CompanyFullData {
   infogreffe?: InfogreffeCompanyData;
   rubyPayeur?: RubyPayeurData;
   bodacc?: BodaccData;
+  procedures?: any[];
   predictor?: PredictorAnalysis;
   enriched?: EnrichedData;
   lastUpdate: string;

@@ -126,6 +126,14 @@ export const useCompanyData = ({
         } else if (bodaccResult.error) {
           allErrors.push(bodaccResult.error);
         }
+
+        // Ajout des procédures collectives BODACC
+        const proceduresResult = await bodaccService.getProcedureCollective(sireneResult.data.siren);
+        if (proceduresResult.data) {
+          companyData.procedures = proceduresResult.data;
+        } else if (proceduresResult.error) {
+          allErrors.push(proceduresResult.error);
+        }
       } catch (error) {
         allErrors.push({
           code: 'BODACC_FETCH_ERROR',

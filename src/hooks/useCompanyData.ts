@@ -134,13 +134,15 @@ export const useCompanyData = ({
         });
       }
 
-      // 4. Données Infogreffe (optionnelles)
+      // 4. Données Infogreffe (optionnelles) - VRAIES DONNÉES
       try {
-        const infogreffeResult = await infogreffeService.getMockData(sireneResult.data.siren);
+        const infogreffeResult = await infogreffeService.getCompanyData(sireneResult.data.siren);
         if (infogreffeResult.data) {
           companyData.infogreffe = infogreffeResult.data;
+          console.log('📊 Données Infogreffe réelles récupérées:', infogreffeResult.data);
         } else if (infogreffeResult.error) {
           allErrors.push(infogreffeResult.error);
+          console.warn('⚠️ Erreur Infogreffe:', infogreffeResult.error);
         }
       } catch (error) {
         allErrors.push({
@@ -148,6 +150,7 @@ export const useCompanyData = ({
           message: 'Erreur lors de la récupération des données Infogreffe',
           source: 'INFOGREFFE'
         });
+        console.error('❌ Erreur réseau Infogreffe:', error);
       }
 
       // 5. Analyse Predictor (via edge function)

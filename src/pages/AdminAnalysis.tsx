@@ -13,7 +13,6 @@ import { useCompanyData } from "@/hooks/useCompanyData";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { DataQualitySection } from "@/components/ui/data-quality-section";
 import { 
   Building2, 
   MapPin, 
@@ -48,6 +47,7 @@ import {
   Zap
 } from "lucide-react";
 
+const AdminAnalysis = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isGenerating, setIsGenerating] = useState(false);
   const [editMode, setEditMode] = useState<Record<string, boolean>>({});
@@ -546,8 +546,64 @@ import {
               </CardContent>
             </Card>
 
-            {/* Data Quality Section */}
-            <DataQualitySection data={companyData} />
+            {/* Badges and Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Statuts et certifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  <Badge variant="secondary" className="bg-success-light text-success">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <EditableField
+                      field="badge-1"
+                      value={additionalFields.badges[0]}
+                      onUpdate={(value) => {
+                        const newBadges = [...additionalFields.badges];
+                        newBadges[0] = value;
+                        updateAdditionalField('badges', newBadges);
+                      }}
+                    />
+                  </Badge>
+                  <Badge variant="secondary" className="bg-success-light text-success">
+                    <Shield className="h-3 w-3 mr-1" />
+                    <EditableField
+                      field="badge-2"
+                      value={additionalFields.badges[1]}
+                      onUpdate={(value) => {
+                        const newBadges = [...additionalFields.badges];
+                        newBadges[1] = value;
+                        updateAdditionalField('badges', newBadges);
+                      }}
+                    />
+                  </Badge>
+                  <Badge variant="secondary" className="bg-success-light text-success">
+                    <FileText className="h-3 w-3 mr-1" />
+                    <EditableField
+                      field="badge-3"
+                      value={additionalFields.badges[2]}
+                      onUpdate={(value) => {
+                        const newBadges = [...additionalFields.badges];
+                        newBadges[2] = value;
+                        updateAdditionalField('badges', newBadges);
+                      }}
+                    />
+                  </Badge>
+                  <Badge variant="secondary" className="bg-warning-light text-warning">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    <EditableField
+                      field="badge-4"
+                      value={additionalFields.badges[3]}
+                      onUpdate={(value) => {
+                        const newBadges = [...additionalFields.badges];
+                        newBadges[3] = value;
+                        updateAdditionalField('badges', newBadges);
+                      }}
+                    />
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Scores */}
             <div className="grid md:grid-cols-3 gap-6">
@@ -2206,6 +2262,6 @@ Recommandation stratégique : Maintenir l'excellence opérationnelle actuelle to
       </div>
     </div>
   );
-}
+};
 
 export default AdminAnalysis;

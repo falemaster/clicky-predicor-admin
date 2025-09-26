@@ -760,14 +760,9 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-success" 
-                          style={{ width: `${getNestedValue(formData, ['enriched', 'dataQuality', 'completeness', 'percentage']) || 85}%` }}
-                        ></div>
+                        <div className="h-full bg-success" style={{ width: '85%' }}></div>
                       </div>
-                      <span className="text-sm font-semibold text-success">
-                        {getNestedValue(formData, ['enriched', 'dataQuality', 'completeness', 'percentage']) || '85'}%
-                      </span>
+                      <span className="text-sm font-semibold text-success">85%</span>
                     </div>
                   </div>
 
@@ -783,7 +778,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                   </div>
 
                   {/* Data Sources Status */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
                       <CheckCircle className="h-4 w-4 text-success" />
                       <div>
@@ -795,58 +790,20 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                     <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
                       <CheckCircle className="h-4 w-4 text-success" />
                       <div>
-                        <p className="text-xs font-medium">INFOGREFFE</p>
-                        <p className="text-xs text-muted-foreground">Données greffes</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      <div>
-                        <p className="text-xs font-medium">PAPPERS</p>
+                        <p className="text-xs font-medium">Pappers API</p>
                         <p className="text-xs text-muted-foreground">Données financières</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      <div>
-                        <p className="text-xs font-medium">BODACC</p>
-                        <p className="text-xs text-muted-foreground">Annonces légales</p>
+                    {formData.rubyPayeur && (
+                      <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
+                        <CheckCircle className="h-4 w-4 text-success" />
+                        <div>
+                          <p className="text-xs font-medium">RubyPayeur</p>
+                          <p className="text-xs text-muted-foreground">Score crédit</p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      <div>
-                        <p className="text-xs font-medium">RUBYPAYEUR</p>
-                        <p className="text-xs text-muted-foreground">Score crédit</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      <div>
-                        <p className="text-xs font-medium">SIRIUS</p>
-                        <p className="text-xs text-muted-foreground">Données Banque de France</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      <div>
-                        <p className="text-xs font-medium">DGFIP</p>
-                        <p className="text-xs text-muted-foreground">Données fiscales</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-2 bg-primary/5 rounded-lg">
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      <div>
-                        <p className="text-xs font-medium">PORTALIS</p>
-                        <p className="text-xs text-muted-foreground">Données judiciaires</p>
-                      </div>
-                    </div>
+                    )}
                     
                     <div className="flex items-center space-x-2 p-2 bg-warning/5 rounded-lg">
                       <AlertTriangle className="h-4 w-4 text-warning" />
@@ -862,12 +819,8 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                     <div className="flex items-center space-x-3">
                       <Shield className="h-4 w-4 text-success" />
                       <div>
-                        <p className="text-sm font-semibold text-success">
-                          {getNestedValue(formData, ['enriched', 'dataQuality', 'overall', 'status']) || 'Données fiables'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {getNestedValue(formData, ['enriched', 'dataQuality', 'overall', 'description']) || 'Mix données officielles + enrichissement IA'}
-                        </p>
+                        <p className="text-sm font-semibold text-success">Données fiables</p>
+                        <p className="text-xs text-muted-foreground">Mix données officielles + enrichissement IA</p>
                       </div>
                     </div>
                     <Badge variant="secondary" className="bg-success/10 text-success border-success/20">

@@ -21,7 +21,6 @@ import { DataWithSource } from "@/components/ui/data-with-source";
 import { DirigeantModal } from "@/components/analysis/DirigeantModal";
 import { CollectiveProcedureAlert } from "@/components/analysis/CollectiveProcedureAlert";
 import { AlertSummaryBadge } from "@/components/admin/AlertSummaryBadge";
-import { DataQualitySection } from "@/components/ui/data-quality-section";
 import { 
   Building2, 
   MapPin, 
@@ -398,8 +397,93 @@ const Analysis = () => {
               </CardContent>
             </Card>
 
-            {/* Data Quality Section */}
-            <DataQualitySection data={realData} />
+            {/* Badges and Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Statuts et certifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  {/* Badge statut entreprise */}
+                  <Badge variant="secondary" className={
+                    companyData.status === 'Actif' 
+                      ? "bg-success-light text-success" 
+                      : "bg-destructive-light text-destructive"
+                  }>
+                    {companyData.status === 'Actif' ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                    Entreprise {companyData.status}
+                  </Badge>
+
+                  {/* Badge RubyPayeur si disponible */}
+                  {hasRealData && realData.rubyPayeur && (
+                    <Badge variant="secondary" className={
+                      realData.rubyPayeur.scoreGlobal >= 7 
+                        ? "bg-success-light text-success" 
+                        : realData.rubyPayeur.scoreGlobal >= 5 
+                        ? "bg-warning-light text-warning"
+                        : "bg-destructive-light text-destructive"
+                    }>
+                      {realData.rubyPayeur.scoreGlobal >= 7 ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
+                      Score Crédit/Finance: {realData.rubyPayeur.scoreGlobal}/10
+                      {realData.rubyPayeur.source && (realData.rubyPayeur.source === 'mock' || realData.rubyPayeur.source === 'fallback') && (
+                        <span className="ml-1 text-xs opacity-75">(simulé)</span>
+                      )}
+                    </Badge>
+                  )}
+
+                  {/* Badge dépôt de comptes */}
+                  {hasRealData && realData.pappers?.depotComptes && (
+                    <Badge variant="secondary" className="bg-success-light text-success">
+                      <FileText className="h-3 w-3 mr-1" />
+                      Comptes à jour
+                    </Badge>
+                  )}
+
+                  {/* Badge procédures collectives */}
+                  {hasRealData && realData.bodacc?.annonces && (
+                    <>
+                      {realData.bodacc.annonces.some(a => a.type === 'Procédure collective') ? (
+                        <Badge variant="secondary" className="bg-destructive-light text-destructive">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Procédure collective
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-success-light text-success">
+                          <Shield className="h-3 w-3 mr-1" />
+                          Aucune procédure
+                        </Badge>
+                      )}
+                    </>
+                  )}
+
+                  {/* Alertes Predictor */}
+                  {hasRealData && realData.predictor?.alertes?.map((alerte, index) => (
+                    <Badge key={index} variant="secondary" className={
+                      alerte.niveau === 'Critique' ? "bg-destructive-light text-destructive" :
+                      alerte.niveau === 'Élevé' ? "bg-warning-light text-warning" :
+                      "bg-info-light text-info"
+                    }>
+                      <AlertTriangle className="h-3 w-3 mr-1" />
+                      {alerte.message.length > 30 ? `${alerte.message.substring(0, 30)}...` : alerte.message}
+                    </Badge>
+                  ))}
+
+                  {/* Badge par défaut si pas de données réelles */}
+                  {!hasRealData && (
+                    <>
+                      <Badge variant="secondary" className="bg-success-light text-success">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Données simulées
+                      </Badge>
+                      <Badge variant="secondary" className="bg-info-light text-info">
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        Recherchez une vraie entreprise
+                      </Badge>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Scores */}
             <div className="grid md:grid-cols-3 gap-6">

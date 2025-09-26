@@ -545,6 +545,99 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Section Qualité des données - Admin Configuration */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Database className="h-5 w-5 mr-2" />
+                    Qualité des données (Configuration Admin)
+                  </div>
+                  <VisibilityToggle
+                    isVisible={(formData as any)?.adminSettings?.showDataQualitySection !== false}
+                    onToggle={(visible) => updateField(['adminSettings', 'showDataQualitySection'], visible.toString())}
+                    label="Afficher la section"
+                  />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="data-completeness">Complétude des données (%)</Label>
+                      <EditableField
+                        value={getNestedValue(formData, ['enriched', 'dataQuality', 'completeness']) || '85'}
+                        placeholder="85"
+                        onSave={(value) => updateField(['enriched', 'dataQuality', 'completeness'], value)}
+                        type="number"
+                        label="Pourcentage de complétude"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="overall-status">Statut global</Label>
+                      <EditableField
+                        value={getNestedValue(formData, ['enriched', 'dataQuality', 'overallStatus']) || 'Données fiables'}
+                        placeholder="Données fiables"
+                        onSave={(value) => updateField(['enriched', 'dataQuality', 'overallStatus'], value)}
+                        label="Statut affiché en bas de section"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Configuration des APIs</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {[
+                        { key: 'insee', label: 'INSEE/SIRENE', category: 'Données officielles' },
+                        { key: 'pappers', label: 'Pappers API', category: 'Données financières' },
+                        { key: 'rubypayeur', label: 'RubyPayeur', category: 'Score crédit' },
+                        { key: 'infogreffe', label: 'Infogreffe', category: 'Données juridiques' },
+                        { key: 'ai_enrichment', label: 'IA Enrichissement', category: 'Données simulées' },
+                        { key: 'sirius', label: 'SIRIUS', category: 'Données fiscales' },
+                        { key: 'dgfip', label: 'DGFIP', category: 'Données fiscales' },
+                        { key: 'portalis', label: 'PORTALIS', category: 'Données judiciaires' },
+                        { key: 'opale', label: 'OPALE', category: 'Données sociales' }
+                      ].map(api => (
+                        <div key={api.key} className="flex items-center justify-between p-2 border rounded">
+                          <div className="text-sm">
+                            <div className="font-medium">{api.label}</div>
+                            <div className="text-xs text-muted-foreground">{api.category}</div>
+                          </div>
+                          <Select 
+                            value={getNestedValue(formData, ['enriched', 'dataQuality', 'apis', api.key, 'status']) || 'active'}
+                            onValueChange={(value) => updateField(['enriched', 'dataQuality', 'apis', api.key, 'status'], value)}
+                          >
+                            <SelectTrigger className="w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="active">
+                                <div className="flex items-center space-x-1">
+                                  <CheckCircle className="h-3 w-3 text-success" />
+                                  <span>Actif</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="warning">
+                                <div className="flex items-center space-x-1">
+                                  <AlertTriangle className="h-3 w-3 text-warning" />
+                                  <span>Alerte</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="inactive">
+                                <div className="flex items-center space-x-1">
+                                  <XCircle className="h-3 w-3 text-destructive" />
+                                  <span>Inactif</span>
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Company Details */}
             <Card>
               <CardHeader>

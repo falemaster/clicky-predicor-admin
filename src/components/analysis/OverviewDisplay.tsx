@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ExecutiveSummary } from "@/components/admin/ExecutiveSummary";
 import { calculateFinancialScore, calculateRiskScore, getRubyPayeurStatus } from "@/utils/scoreCalculator";
+import { DataQualitySection } from "@/components/ui/data-quality-section";
 import { 
   Building2, 
   MapPin, 
@@ -282,6 +283,26 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Section Qualité des données */}
+      <DataQualitySection 
+        config={{
+          completeness: 85,
+          lastUpdate: new Date().toISOString(),
+          apis: {
+            insee: { status: 'active', label: 'INSEE/SIRENE', category: 'Données officielles' },
+            pappers: { status: 'active', label: 'Pappers API', category: 'Données financières' },
+            rubypayeur: { status: 'active', label: 'RubyPayeur', category: 'Score crédit' },
+            infogreffe: { status: 'active', label: 'Infogreffe', category: 'Données juridiques' },
+            ai_enrichment: { status: 'warning', label: 'IA Enrichissement', category: 'Données simulées' },
+            sirius: { status: 'active', label: 'SIRIUS', category: 'Données fiscales' },
+            dgfip: { status: 'active', label: 'DGFIP', category: 'Données fiscales' },
+            portalis: { status: 'active', label: 'PORTALIS', category: 'Données judiciaires' },
+            opale: { status: 'active', label: 'OPALE', category: 'Données sociales' }
+          },
+          overallStatus: 'Données fiables'
+        }}
+      />
     </div>
   );
 }

@@ -29,7 +29,7 @@ export default function LoadingProgress({ companyName, siren }: LoadingProgressP
     {
       id: 'sirius',
       name: 'SIRIUS',
-      description: 'Répertoire entreprises',
+      description: 'Données fiscales DGFiP',
       icon: Building2,
       status: 'pending'
     },

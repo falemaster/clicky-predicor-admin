@@ -652,33 +652,33 @@ const Analysis = () => {
                   
                    <div className="grid grid-cols-2 gap-4 text-sm">
                      <div>
-                       <span className="text-muted-foreground">Code NAF ou APE :</span>
-                       <DataWithSource source="SIRIUS">
-                         <div className="font-medium">
-                           {realData?.sirene?.naf || realData?.pappers?.codeNaf || 'Non renseigné'}
-                           {realData?.sirene?.naf && (
-                             <Badge variant="outline" className="ml-1 text-xs">
-                               {realData.sirene.naf.startsWith('62') ? 'Services' : 
-                                realData.sirene.naf.startsWith('70') ? 'Conseil' :
-                                realData.sirene.naf.startsWith('46') ? 'Commerce' : 'Autre'}
-                             </Badge>
-                           )}
-                         </div>
-                       </DataWithSource>
+                        <span className="text-muted-foreground">Code NAF ou APE :</span>
+                        <DataWithSource source="INSEE">
+                          <div className="font-medium">
+                            {realData?.sirene?.naf || realData?.pappers?.codeNaf || 'Non renseigné'}
+                            {realData?.sirene?.naf && (
+                              <Badge variant="outline" className="ml-1 text-xs">
+                                {realData.sirene.naf.startsWith('62') ? 'Services' : 
+                                 realData.sirene.naf.startsWith('70') ? 'Conseil' :
+                                 realData.sirene.naf.startsWith('46') ? 'Commerce' : 'Autre'}
+                              </Badge>
+                            )}
+                          </div>
+                        </DataWithSource>
                        <div className="text-xs text-muted-foreground mt-1">
                          ({realData?.pappers?.libelleNaf || 'Libellé non disponible'})
                        </div>
                      </div>
                      <div>
-                       <span className="text-muted-foreground">Domaine d'activité :</span>
-                       <DataWithSource source="SIRIUS">
-                         <div className="font-medium">
-                           {realData?.sirene?.naf?.startsWith('62') ? 'Services informatiques' :
-                            realData?.sirene?.naf?.startsWith('70') ? 'Activités spécialisées' :
-                            realData?.sirene?.naf?.startsWith('46') ? 'Commerce de gros' :
-                            'Non déterminé'}
-                         </div>
-                       </DataWithSource>
+                        <span className="text-muted-foreground">Domaine d'activité :</span>
+                        <DataWithSource source="INSEE">
+                          <div className="font-medium">
+                            {realData?.sirene?.naf?.startsWith('62') ? 'Services informatiques' :
+                             realData?.sirene?.naf?.startsWith('70') ? 'Activités spécialisées' :
+                             realData?.sirene?.naf?.startsWith('46') ? 'Commerce de gros' :
+                             'Non déterminé'}
+                          </div>
+                        </DataWithSource>
                      </div>
                      <div>
                        <span className="text-muted-foreground">Forme d'exercice :</span>
@@ -692,15 +692,15 @@ const Analysis = () => {
                        </DataWithSource>
                      </div>
                      <div>
-                       <span className="text-muted-foreground">Convention collective :</span>
-                       <DataWithSource source="SIRIUS">
-                         <div className="font-medium">
-                           {realData?.sirene?.naf?.startsWith('62') ? 'Syntec - IDCC 1486' :
-                            realData?.sirene?.naf?.startsWith('70') ? 'Bureaux d\'études techniques - IDCC 1486' :
-                            'Non déterminée'}
-                           <Badge variant="outline" className="ml-1 text-xs">supposée</Badge>
-                         </div>
-                       </DataWithSource>
+                        <span className="text-muted-foreground">Convention collective :</span>
+                        <DataWithSource source="PAPPERS">
+                          <div className="font-medium">
+                            {realData?.sirene?.naf?.startsWith('62') ? 'Syntec - IDCC 1486' :
+                             realData?.sirene?.naf?.startsWith('70') ? 'Bureaux d\'études techniques - IDCC 1486' :
+                             'Non déterminée'}
+                            <Badge variant="outline" className="ml-1 text-xs">supposée</Badge>
+                          </div>
+                        </DataWithSource>
                      </div>
                      <div>
                        <span className="text-muted-foreground">Date de clôture exercice :</span>

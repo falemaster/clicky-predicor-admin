@@ -264,19 +264,19 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                         </div>
                         <div className="flex justify-between items-center text-sm py-1">
                           <span>Formation professionnelle</span>
-                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-03T09:00:00Z">
+                          <DataWithSource source="OPALE" lastUpdate="2024-01-03T09:00:00Z">
                             <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 border-amber-300">Retard</Badge>
                           </DataWithSource>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1">
                           <span>Médecine du travail</span>
-                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-12T10:20:00Z">
+                          <DataWithSource source="OPALE" lastUpdate="2024-01-12T10:20:00Z">
                             <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Conforme</Badge>
                           </DataWithSource>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1">
                           <span>Registres obligatoires</span>
-                          <DataWithSource source="SIRIUS" lastUpdate="2024-01-10T15:40:00Z">
+                          <DataWithSource source="INFOGREFFE" lastUpdate="2024-01-10T15:40:00Z">
                             <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Tenus</Badge>
                           </DataWithSource>
                         </div>

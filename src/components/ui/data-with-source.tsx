@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface DataWithSourceProps {
   children: ReactNode;
-  source: 'INSEE' | 'INFOGREFFE' | 'PAPPERS' | 'PREDICTOR' | 'RUBYPAYEUR' | 'AI' | 'ALPAGE' | 'PORTALIS' | 'SIRIUS' | 'DGFIP' | 'BODACC';
+  source: 'INSEE' | 'INFOGREFFE' | 'PAPPERS' | 'PREDICTOR' | 'RUBYPAYEUR' | 'AI' | 'ALPAGE' | 'PORTALIS' | 'SIRIUS' | 'DGFIP' | 'BODACC' | 'OPALE';
   lastUpdate?: string;
   className?: string;
 }
@@ -44,7 +44,7 @@ const sourceConfig = {
   },
   SIRIUS: {
     label: 'SIRIUS',
-    description: 'Système d\'information des entreprises - DGFIP'
+    description: 'Système d\'information fiscal - DGFIP'
   },
   DGFIP: {
     label: 'DGFIP',
@@ -53,6 +53,10 @@ const sourceConfig = {
   BODACC: {
     label: 'BODACC',
     description: 'Bulletin officiel des annonces civiles et commerciales'
+  },
+  OPALE: {
+    label: 'OPALE',
+    description: 'Organisme paritaire des administrations et entreprises'
   }
 };
 

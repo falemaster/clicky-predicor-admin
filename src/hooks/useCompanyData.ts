@@ -305,7 +305,14 @@ export const useCompanyData = ({
     
     // Les données admin écrasent les données API quand elles existent
     if (adminData.sirene) merged.sirene = { ...apiData.sirene, ...adminData.sirene };
-    if (adminData.pappers) merged.pappers = { ...apiData.pappers, ...adminData.pappers };
+    if (adminData.pappers) {
+      // Préserver la valeur officielle du capital social (API > admin)
+      const mergedPappers = { ...apiData.pappers, ...adminData.pappers } as any;
+      if (apiData.pappers && typeof apiData.pappers.capitalSocial !== 'undefined') {
+        mergedPappers.capitalSocial = apiData.pappers.capitalSocial;
+      }
+      merged.pappers = mergedPappers;
+    }
     if (adminData.infogreffe) merged.infogreffe = { ...apiData.infogreffe, ...adminData.infogreffe };
     if (adminData.rubyPayeur) merged.rubyPayeur = { ...apiData.rubyPayeur, ...adminData.rubyPayeur };
     if (adminData.predictor) merged.predictor = { ...apiData.predictor, ...adminData.predictor };

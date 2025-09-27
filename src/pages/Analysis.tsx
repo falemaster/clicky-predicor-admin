@@ -658,8 +658,8 @@ const Analysis = () => {
                       <span className="text-muted-foreground">Capital social :</span>
                       <div className="font-medium">
                         <DataWithSource source={realData?.infogreffe?.capitalSocial ? "INFOGREFFE" : "PAPPERS"}>
-                          {(realData?.infogreffe?.capitalSocial ? realData.infogreffe.capitalSocial.toLocaleString() + ' €' : '') ||
-                           (realData?.pappers?.capitalSocial ? realData.pappers.capitalSocial.toLocaleString() + ' €' : '') || 
+                          {(realData?.infogreffe?.capitalSocial ? `${realData.infogreffe.capitalSocial.toLocaleString('fr-FR')} €` : '') ||
+                           (realData?.pappers?.capitalSocial ? `${realData.pappers.capitalSocial.toLocaleString('fr-FR')} €` : '') || 
                            'Non renseigné'}
                         </DataWithSource>
                       </div>

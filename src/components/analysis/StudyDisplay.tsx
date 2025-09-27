@@ -40,8 +40,6 @@ interface StudyDisplayProps {
 export function StudyDisplay({ companyData }: StudyDisplayProps) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     compliance: false,
-    certifications: false,
-    procedures: false,
     fiscal: false,
     financial: false,
     economic: false,
@@ -284,255 +282,194 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
+          </Card>
+        </div>
 
-        {/* 2. Certifications et Agréments */}
-        <Card>
-          <Collapsible 
-            open={openSections.certifications} 
-            onOpenChange={() => toggleSection('certifications')}
-          >
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Award className="h-5 w-5 text-primary" />
-                    <div>
-                      <CardTitle className="text-lg">Certifications et Agréments</CardTitle>
-                    </div>
-                  </div>
-                  {openSections.certifications ? 
-                    <ChevronDown className="h-4 w-4" /> : 
-                    <ChevronRight className="h-4 w-4" />
-                  }
-                </div>
+        {/* Certifications et agréments */}
+        <div className="mt-6">
+          <h4 className="text-lg font-semibold mb-4 flex items-center">
+            <Award className="h-5 w-5 mr-2 text-primary" />
+            Certifications et Agréments
+          </h4>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center">
+                  <Award className="h-4 w-4 mr-2" />
+                  Certifications Qualité
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Standards et certifications sectorielles
+                </CardDescription>
               </CardHeader>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center">
-                        <Award className="h-4 w-4 mr-2" />
-                        Certifications Qualité
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        Standards et certifications sectorielles
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">ISO 9001:2015</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Certifiée</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">ISO 14001</span>
-                          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">En cours</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">OHSAS 18001</span>
-                          <Badge variant="outline">-</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Certification RGE</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Valide</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center">
-                        <FileText className="h-4 w-4 mr-2" />
-                        Agréments Administratifs
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        Autorisations et agréments obtenus
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Agrément préfectoral</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Valide</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Licence d'exploitation</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Obtenue</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Homologation produits</span>
-                          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">Renouvellement</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Autorisation ICPE</span>
-                          <Badge variant="outline">-</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-
-        {/* 3. Procédures Judiciaires et Légales */}
-        <Card>
-          <Collapsible 
-            open={openSections.procedures} 
-            onOpenChange={() => toggleSection('procedures')}
-          >
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Scale className="h-5 w-5 text-primary" />
-                    <div>
-                      <CardTitle className="text-lg">Procédures Judiciaires et Légales</CardTitle>
-                    </div>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">ISO 9001:2015</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Certifiée</Badge>
                   </div>
-                  {openSections.procedures ? 
-                    <ChevronDown className="h-4 w-4" /> : 
-                    <ChevronRight className="h-4 w-4" />
-                  }
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">ISO 14001</span>
+                    <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">En cours</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">OHSAS 18001</span>
+                    <Badge variant="outline">-</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Certification RGE</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Valide</Badge>
+                  </div>
                 </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  {/* Procédures Précontentieuses */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center">
-                        <AlertTriangle className="h-4 w-4 mr-2" />
-                        Procédures Précontentieuses
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        Procédures de recouvrement et alertes préventives
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-xs text-muted-foreground italic mb-4">Source des données : BODACC</p>
-                      
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center pb-1 border-b">
-                          <span className="text-sm font-medium">Nature</span>
-                          <span className="text-sm font-medium">Statut</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Mise en demeure</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Commandement de payer par huissier</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Résiliation de contrat</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Inscription privilèges/nantissements</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Radiation d'office du RCS</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Non</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Procédure amiable</span>
-                          <Badge variant="outline" className="bg-primary/10 text-primary border-primary">1 en cours</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Déclaration de créance</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Procédures Judiciaires */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center">
-                        <Gavel className="h-4 w-4 mr-2" />
-                        Procédures Judiciaires
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        Suivi des procédures contentieuses et juridictionnelles
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-xs text-muted-foreground italic mb-4">Source des données : Portalys</p>
-                      
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center pb-1 border-b">
-                          <span className="text-sm font-medium">Nature</span>
-                          <span className="text-sm font-medium">Statut</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Assignation Tribunal de commerce</span>
-                          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">1 active</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Injonction de payer</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Référé commercial</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Procédure collective</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Non</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Appel des décisions</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Contentieux prud'homal</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Contentieux administratif</span>
-                          <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Analyse de Risque Juridique */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center">
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      Analyse de Risque Juridique
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Profil de risque judiciaire <strong>faible à modéré</strong>. Le contentieux commercial identifié est isolé et fait l'objet d'un provisionnement intégral. L'absence de contentieux fiscal témoigne d'une gestion rigoureuse des obligations déclaratives. Recommandation : maintenir la veille juridique active et le suivi préventif des relations contractuelles.
-                    </p>
-                  </CardContent>
-                </Card>
               </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Agréments Administratifs
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Autorisations et agréments obtenus
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Agrément préfectoral</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Valide</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Licence d'exploitation</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Obtenue</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Homologation produits</span>
+                    <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">Renouvellement</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Autorisation ICPE</span>
+                    <Badge variant="outline">-</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Procédures judiciaires et légales */}
+        <div className="mt-6">
+          <h4 className="text-lg font-semibold mb-4 flex items-center">
+            <Scale className="h-5 w-5 mr-2 text-primary" />
+            Procédures Judiciaires et Légales
+          </h4>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Procédures Précontentieuses
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Procédures de recouvrement et alertes préventives
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground italic mb-4">Source des données : BODACC</p>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center pb-1 border-b">
+                    <span className="text-sm font-medium">Nature</span>
+                    <span className="text-sm font-medium">Statut</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Mise en demeure</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Commandement de payer par huissier</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Résiliation de contrat</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Inscription privilèges/nantissements</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Radiation d'office du RCS</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Non</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Procédure amiable</span>
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary">1 en cours</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Déclaration de créance</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center">
+                  <Gavel className="h-4 w-4 mr-2" />
+                  Procédures Judiciaires
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Suivi des procédures contentieuses et juridictionnelles
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground italic mb-4">Source des données : Portalys</p>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center pb-1 border-b">
+                    <span className="text-sm font-medium">Nature</span>
+                    <span className="text-sm font-medium">Statut</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Assignation Tribunal de commerce</span>
+                    <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">1 active</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Injonction de payer</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Aucune</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Référé commercial</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Aucun</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Procédure collective</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Non</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Liquidation judiciaire</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Non</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Redressement judiciaire</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Non</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Procédure de sauvegarde</span>
+                    <Badge variant="outline" className="bg-success-light text-success border-success">Non</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </CardContent>
+    </CollapsibleContent>
+  </Collapsible>
+</Card>
 
         {/* 2. Mitigation Fiscale */}
         <Card>

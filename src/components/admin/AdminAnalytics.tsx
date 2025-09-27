@@ -529,30 +529,56 @@ export function AdminAnalytics() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 rounded-lg bg-success-light border border-success/20">
-                  <p className="text-sm font-medium text-success">
-                    +15% d'augmentation des recherches ce mois
-                  </p>
-                  <p className="text-xs text-success/80">
-                    Croissance constante de l'engagement utilisateur
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-success-light border border-success/20">
-                  <p className="text-sm font-medium text-success">
-                    Temps de réponse amélioré de 12%
-                  </p>
-                  <p className="text-xs text-success/80">
-                    Optimisations récentes des APIs
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-success-light border border-success/20">
-                  <p className="text-sm font-medium text-success">
-                    99.2% de disponibilité système
-                  </p>
-                  <p className="text-xs text-success/80">
-                    Infrastructure stable et fiable
-                  </p>
-                </div>
+                {analytics.overview.searchGrowth > 0 && (
+                  <div className="p-3 rounded-lg bg-success-light border border-success/20">
+                    <p className="text-sm font-medium text-success">
+                      {formatPercentage(analytics.overview.searchGrowth)} d'augmentation des recherches
+                    </p>
+                    <p className="text-xs text-success/80">
+                      Croissance constante de l'engagement utilisateur
+                    </p>
+                  </div>
+                )}
+                {analytics.overview.totalCompanies > 0 && (
+                  <div className="p-3 rounded-lg bg-success-light border border-success/20">
+                    <p className="text-sm font-medium text-success">
+                      {formatNumber(analytics.overview.totalCompanies)} entreprises indexées
+                    </p>
+                    <p className="text-xs text-success/80">
+                      Base de données riche et complète
+                    </p>
+                  </div>
+                )}
+                {analytics.overview.averageResponseTime < 1500 && (
+                  <div className="p-3 rounded-lg bg-success-light border border-success/20">
+                    <p className="text-sm font-medium text-success">
+                      Temps de réponse optimal: {analytics.overview.averageResponseTime}ms
+                    </p>
+                    <p className="text-xs text-success/80">
+                      Performance système excellente
+                    </p>
+                  </div>
+                )}
+                {analytics.topSearches.length > 0 && (
+                  <div className="p-3 rounded-lg bg-success-light border border-success/20">
+                    <p className="text-sm font-medium text-success">
+                      {analytics.topSearches[0].count} recherches pour la requête top
+                    </p>
+                    <p className="text-xs text-success/80">
+                      "{analytics.topSearches[0].query}" est très populaire
+                    </p>
+                  </div>
+                )}
+                {analytics.overview.totalSearches === 0 && (
+                  <div className="p-3 rounded-lg bg-muted border border-muted/20">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Aucune donnée disponible pour la période sélectionnée
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Modifiez la plage de temps pour voir des insights
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -564,30 +590,57 @@ export function AdminAnalytics() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 rounded-lg bg-warning-light border border-warning/20">
-                  <p className="text-sm font-medium text-warning">
-                    Pic d'usage entre 9h-11h
-                  </p>
-                  <p className="text-xs text-warning/80">
-                    Considérer l'optimisation des ressources
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-warning-light border border-warning/20">
-                  <p className="text-sm font-medium text-warning">
-                    API Enrichment plus lente
-                  </p>
-                  <p className="text-xs text-warning/80">
-                    Temps de réponse 2.3s vs 1.2s objectif
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-accent-light border border-accent/20">
-                  <p className="text-sm font-medium text-accent">
-                    Mobile représente 30% du trafic
-                  </p>
-                  <p className="text-xs text-accent/80">
-                    Opportunité d'optimisation mobile
-                  </p>
-                </div>
+                {analytics.overview.searchGrowth < 0 && (
+                  <div className="p-3 rounded-lg bg-warning-light border border-warning/20">
+                    <p className="text-sm font-medium text-warning">
+                      {formatPercentage(analytics.overview.searchGrowth)} de baisse des recherches
+                    </p>
+                    <p className="text-xs text-warning/80">
+                      Analyser les causes de cette diminution
+                    </p>
+                  </div>
+                )}
+                {analytics.performanceData.some(p => p.avgResponseTime > 2000) && (
+                  <div className="p-3 rounded-lg bg-warning-light border border-warning/20">
+                    <p className="text-sm font-medium text-warning">
+                      API Enrichment plus lente
+                    </p>
+                    <p className="text-xs text-warning/80">
+                      Temps de réponse: {analytics.performanceData.find(p => p.endpoint.includes('Enrichment'))?.avgResponseTime || 'N/A'}ms
+                    </p>
+                  </div>
+                )}
+                {analytics.deviceData.find(d => d.device === 'Mobile')?.percentage && 
+                 analytics.deviceData.find(d => d.device === 'Mobile')!.percentage >= 25 && (
+                  <div className="p-3 rounded-lg bg-accent-light border border-accent/20">
+                    <p className="text-sm font-medium text-accent">
+                      Mobile représente {analytics.deviceData.find(d => d.device === 'Mobile')?.percentage}% du trafic
+                    </p>
+                    <p className="text-xs text-accent/80">
+                      Opportunité d'optimisation mobile
+                    </p>
+                  </div>
+                )}
+                {analytics.overview.uniqueUsers < 10 && analytics.overview.totalSearches > 0 && (
+                  <div className="p-3 rounded-lg bg-warning-light border border-warning/20">
+                    <p className="text-sm font-medium text-warning">
+                      Faible nombre d'utilisateurs actifs: {analytics.overview.uniqueUsers}
+                    </p>
+                    <p className="text-xs text-warning/80">
+                      Considérer des actions marketing
+                    </p>
+                  </div>
+                )}
+                {analytics.searchTypeData.length === 0 && analytics.overview.totalSearches > 0 && (
+                  <div className="p-3 rounded-lg bg-muted border border-muted/20">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Données d'analyse limitées
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Plus de données nécessaires pour des insights précis
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

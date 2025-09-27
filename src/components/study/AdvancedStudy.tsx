@@ -299,7 +299,7 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                     <Shield className="h-5 w-5 text-primary" />
                     <div>
                       <CardTitle className="text-lg">Conformités et Obligations Légales</CardTitle>
-                      <CardDescription>Respect des réglementations et audits de conformité</CardDescription>
+                      <CardDescription>Analyse de la situation de conformité et cohérence déclarative</CardDescription>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">

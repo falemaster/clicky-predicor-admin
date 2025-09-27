@@ -1299,7 +1299,7 @@ Recommandation stratégique : Maintenir l'excellence opérationnelle actuelle to
                         <CardDescription>
                           <EditableField
                             field="compliance-desc"
-                            value="Respect des réglementations et audits de conformité"
+                            value="Analyse de la situation de conformité et cohérence déclarative"
                             onUpdate={() => {}}
                           />
                         </CardDescription>

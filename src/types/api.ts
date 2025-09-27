@@ -280,6 +280,10 @@ export interface ApiError {
   code: string;
   message: string;
   source: 'SIRENE' | 'PAPPERS' | 'INFOGREFFE' | 'RUBYPAYEUR' | 'BODACC' | 'PREDICTOR' | 'ENRICHMENT';
+  metadata?: {
+    mock?: boolean;
+    reason?: string;
+  };
 }
 
 // Types pour les réponses agrégées
@@ -294,4 +298,8 @@ export interface CompanyFullData {
   enriched?: EnrichedData;
   lastUpdate: string;
   errors: ApiError[];
+  flags?: {
+    infogreffeUnavailable?: boolean;
+    infogreffeReason?: string;
+  };
 }

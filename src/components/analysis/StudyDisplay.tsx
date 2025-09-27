@@ -668,7 +668,10 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                       <div className="space-y-3">
                           <div className="flex justify-between items-center">
                             <span className="text-sm">Capital social</span>
-                            <DataWithSource source="PAPPERS" lastUpdate={companyData?.pappers?.derniereMiseAJour || companyData?.lastUpdate}>
+                            <DataWithSource 
+                              source={companyData?.pappers?.capitalSocial ? "PAPPERS" : "INFOGREFFE"} 
+                              lastUpdate={companyData?.pappers?.derniereMiseAJour || companyData?.lastUpdate}
+                            >
                               <span className="font-medium">
                                 {(companyData?.pappers?.capitalSocial ?? companyData?.infogreffe?.capitalSocial)?.toLocaleString('fr-FR') || 'Non renseigné'} €
                               </span>

@@ -43,7 +43,21 @@ export class InfogreffeApiService {
           error: {
             code: data.error.code || 'INFOGREFFE_API_ERROR',
             message: data.error.message || 'Erreur API Infogreffe',
-            source: 'INFOGREFFE'
+            source: 'INFOGREFFE',
+            metadata: data.metadata
+          }
+        };
+      }
+
+      // Check if it's mock data and treat as unavailable
+      if (data?.metadata?.mock) {
+        return {
+          data: null,
+          error: {
+            code: 'PAYMENT_REQUIRED',
+            message: 'Infogreffe indisponible (paiement requis). Fallback vers Pappers.',
+            source: 'INFOGREFFE',
+            metadata: data.metadata
           }
         };
       }

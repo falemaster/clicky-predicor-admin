@@ -20,9 +20,14 @@ serve(async (req) => {
     const INFOGREFFE_API_KEY = Deno.env.get('INFOGREFFE_API_KEY');
     
     if (!INFOGREFFE_API_KEY) {
-      console.log('INFOGREFFE_API_KEY not found, returning mock data');
-      const mockData = generateMockInfogreffeData(siren, endpoint);
-      return new Response(JSON.stringify(mockData), {
+      console.log('INFOGREFFE_API_KEY not found, returning error response');
+      return new Response(JSON.stringify({
+        error: { 
+          code: 'NO_API_KEY', 
+          message: 'Clé API Infogreffe manquante. Fallback vers Pappers.' 
+        },
+        metadata: { mock: true, reason: 'no_key' }
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -91,9 +96,22 @@ serve(async (req) => {
     
     if (!response.ok) {
       console.error('Infogreffe API error:', response.status, response.statusText);
-      // Fallback to mock data if API fails
-      const mockData = generateMockInfogreffeData(siren, endpoint);
-      return new Response(JSON.stringify(mockData), {
+      let errorCode = 'API_ERROR';
+      let reason = 'api_error';
+      
+      if (response.status === 402) {
+        errorCode = 'PAYMENT_REQUIRED';
+        reason = 'payment_required';
+        console.log('Infogreffe 402 Payment Required - fallback to Pappers needed');
+      }
+      
+      return new Response(JSON.stringify({
+        error: { 
+          code: errorCode, 
+          message: `Erreur Infogreffe (${response.status}). Fallback vers Pappers.` 
+        },
+        metadata: { mock: true, reason }
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -117,8 +135,13 @@ serve(async (req) => {
       new URL(req.url).searchParams.get('siren') : null;
     
     if (siren) {
-      const mockData = generateMockInfogreffeData(siren, 'entreprise');
-      return new Response(JSON.stringify(mockData), {
+      return new Response(JSON.stringify({
+        error: { 
+          code: 'FUNCTION_ERROR', 
+          message: 'Erreur fonction Infogreffe. Fallback vers Pappers.' 
+        },
+        metadata: { mock: true, reason: 'function_error' }
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

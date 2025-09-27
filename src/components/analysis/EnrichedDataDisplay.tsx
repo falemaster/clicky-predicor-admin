@@ -116,13 +116,23 @@ export const EnrichedDataDisplay = ({ companyData, onDataEnriched }: EnrichedDat
                   <Badge variant="success" className="ml-1 text-xs">Infogreffe</Badge>
                 </div>
               )}
-              {infogreffe.capitalSocial && (
-                <div className="flex items-center gap-2">
-                  <Euro className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">Capital: {infogreffe.capitalSocial.toLocaleString()} €</span>
-                  <Badge variant="success" className="text-xs">Infogreffe</Badge>
-                </div>
-              )}
+              {(() => {
+                // Prioritize Pappers for capital social if Infogreffe is unavailable
+                const isInfogreffeUnavailable = (companyData as any)?.flags?.infogreffeUnavailable;
+                const pappersCapital = pappers?.capitalSocial;
+                const infogreffeCapital = infogreffe.capitalSocial;
+                
+                const capital = (isInfogreffeUnavailable && pappersCapital) ? pappersCapital : infogreffeCapital;
+                const source = (isInfogreffeUnavailable && pappersCapital) ? "Pappers" : "Infogreffe";
+                
+                return capital ? (
+                  <div className="flex items-center gap-2">
+                    <Euro className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Capital: {capital.toLocaleString()} €</span>
+                    <Badge variant="success" className="text-xs">{source}</Badge>
+                  </div>
+                ) : null;
+              })()}
               {infogreffe.numeroRcs && (
                 <div>
                   <span className="text-sm font-medium">RCS:</span>

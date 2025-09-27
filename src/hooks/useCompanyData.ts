@@ -152,6 +152,16 @@ export const useCompanyData = ({
         } else if (infogreffeResult.error) {
           allErrors.push(infogreffeResult.error);
           console.warn('⚠️ Erreur Infogreffe:', infogreffeResult.error);
+          
+          // Mark Infogreffe as unavailable if payment required or other critical errors
+          if (infogreffeResult.error.code === 'PAYMENT_REQUIRED' || 
+              infogreffeResult.error.code === 'NO_API_KEY' ||
+              infogreffeResult.error.metadata?.mock) {
+            (companyData as any).flags = (companyData as any).flags || {};
+            (companyData as any).flags.infogreffeUnavailable = true;
+            (companyData as any).flags.infogreffeReason = infogreffeResult.error.metadata?.reason || 'payment_required';
+            console.log('🚫 Infogreffe marqué comme indisponible, fallback vers Pappers activé');
+          }
         }
 
         // NOTAPME Performance - PRIORITAIRE pour les scores financiers

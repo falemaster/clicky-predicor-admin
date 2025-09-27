@@ -583,20 +583,35 @@ const Analysis = () => {
                     <div>
                       <span className="text-muted-foreground">Capital social :</span>
                       <div className="font-medium">
-                        <DataWithSource source={realData?.infogreffe?.capitalSocial ? "INFOGREFFE" : "PAPPERS"}>
-                          {(realData?.infogreffe?.capitalSocial ? `${realData.infogreffe.capitalSocial.toLocaleString('fr-FR')} €` : '') ||
-                           (realData?.pappers?.capitalSocial ? `${realData.pappers.capitalSocial.toLocaleString('fr-FR')} €` : '') || 
-                           'Non renseigné'}
-                        </DataWithSource>
+                        {(() => {
+                          const preferPappers = !!realData?.pappers?.capitalSocial && 
+                            ((realData as any)?.flags?.infogreffeUnavailable || !realData?.infogreffe?.capitalSocial);
+                          const capital = preferPappers ? realData.pappers.capitalSocial : realData?.infogreffe?.capitalSocial;
+                          const source = preferPappers ? "PAPPERS" : "INFOGREFFE";
+                          
+                          return (
+                            <DataWithSource source={source}>
+                              {typeof capital === 'number' ? `${capital.toLocaleString('fr-FR')} €` : 
+                               (realData?.pappers?.capitalSocial ? `${realData.pappers.capitalSocial.toLocaleString('fr-FR')} €` : 'Non renseigné')}
+                            </DataWithSource>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
 
                   {/* Sources des données */}
                   <div className="mt-6 pt-4 border-t">
-                    <p className="text-xs text-muted-foreground">
-                      Sources : INSEE, Infogreffe, Pappers
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        Sources : INSEE, Infogreffe, Pappers
+                      </p>
+                      {(realData as any)?.flags?.infogreffeUnavailable && (
+                        <Badge variant="outline" className="text-xs">
+                          Infogreffe indisponible - Pappers utilisé
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
                   {/* Dirigeants interactifs */}

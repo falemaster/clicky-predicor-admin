@@ -7,10 +7,32 @@ import type { InfogreffeCompanyData, InfogreffeRepresentant, InfogreffeRepartiti
 
 interface InfogreffeDataDisplayProps {
   data: InfogreffeCompanyData;
+  fallbackCapital?: number;
+  isInfogreffeUnavailable?: boolean;
 }
 
-export function InfogreffeDataDisplay({ data }: InfogreffeDataDisplayProps) {
-  if (!data) return null;
+export function InfogreffeDataDisplay({ data, fallbackCapital, isInfogreffeUnavailable }: InfogreffeDataDisplayProps) {
+  if (!data && !isInfogreffeUnavailable) return null;
+  
+  // Show fallback message when Infogreffe is unavailable but we don't have Infogreffe data
+  if (!data && isInfogreffeUnavailable) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            Données juridiques Infogreffe
+            <Badge variant="outline" className="text-xs ml-2">
+              Indisponible - Voir Pappers
+            </Badge>
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Infogreffe temporairement indisponible (erreur 402). Les données juridiques sont disponibles via Pappers.
+          </p>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -20,7 +42,17 @@ export function InfogreffeDataDisplay({ data }: InfogreffeDataDisplayProps) {
           <CardTitle className="flex items-center gap-2">
             <Building className="h-5 w-5" />
             Données juridiques Infogreffe
+            {isInfogreffeUnavailable && (
+              <Badge variant="outline" className="text-xs ml-2">
+                Indisponible - Pappers affiché
+              </Badge>
+            )}
           </CardTitle>
+          {isInfogreffeUnavailable && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Infogreffe indisponible (erreur 402) - Données issues de Pappers quand disponible
+            </p>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -30,14 +62,17 @@ export function InfogreffeDataDisplay({ data }: InfogreffeDataDisplayProps) {
                 <p className="text-sm">{data.formeJuridique}</p>
               </div>
             )}
-            {data.capitalSocial && (
+            {(data?.capitalSocial || fallbackCapital) && (
               <div>
                 <span className="text-sm font-medium text-muted-foreground">Capital social</span>
                 <p className="text-sm font-semibold">
                   {new Intl.NumberFormat('fr-FR', {
                     style: 'currency',
                     currency: 'EUR'
-                  }).format(data.capitalSocial)}
+                  }).format(data?.capitalSocial || fallbackCapital || 0)}
+                  {isInfogreffeUnavailable && fallbackCapital && (
+                    <span className="text-xs text-muted-foreground ml-1">(Pappers)</span>
+                  )}
                 </p>
               </div>
             )}

@@ -236,11 +236,18 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
           <CardContent className="space-y-4">
             <div>
               <span className="text-sm font-medium">Forme juridique:</span>
-              <span className="ml-2 text-sm">SAS</span>
+              <span className="ml-2 text-sm">
+                {companyData?.pappers?.formeJuridique || companyData?.sirene?.formeJuridique || 'Non renseigné'}
+              </span>
             </div>
             <div>
               <span className="text-sm font-medium">Capital social:</span>
-              <span className="ml-2 text-sm">50 000 €</span>
+              <span className="ml-2 text-sm">
+                {companyData?.pappers?.capitalSocial 
+                  ? `${companyData.pappers.capitalSocial.toLocaleString('fr-FR')} €`
+                  : 'Non renseigné'
+                }
+              </span>
             </div>
             <div>
               <span className="text-sm font-medium">RCS:</span>
@@ -264,7 +271,11 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
           <CardContent className="space-y-4">
             <div>
               <span className="text-sm font-medium">Secteur d'activité:</span>
-              <span className="ml-2 text-sm">Services aux entreprises</span>
+              <span className="ml-2 text-sm">
+                {companyData?.pappers?.libelleNaf || 
+                 companyData?.sirene?.activitePrincipale || 
+                 'Non renseigné'}
+              </span>
             </div>
             <div>
               <span className="text-sm font-medium">Code NAF:</span>
@@ -272,7 +283,12 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
             </div>
             <div>
               <span className="text-sm font-medium">Effectif:</span>
-              <span className="ml-2 text-sm">{companyData.employees} salariés</span>
+              <span className="ml-2 text-sm">
+                {companyData?.pappers?.bilans?.[0]?.effectifs || 
+                 companyData.employees || 
+                 'Non renseigné'} 
+                {(companyData?.pappers?.bilans?.[0]?.effectifs || companyData.employees) && ' salariés'}
+              </span>
             </div>
             <div>
               <span className="text-sm font-medium">Statut:</span>

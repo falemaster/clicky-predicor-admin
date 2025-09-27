@@ -1121,7 +1121,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                                           <AlertTriangle className="h-4 w-4 mr-2 text-amber-500" />
                                           Procédures Précontentieuses
                                         </CardTitle>
-                                        <CardDescription>Source affichée: BODACC</CardDescription>
+                                        <CardDescription>Source affichée: FIBEN</CardDescription>
                                       </CardHeader>
                                       <CardContent>
                                         <div className="space-y-3">

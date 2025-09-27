@@ -278,7 +278,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
       console.error('Erreur lors de la sauvegarde:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder les modifications",
+        description: error instanceof Error ? error.message : "Impossible de sauvegarder les modifications",
         variant: "destructive"
       });
     } finally {
@@ -364,7 +364,10 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     naf: getNestedValue(formData, ['sirene', 'naf']),
     employees: getNestedValue(formData, ['sirene', 'effectifs']),
     address: getNestedValue(formData, ['sirene', 'adresse']),
-    director: formData.pappers?.dirigeants?.[0] ? `${formData.pappers.dirigeants[0].prenom} ${formData.pappers.dirigeants[0].nom}` : '',
+    director: (() => {
+      const d = formData.pappers?.dirigeants?.[0];
+      return d ? [d.prenom, d.nom].filter(Boolean).join(' ') : '';
+    })(),
     phone: getNestedValue(formData, ['enriched', 'contactInfo', 'phone']) || getNestedValue(formData, ['pappers', 'telephone']),
     email: getNestedValue(formData, ['enriched', 'contactInfo', 'email']) || getNestedValue(formData, ['pappers', 'email']),
     website: getNestedValue(formData, ['pappers', 'siteWeb']),
@@ -660,7 +663,20 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       label="Dirigeant"
                       value={displayCompanyData.director}
                       placeholder="Nom du dirigeant"
-                      onSave={(value) => updateField(['pappers', 'dirigeants', '0', 'nom'], value)}
+                      onSave={(value) => {
+                        const parts = value.trim().split(/\s+/);
+                        if (parts.length === 1) {
+                          // Un seul mot => nom seulement
+                          updateField(['pappers', 'dirigeants', '0', 'prenom'], '');
+                          updateField(['pappers', 'dirigeants', '0', 'nom'], parts[0]);
+                        } else {
+                          // Plusieurs mots => premier = prénom, reste = nom
+                          const first = parts.shift() || '';
+                          const last = parts.join(' ');
+                          updateField(['pappers', 'dirigeants', '0', 'prenom'], first);
+                          updateField(['pappers', 'dirigeants', '0', 'nom'], last);
+                        }
+                      }}
                       icon={<User className="h-4 w-4" />}
                     />
                     <EditableField

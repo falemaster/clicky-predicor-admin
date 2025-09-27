@@ -398,26 +398,6 @@ const Analysis = () => {
               </CardContent>
             </Card>
 
-            {/* Section Qualité des données */}
-            <DataQualitySection 
-              config={{
-                completeness: 85,
-                lastUpdate: new Date().toISOString(),
-                apis: {
-                  insee: { status: 'active', label: 'INSEE/SIRENE', category: 'Données officielles' },
-                  pappers: { status: 'active', label: 'Pappers API', category: 'Données financières' },
-                  rubypayeur: { status: 'active', label: 'RubyPayeur', category: 'Score crédit' },
-                  infogreffe: { status: 'active', label: 'Infogreffe', category: 'Données juridiques' },
-                  ai_enrichment: { status: 'warning', label: 'IA Enrichissement', category: 'Données simulées' },
-                  sirius: { status: 'active', label: 'SIRIUS', category: 'Données fiscales' },
-                  dgfip: { status: 'active', label: 'DGFIP', category: 'Données fiscales' },
-                  portalis: { status: 'active', label: 'PORTALIS', category: 'Données judiciaires' },
-                  opale: { status: 'active', label: 'OPALE', category: 'Données sociales' }
-                },
-                overallStatus: 'Données fiables'
-              }}
-            />
-
             {/* Scores */}
             <div className="grid md:grid-cols-3 gap-6">
               <Card>
@@ -503,60 +483,6 @@ const Analysis = () => {
                 </CardContent>
               </Card>
             </div>
-
-            {/* AI Analysis */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Analyse IA globale
-                  {loading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-slate-100 rounded-lg p-4">
-                  {hasRealData && realData.predictor?.recommandations ? (
-                    <div className="space-y-3">
-                      <p className="text-sm leading-relaxed">
-                        <strong>{companyData.name}</strong> - Analyse basée sur les données réelles :
-                      </p>
-                      <ul className="text-sm space-y-2">
-                        {realData.predictor.recommandations.slice(0, 4).map((rec, index) => (
-                          <li key={index} className="flex items-start space-x-2">
-                            <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      
-                      {/* Facteurs de risque principaux */}
-                      {realData.predictor.facteursExplicatifs && realData.predictor.facteursExplicatifs.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-slate-200">
-                          <p className="text-sm font-medium mb-2">Facteurs clés identifiés :</p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {realData.predictor.facteursExplicatifs.slice(0, 4).map((facteur, index) => (
-                              <div key={index} className="flex items-center justify-between text-xs">
-                                <span>{facteur.nom}</span>
-                                <Badge variant={facteur.impact > 0 ? "default" : "destructive"} className="text-xs">
-                                  {facteur.impact > 0 ? '+' : ''}{(facteur.impact * 100).toFixed(0)}%
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-sm leading-relaxed">
-                      <strong>{companyData.name}</strong> - Analyse basée sur des données simulées. 
-                      Recherchez une entreprise réelle pour obtenir une analyse prédictive complète 
-                      basée sur les dernières données SIRENE, BODACC, et les scores de paiement financier.
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
 
             {/* Informations juridiques détaillées */}
             <div className="grid md:grid-cols-2 gap-6">
@@ -816,9 +742,82 @@ const Analysis = () => {
                        </div>
                      </DataWithSource>
                    </div>
-                 </CardContent>
-               </Card>
-            </div>
+                  </CardContent>
+                </Card>
+             </div>
+
+            {/* Section Qualité des données - Déplacée en fin */}
+            <DataQualitySection 
+              config={{
+                completeness: 85,
+                lastUpdate: new Date().toISOString(),
+                apis: {
+                  insee: { status: 'active', label: 'INSEE/SIRENE', category: 'Données officielles' },
+                  pappers: { status: 'active', label: 'Pappers API', category: 'Données financières' },
+                  rubypayeur: { status: 'active', label: 'RubyPayeur', category: 'Score crédit' },
+                  infogreffe: { status: 'active', label: 'Infogreffe', category: 'Données juridiques' },
+                  ai_enrichment: { status: 'warning', label: 'IA Enrichissement', category: 'Données simulées' },
+                  sirius: { status: 'active', label: 'SIRIUS', category: 'Données fiscales' },
+                  dgfip: { status: 'active', label: 'DGFIP', category: 'Données fiscales' },
+                  portalis: { status: 'active', label: 'PORTALIS', category: 'Données judiciaires' },
+                  opale: { status: 'active', label: 'OPALE', category: 'Données sociales' }
+                },
+                overallStatus: 'Données fiables'
+              }}
+            />
+
+            {/* Analyse IA globale - Déplacée en fin */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart3 className="h-5 w-5 mr-2" />
+                  Analyse IA globale
+                  {loading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-slate-100 rounded-lg p-4">
+                  {hasRealData && realData.predictor?.recommandations ? (
+                    <div className="space-y-3">
+                      <p className="text-sm leading-relaxed">
+                        <strong>{companyData.name}</strong> - Analyse basée sur les données réelles :
+                      </p>
+                      <ul className="text-sm space-y-2">
+                        {realData.predictor.recommandations.slice(0, 4).map((rec, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
+                            <span>{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      {/* Facteurs de risque principaux */}
+                      {realData.predictor.facteursExplicatifs && realData.predictor.facteursExplicatifs.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-slate-200">
+                          <p className="text-sm font-medium mb-2">Facteurs clés identifiés :</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {realData.predictor.facteursExplicatifs.slice(0, 4).map((facteur, index) => (
+                              <div key={index} className="flex items-center justify-between text-xs">
+                                <span>{facteur.nom}</span>
+                                <Badge variant={facteur.impact > 0 ? "default" : "destructive"} className="text-xs">
+                                  {facteur.impact > 0 ? '+' : ''}{(facteur.impact * 100).toFixed(0)}%
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm leading-relaxed">
+                      <strong>{companyData.name}</strong> - Analyse basée sur des données simulées. 
+                      Recherchez une entreprise réelle pour obtenir une analyse prédictive complète 
+                      basée sur les dernières données SIRENE, BODACC, et les scores de paiement financier.
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="study" className="space-y-6">

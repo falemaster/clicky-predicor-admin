@@ -1352,53 +1352,369 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
            </TabsContent>
 
            <TabsContent value="predictive" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analyse Prédictive - Mode Édition</CardTitle>
-                <CardDescription>Configuration des modèles et paramètres prédictifs</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Risque 3 mois (%)</label>
-                    <EditableField
-                      value={formData.predictor?.probabiliteDefaut?.mois3 ? (formData.predictor.probabiliteDefaut.mois3 * 100).toFixed(1) : ''}
-                      placeholder="2.1"
-                      onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois3'], (parseFloat(value) / 100).toString())}
-                      type="number"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Risque 6 mois (%)</label>
-                    <EditableField
-                      value={formData.predictor?.probabiliteDefaut?.mois6 ? (formData.predictor.probabiliteDefaut.mois6 * 100).toFixed(1) : ''}
-                      placeholder="3.8"
-                      onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois6'], (parseFloat(value) / 100).toString())}
-                      type="number"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Risque 12 mois (%)</label>
-                    <EditableField
-                      value={formData.predictor?.probabiliteDefaut?.mois12 ? (formData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1) : ''}
-                      placeholder="4.9"
-                      onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois12'], (parseFloat(value) / 100).toString())}
-                      type="number"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Confiance IA (%)</label>
-                    <EditableField
-                      value={getNestedValue(formData, ['predictor', 'confidence'])}
-                      placeholder="85"
-                      onSave={(value) => updateField(['predictor', 'confidence'], value)}
-                      type="number"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+             {/* Analyse IA */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center">
+                   <Bot className="h-5 w-5 mr-2" />
+                   Analyse IA
+                 </CardTitle>
+                 <CardDescription>Probabilités de défaut et confiance du modèle</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                   <div className="space-y-2">
+                     <label className="text-sm font-medium">Risque 3 mois (%)</label>
+                     <EditableField
+                       value={formData.predictor?.probabiliteDefaut?.mois3 ? (formData.predictor.probabiliteDefaut.mois3 * 100).toFixed(1) : ''}
+                       placeholder="2.1"
+                       onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois3'], (parseFloat(value) / 100).toString())}
+                       type="number"
+                     />
+                   </div>
+                   <div className="space-y-2">
+                     <label className="text-sm font-medium">Risque 6 mois (%)</label>
+                     <EditableField
+                       value={formData.predictor?.probabiliteDefaut?.mois6 ? (formData.predictor.probabiliteDefaut.mois6 * 100).toFixed(1) : ''}
+                       placeholder="3.8"
+                       onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois6'], (parseFloat(value) / 100).toString())}
+                       type="number"
+                     />
+                   </div>
+                   <div className="space-y-2">
+                     <label className="text-sm font-medium">Risque 12 mois (%)</label>
+                     <EditableField
+                       value={formData.predictor?.probabiliteDefaut?.mois12 ? (formData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1) : ''}
+                       placeholder="4.9"
+                       onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois12'], (parseFloat(value) / 100).toString())}
+                       type="number"
+                     />
+                   </div>
+                   <div className="space-y-2">
+                     <label className="text-sm font-medium">Confiance IA (%)</label>
+                     <EditableField
+                       value={getNestedValue(formData, ['predictor', 'confidence']) || '85'}
+                       placeholder="85"
+                       onSave={(value) => updateField(['predictor', 'confidence'], value)}
+                       type="number"
+                     />
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+
+             {/* Évolution du Risque Prédictif */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center">
+                   <LineChartIcon className="h-5 w-5 mr-2" />
+                   Évolution du Risque Prédictif (12 mois)
+                 </CardTitle>
+                 <CardDescription>Projection mensuelle basée sur les algorithmes d'IA avancés</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 <EditableField
+                   label="Description de l'évolution"
+                   value={getNestedValue(formData, ['enriched', 'predictive', 'evolution']) || ''}
+                   placeholder="Projection mensuelle du risque de défaut sur 12 mois..."
+                   onSave={(value) => updateField(['enriched', 'predictive', 'evolution'], value)}
+                   multiline
+                 />
+                 <div className="grid md:grid-cols-3 gap-4">
+                   <EditableField
+                     label="Tendance générale"
+                     value={getNestedValue(formData, ['enriched', 'predictive', 'trend']) || ''}
+                     placeholder="Stable, croissant, décroissant"
+                     onSave={(value) => updateField(['enriched', 'predictive', 'trend'], value)}
+                   />
+                   <EditableField
+                     label="Pic de risque (mois)"
+                     value={getNestedValue(formData, ['enriched', 'predictive', 'peakMonth']) || ''}
+                     placeholder="Juin 2024"
+                     onSave={(value) => updateField(['enriched', 'predictive', 'peakMonth'], value)}
+                   />
+                   <EditableField
+                     label="Moyenne secteur (%)"
+                     value={getNestedValue(formData, ['enriched', 'predictive', 'sectorAverage']) || ''}
+                     placeholder="12.5"
+                     onSave={(value) => updateField(['enriched', 'predictive', 'sectorAverage'], value)}
+                     type="number"
+                   />
+                 </div>
+               </CardContent>
+             </Card>
+
+             {/* Tests de Résistance */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center">
+                   <Shield className="h-5 w-5 mr-2" />
+                   Tests de Résistance
+                 </CardTitle>
+                 <CardDescription>Simulation de scénarios de crise</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 <div className="grid md:grid-cols-2 gap-6">
+                   <div className="space-y-4">
+                     <h4 className="font-semibold">Scénarios Économiques</h4>
+                     <EditableField
+                       label="Récession -10%"
+                       value={getNestedValue(formData, ['enriched', 'stressTest', 'recession']) || ''}
+                       placeholder="Impact: 6.8%, Probabilité: 15%"
+                       onSave={(value) => updateField(['enriched', 'stressTest', 'recession'], value)}
+                     />
+                     <EditableField
+                       label="Inflation +5%"
+                       value={getNestedValue(formData, ['enriched', 'stressTest', 'inflation']) || ''}
+                       placeholder="Impact: 4.1%, Probabilité: 40%"
+                       onSave={(value) => updateField(['enriched', 'stressTest', 'inflation'], value)}
+                     />
+                     <EditableField
+                       label="Hausse taux +3%"
+                       value={getNestedValue(formData, ['enriched', 'stressTest', 'interestRates']) || ''}
+                       placeholder="Impact: 3.7%, Probabilité: 35%"
+                       onSave={(value) => updateField(['enriched', 'stressTest', 'interestRates'], value)}
+                     />
+                   </div>
+                   <div className="space-y-4">
+                     <h4 className="font-semibold">Scénarios Spécifiques</h4>
+                     <EditableField
+                       label="Perte client majeur"
+                       value={getNestedValue(formData, ['enriched', 'stressTest', 'clientLoss']) || ''}
+                       placeholder="Impact: 8.2%, Probabilité: 25%"
+                       onSave={(value) => updateField(['enriched', 'stressTest', 'clientLoss'], value)}
+                     />
+                     <EditableField
+                       label="Crise secteur"
+                       value={getNestedValue(formData, ['enriched', 'stressTest', 'sectorCrisis']) || ''}
+                       placeholder="Impact: 5.4%, Probabilité: 20%"
+                       onSave={(value) => updateField(['enriched', 'stressTest', 'sectorCrisis'], value)}
+                     />
+                     <EditableField
+                       label="Analyse globale"
+                       value={getNestedValue(formData, ['enriched', 'stressTest', 'globalAnalysis']) || ''}
+                       placeholder="Synthèse des tests de résistance..."
+                       onSave={(value) => updateField(['enriched', 'stressTest', 'globalAnalysis'], value)}
+                       multiline
+                     />
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+
+             {/* Facteurs Discriminants IA */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center">
+                   <Brain className="h-5 w-5 mr-2" />
+                   Facteurs Discriminants IA
+                 </CardTitle>
+                 <CardDescription>Variables clés identifiées par l'intelligence artificielle</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 <div className="grid md:grid-cols-2 gap-6">
+                   <div className="space-y-4">
+                     <EditableField
+                       label="Signaux faibles détectés"
+                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'weakSignals']) || ''}
+                       placeholder="Trend CA positif détecté, Recrutements récents (+5), Délais paiement +2 jours..."
+                       onSave={(value) => updateField(['enriched', 'aiFactors', 'weakSignals'], value)}
+                       multiline
+                     />
+                     <EditableField
+                       label="Variables importantes"
+                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'keyVariables']) || ''}
+                       placeholder="Flux de trésorerie, Ratio d'endettement, Croissance CA..."
+                       onSave={(value) => updateField(['enriched', 'aiFactors', 'keyVariables'], value)}
+                       multiline
+                     />
+                   </div>
+                   <div className="space-y-4">
+                     <EditableField
+                       label="Algorithme utilisé"
+                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'algorithm']) || ''}
+                       placeholder="XGBoost v2.1 - Précision 94.2%"
+                       onSave={(value) => updateField(['enriched', 'aiFactors', 'algorithm'], value)}
+                     />
+                     <EditableField
+                       label="Variables analysées"
+                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'variablesCount']) || ''}
+                       placeholder="247"
+                       onSave={(value) => updateField(['enriched', 'aiFactors', 'variablesCount'], value)}
+                       type="number"
+                     />
+                     <EditableField
+                       label="Base d'entraînement"
+                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'trainingData']) || ''}
+                       placeholder="450K entreprises"
+                       onSave={(value) => updateField(['enriched', 'aiFactors', 'trainingData'], value)}
+                     />
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+
+             {/* Insights Machine Learning */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center">
+                   <Zap className="h-5 w-5 mr-2" />
+                   Insights Machine Learning
+                 </CardTitle>
+                 <CardDescription>Analyses avancées et recommandations automatisées</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 <EditableField
+                   label="Recommandations automatisées"
+                   value={getNestedValue(formData, ['enriched', 'mlInsights', 'recommendations']) || ''}
+                   placeholder="Surveiller URSSAF mensuel, Diversifier top 3 clients, Renforcer trésorerie Q4..."
+                   onSave={(value) => updateField(['enriched', 'mlInsights', 'recommendations'], value)}
+                   multiline
+                 />
+                 <div className="grid md:grid-cols-2 gap-6">
+                   <EditableField
+                     label="Patterns détectés"
+                     value={getNestedValue(formData, ['enriched', 'mlInsights', 'patterns']) || ''}
+                     placeholder="Saisonnalité forte Q4, Corrélation CA/effectifs..."
+                     onSave={(value) => updateField(['enriched', 'mlInsights', 'patterns'], value)}
+                     multiline
+                   />
+                   <EditableField
+                     label="Alertes préventives"
+                     value={getNestedValue(formData, ['enriched', 'mlInsights', 'alerts']) || ''}
+                     placeholder="Monitoring hebdomadaire requis, Seuil critique détecté..."
+                     onSave={(value) => updateField(['enriched', 'mlInsights', 'alerts'], value)}
+                     multiline
+                   />
+                 </div>
+               </CardContent>
+             </Card>
+
+             {/* Conformité et Santé Fiscale */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center">
+                   <Gavel className="h-5 w-5 mr-2" />
+                   Conformité et Santé Fiscale
+                 </CardTitle>
+                 <CardDescription>Évaluation prédictive du risque de vérification fiscale</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 <div className="grid md:grid-cols-3 gap-4">
+                   <EditableField
+                     label="Probabilité contrôle 36 mois (%)"
+                     value={getNestedValue(formData, ['enriched', 'fiscal', 'auditRisk36']) || ''}
+                     placeholder="18"
+                     onSave={(value) => updateField(['enriched', 'fiscal', 'auditRisk36'], value)}
+                     type="number"
+                   />
+                   <EditableField
+                     label="Score risque fiscal (%)"
+                     value={getNestedValue(formData, ['enriched', 'fiscal', 'fiscalScore']) || ''}
+                     placeholder="12"
+                     onSave={(value) => updateField(['enriched', 'fiscal', 'fiscalScore'], value)}
+                     type="number"
+                   />
+                   <EditableField
+                     label="Écart secteur (pts)"
+                     value={getNestedValue(formData, ['enriched', 'fiscal', 'sectorGap']) || ''}
+                     placeholder="-6"
+                     onSave={(value) => updateField(['enriched', 'fiscal', 'sectorGap'], value)}
+                     type="number"
+                   />
+                 </div>
+                 
+                 <div className="space-y-4 mt-6">
+                   <h4 className="font-semibold">Facteurs de Risque Détectés</h4>
+                   <div className="grid md:grid-cols-2 gap-4">
+                     <EditableField
+                       label="Cohérence TVA/CA"
+                       value={getNestedValue(formData, ['enriched', 'fiscal', 'vatConsistency']) || ''}
+                       placeholder="Conforme"
+                       onSave={(value) => updateField(['enriched', 'fiscal', 'vatConsistency'], value)}
+                     />
+                     <EditableField
+                       label="Croissance CA"
+                       value={getNestedValue(formData, ['enriched', 'fiscal', 'revenueGrowth']) || ''}
+                       placeholder="Attention - Rapide"
+                       onSave={(value) => updateField(['enriched', 'fiscal', 'revenueGrowth'], value)}
+                     />
+                     <EditableField
+                       label="Ratios sectoriels"
+                       value={getNestedValue(formData, ['enriched', 'fiscal', 'sectorRatios']) || ''}
+                       placeholder="Normaux"
+                       onSave={(value) => updateField(['enriched', 'fiscal', 'sectorRatios'], value)}
+                     />
+                     <EditableField
+                       label="Régularité déclarative"
+                       value={getNestedValue(formData, ['enriched', 'fiscal', 'declarationRegularity']) || ''}
+                       placeholder="Exemplaire"
+                       onSave={(value) => updateField(['enriched', 'fiscal', 'declarationRegularity'], value)}
+                     />
+                   </div>
+                 </div>
+
+                 <div className="space-y-4 mt-6">
+                   <h4 className="font-semibold">Stratégie de Mitigation Fiscale</h4>
+                   <EditableField
+                     value={getNestedValue(formData, ['enriched', 'fiscal', 'mitigationStrategy']) || ''}
+                     placeholder="Documentation renforcée, Conformité TVA, Audit préventif, Veille réglementaire..."
+                     onSave={(value) => updateField(['enriched', 'fiscal', 'mitigationStrategy'], value)}
+                     multiline
+                   />
+                 </div>
+               </CardContent>
+             </Card>
+
+             {/* Simulation de Scénarios */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center">
+                   <Target className="h-5 w-5 mr-2" />
+                   Simulation de Scénarios
+                 </CardTitle>
+                 <CardDescription>Modélisation interactive des impacts futurs</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 <div className="grid md:grid-cols-2 gap-6">
+                   <div className="space-y-4">
+                     <h4 className="font-semibold">Scénarios de Croissance</h4>
+                     <EditableField
+                       label="Croissance +20%"
+                       value={getNestedValue(formData, ['enriched', 'scenarios', 'growth20']) || ''}
+                       placeholder="Impact sur le score: +0.8, Risque 12 mois: 3.2%"
+                       onSave={(value) => updateField(['enriched', 'scenarios', 'growth20'], value)}
+                       multiline
+                     />
+                     <EditableField
+                       label="Stagnation 0%"
+                       value={getNestedValue(formData, ['enriched', 'scenarios', 'stagnation']) || ''}
+                       placeholder="Impact sur le score: -0.3, Risque 12 mois: 5.8%"
+                       onSave={(value) => updateField(['enriched', 'scenarios', 'stagnation'], value)}
+                       multiline
+                     />
+                   </div>
+                   <div className="space-y-4">
+                     <h4 className="font-semibold">Scénarios de Crise</h4>
+                     <EditableField
+                       label="Récession -15%"
+                       value={getNestedValue(formData, ['enriched', 'scenarios', 'recession15']) || ''}
+                       placeholder="Impact sur le score: -1.2, Risque 12 mois: 12.4%"
+                       onSave={(value) => updateField(['enriched', 'scenarios', 'recession15'], value)}
+                       multiline
+                     />
+                     <EditableField
+                       label="Renforcement BFR"
+                       value={getNestedValue(formData, ['enriched', 'scenarios', 'workingCapital']) || ''}
+                       placeholder="Impact sur la trésorerie et recommandations..."
+                       onSave={(value) => updateField(['enriched', 'scenarios', 'workingCapital'], value)}
+                       multiline
+                     />
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+           </TabsContent>
 
           <TabsContent value="reports" className="space-y-6">
             <Card>

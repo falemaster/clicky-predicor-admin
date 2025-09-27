@@ -53,37 +53,50 @@ export function AdminDashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
+      console.log('AdminDashboard: Starting to load data...');
 
       // Get users stats
-      const { count: totalUsers } = await supabase
+      const { count: totalUsers, error: usersError } = await supabase
         .from('admin_users')
         .select('*', { count: 'exact', head: true });
 
-      const { count: activeUsers } = await supabase
+      console.log('AdminDashboard: Total users:', totalUsers, 'Error:', usersError);
+
+      const { count: activeUsers, error: activeUsersError } = await supabase
         .from('admin_users')
         .select('*', { count: 'exact', head: true })
         .eq('is_active', true);
 
+      console.log('AdminDashboard: Active users:', activeUsers, 'Error:', activeUsersError);
+
       // Get companies stats
-      const { count: totalCompanies } = await supabase
+      const { count: totalCompanies, error: companiesError } = await supabase
         .from('admin_companies')
         .select('*', { count: 'exact', head: true });
 
-      const { count: editedCompanies } = await supabase
+      console.log('AdminDashboard: Total companies:', totalCompanies, 'Error:', companiesError);
+
+      const { count: editedCompanies, error: editedCompaniesError } = await supabase
         .from('admin_companies')
         .select('*', { count: 'exact', head: true })
         .eq('is_manually_edited', true);
 
+      console.log('AdminDashboard: Edited companies:', editedCompanies, 'Error:', editedCompaniesError);
+
       // Get search stats
-      const { count: totalSearches } = await supabase
+      const { count: totalSearches, error: searchesError } = await supabase
         .from('admin_search_history')
         .select('*', { count: 'exact', head: true });
 
+      console.log('AdminDashboard: Total searches:', totalSearches, 'Error:', searchesError);
+
       const today = new Date().toISOString().split('T')[0];
-      const { count: todaySearches } = await supabase
+      const { count: todaySearches, error: todaySearchesError } = await supabase
         .from('admin_search_history')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today);
+
+      console.log('AdminDashboard: Today searches:', todaySearches, 'Error:', todaySearchesError);
 
       // Get recent activity from database
       const { data: searchHistory, error: searchError } = await supabase
@@ -91,6 +104,8 @@ export function AdminDashboard() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
+
+      console.log('AdminDashboard: Search history:', searchHistory, 'Error:', searchError);
 
       let recentActivity: ActivityItem[] = [];
       
@@ -117,7 +132,7 @@ export function AdminDashboard() {
         ];
       }
 
-      setStats({
+      const newStats = {
         totalUsers: totalUsers || 0,
         activeUsers: activeUsers || 0,
         totalCompanies: totalCompanies || 0,
@@ -125,10 +140,13 @@ export function AdminDashboard() {
         todaySearches: todaySearches || 0,
         editedCompanies: editedCompanies || 0,
         recentActivity
-      });
+      };
+
+      console.log('AdminDashboard: Setting stats:', newStats);
+      setStats(newStats);
 
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('AdminDashboard: Error loading dashboard data:', error);
       toast({
         title: "Erreur",
         description: "Impossible de charger les données du dashboard",
@@ -136,6 +154,7 @@ export function AdminDashboard() {
       });
     } finally {
       setLoading(false);
+      console.log('AdminDashboard: Loading finished');
     }
   };
 

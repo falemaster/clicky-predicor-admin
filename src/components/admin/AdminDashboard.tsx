@@ -14,139 +14,111 @@ import {
   Edit3,
   AlertTriangle,
   CheckCircle,
-  BarChart3
+  BarChart3,
+  CreditCard,
+  History,
+  ExternalLink
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardStats {
-  totalUsers: number;
-  activeUsers: number;
+  sirenSearches: number;
+  siretSearches: number;
   totalCompanies: number;
-  totalSearches: number;
-  todaySearches: number;
-  editedCompanies: number;
-  recentActivity: ActivityItem[];
+  infogreffeCredits: number | null;
+  infogreffeStatus: 'active' | 'expired' | 'error';
+  recentEditedCompanies: EditedCompany[];
 }
 
-interface ActivityItem {
+interface EditedCompany {
   id: string;
-  type: 'search' | 'user_register' | 'company_edit';
-  description: string;
-  timestamp: string;
-  user?: string;
+  siren: string;
+  company_name: string;
+  edited_at: string;
+  edited_by: string | null;
 }
 
 export function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    activeUsers: 0,
+    sirenSearches: 0,
+    siretSearches: 0,
     totalCompanies: 0,
-    totalSearches: 0,
-    todaySearches: 0,
-    editedCompanies: 0,
-    recentActivity: []
+    infogreffeCredits: null,
+    infogreffeStatus: 'error',
+    recentEditedCompanies: []
   });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const checkInfogreffeCredits = async () => {
+    try {
+      const response = await supabase.functions.invoke('infogreffe-api', {
+        body: { 
+          siren: '123456789', // Test SIREN
+          endpoint: 'ficheidentite' 
+        }
+      });
+      
+      if (response.error) {
+        if (response.error.message?.includes('402') || response.error.message?.includes('Payment Required')) {
+          return { status: 'expired' as const, credits: 0 };
+        }
+        return { status: 'error' as const, credits: null };
+      }
+      
+      return { status: 'active' as const, credits: null }; // Crédits disponibles mais nombre inconnu
+    } catch (error) {
+      console.error('Error checking Infogreffe credits:', error);
+      return { status: 'error' as const, credits: null };
+    }
+  };
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      console.log('AdminDashboard: Starting to load data...');
 
-      // Get users stats
-      const { count: totalUsers, error: usersError } = await supabase
-        .from('admin_users')
-        .select('*', { count: 'exact', head: true });
-
-      console.log('AdminDashboard: Total users:', totalUsers, 'Error:', usersError);
-
-      const { count: activeUsers, error: activeUsersError } = await supabase
-        .from('admin_users')
+      // Get SIREN/SIRET searches
+      const { count: sirenSearches } = await supabase
+        .from('admin_search_history')
         .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
+        .eq('search_type', 'siren');
 
-      console.log('AdminDashboard: Active users:', activeUsers, 'Error:', activeUsersError);
+      const { count: siretSearches } = await supabase
+        .from('admin_search_history')
+        .select('*', { count: 'exact', head: true })
+        .eq('search_type', 'siret');
 
-      // Get companies stats
-      const { count: totalCompanies, error: companiesError } = await supabase
+      // Get total companies
+      const { count: totalCompanies } = await supabase
         .from('admin_companies')
         .select('*', { count: 'exact', head: true });
 
-      console.log('AdminDashboard: Total companies:', totalCompanies, 'Error:', companiesError);
+      // Check Infogreffe credits
+      const infogreffeStatus = await checkInfogreffeCredits();
 
-      const { count: editedCompanies, error: editedCompaniesError } = await supabase
+      // Get recently edited companies
+      const { data: recentEditedCompanies } = await supabase
         .from('admin_companies')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_manually_edited', true);
-
-      console.log('AdminDashboard: Edited companies:', editedCompanies, 'Error:', editedCompaniesError);
-
-      // Get search stats
-      const { count: totalSearches, error: searchesError } = await supabase
-        .from('admin_search_history')
-        .select('*', { count: 'exact', head: true });
-
-      console.log('AdminDashboard: Total searches:', totalSearches, 'Error:', searchesError);
-
-      const today = new Date().toISOString().split('T')[0];
-      const { count: todaySearches, error: todaySearchesError } = await supabase
-        .from('admin_search_history')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', today);
-
-      console.log('AdminDashboard: Today searches:', todaySearches, 'Error:', todaySearchesError);
-
-      // Get recent activity from database
-      const { data: searchHistory, error: searchError } = await supabase
-        .from('admin_search_history')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .select('id, siren, company_name, edited_at, edited_by')
+        .eq('is_manually_edited', true)
+        .not('edited_at', 'is', null)
+        .order('edited_at', { ascending: false })
         .limit(10);
 
-      console.log('AdminDashboard: Search history:', searchHistory, 'Error:', searchError);
-
-      let recentActivity: ActivityItem[] = [];
-      
-      if (searchHistory && !searchError) {
-        recentActivity = searchHistory.map(search => ({
-          id: search.id,
-          type: 'search',
-          description: `Recherche ${search.search_type} ${search.search_query}`,
-          timestamp: search.created_at,
-          user: search.user_id || 'Utilisateur anonyme'
-        }));
-      }
-
-      // Add some simulated activity if no real data yet
-      if (recentActivity.length === 0) {
-        recentActivity = [
-          {
-            id: 'sim-1',
-            type: 'search',
-            description: 'Aucune activité récente',
-            timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
-            user: 'System'
-          }
-        ];
-      }
-
-      const newStats = {
-        totalUsers: totalUsers || 0,
-        activeUsers: activeUsers || 0,
+      setStats({
+        sirenSearches: sirenSearches || 0,
+        siretSearches: siretSearches || 0,
         totalCompanies: totalCompanies || 0,
-        totalSearches: totalSearches || 0,
-        todaySearches: todaySearches || 0,
-        editedCompanies: editedCompanies || 0,
-        recentActivity
-      };
-
-      console.log('AdminDashboard: Setting stats:', newStats);
-      setStats(newStats);
+        infogreffeCredits: infogreffeStatus.credits,
+        infogreffeStatus: infogreffeStatus.status,
+        recentEditedCompanies: recentEditedCompanies || []
+      });
 
     } catch (error) {
-      console.error('AdminDashboard: Error loading dashboard data:', error);
+      console.error('Error loading dashboard data:', error);
       toast({
         title: "Erreur",
         description: "Impossible de charger les données du dashboard",
@@ -154,7 +126,6 @@ export function AdminDashboard() {
       });
     } finally {
       setLoading(false);
-      console.log('AdminDashboard: Loading finished');
     }
   };
 
@@ -162,27 +133,46 @@ export function AdminDashboard() {
     loadDashboardData();
   }, []);
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'search':
-        return <Search className="h-4 w-4 text-primary" />;
-      case 'company_edit':
-        return <Edit3 className="h-4 w-4 text-warning" />;
-      case 'user_register':
-        return <Users className="h-4 w-4 text-success" />;
-      default:
-        return <Activity className="h-4 w-4 text-muted-foreground" />;
-    }
+  const handleEditCompany = (companyId: string, siren: string) => {
+    navigate(`/admin/editor?siren=${siren}`);
   };
 
   const formatTimeAgo = (timestamp: string) => {
     const diff = Date.now() - new Date(timestamp).getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
     
+    if (days > 0) return `il y a ${days}j`;
     if (hours > 0) return `il y a ${hours}h`;
     if (minutes > 0) return `il y a ${minutes}min`;
     return 'maintenant';
+  };
+
+  const getInfogreffeStatusBadge = () => {
+    switch (stats.infogreffeStatus) {
+      case 'active':
+        return (
+          <Badge variant="secondary" className="bg-success-light text-success">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Crédits disponibles
+          </Badge>
+        );
+      case 'expired':
+        return (
+          <Badge variant="destructive">
+            <AlertTriangle className="w-3 h-3 mr-1" />
+            Crédits épuisés
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="secondary" className="bg-warning-light text-warning">
+            <AlertTriangle className="w-3 h-3 mr-1" />
+            Statut inconnu
+          </Badge>
+        );
+    }
   };
 
   if (loading) {
@@ -212,7 +202,7 @@ export function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard Admin</h1>
           <p className="text-muted-foreground">
-            Vue d'ensemble de l'activité Predicor
+            Métriques essentielles de l'activité Predicor
           </p>
         </div>
         <Button onClick={loadDashboardData} variant="outline">
@@ -221,122 +211,111 @@ export function AdminDashboard() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
+      {/* Essential Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* SIREN Searches */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Utilisateurs Total</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Recherches SIREN</CardTitle>
+            <Search className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            <div className="text-2xl font-bold">{stats.sirenSearches}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.activeUsers} actifs
+              Consultations via SIREN
             </p>
           </CardContent>
         </Card>
 
+        {/* SIRET Searches */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Entreprises</CardTitle>
+            <CardTitle className="text-sm font-medium">Recherches SIRET</CardTitle>
+            <Search className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.siretSearches}</div>
+            <p className="text-xs text-muted-foreground">
+              Consultations via SIRET
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Total Companies */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Entreprises Indexées</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalCompanies}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.editedCompanies} modifiées manuellement
+              Base de données
             </p>
           </CardContent>
         </Card>
 
+        {/* Infogreffe Credits */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recherches Total</CardTitle>
-            <Search className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSearches}</div>
-            <p className="text-xs text-success flex items-center">
-              <TrendingUp className="w-3 h-3 mr-1" />
-              {stats.todaySearches} aujourd'hui
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Activité</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">API Infogreffe</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.recentActivity.length}
+              {stats.infogreffeStatus === 'active' ? '✓' : 
+               stats.infogreffeStatus === 'expired' ? '✗' : '?'}
             </div>
-            <p className="text-xs text-muted-foreground">
-              actions récentes
-            </p>
+            <div className="text-xs">
+              {getInfogreffeStatusBadge()}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Activity and Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Clock className="h-5 w-5" />
-              <span>Activité Récente</span>
-            </CardTitle>
-            <CardDescription>
-              Les dernières actions sur la plateforme
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {stats.recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
-                {getActivityIcon(activity.type)}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    {activity.description}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {activity.user} • {formatTimeAgo(activity.timestamp)}
-                  </p>
+      {/* Recently Edited Companies */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <History className="h-5 w-5" />
+            <span>Entreprises Modifiées Récemment</span>
+          </CardTitle>
+          <CardDescription>
+            Historique des entreprises éditées manuellement par les administrateurs
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {stats.recentEditedCompanies.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              Aucune entreprise modifiée récemment
+            </div>
+          ) : (
+            stats.recentEditedCompanies.map((company) => (
+              <div 
+                key={company.id} 
+                className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
+                onClick={() => handleEditCompany(company.id, company.siren)}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Building2 className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{company.company_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      SIREN: {company.siren} • Modifié {formatTimeAgo(company.edited_at)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge variant="outline">Édité</Badge>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground" />
                 </div>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Actions Rapides</CardTitle>
-            <CardDescription>
-              Accès direct aux fonctionnalités principales
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button className="w-full justify-start" variant="outline">
-              <Users className="w-4 h-4 mr-2" />
-              Gérer les utilisateurs
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <Building2 className="w-4 h-4 mr-2" />
-              Voir les entreprises
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <Edit3 className="w-4 h-4 mr-2" />
-              Éditeur WYSIWYG
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Analytics détaillées
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       {/* System Status */}
       <Card>
@@ -351,18 +330,15 @@ export function AdminDashboard() {
             <div className="flex items-center space-x-2">
               <Badge variant="secondary" className="bg-success-light text-success">
                 <CheckCircle className="w-3 h-3 mr-1" />
-                API Fonctionnelle
-              </Badge>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary" className="bg-success-light text-success">
-                <CheckCircle className="w-3 h-3 mr-1" />
                 Base de données OK
               </Badge>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge variant="secondary" className="bg-warning-light text-warning">
-                <AlertTriangle className="w-3 h-3 mr-1" />
+              {getInfogreffeStatusBadge()}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge variant="secondary" className="bg-success-light text-success">
+                <CheckCircle className="w-3 h-3 mr-1" />
                 Edge Functions
               </Badge>
             </div>

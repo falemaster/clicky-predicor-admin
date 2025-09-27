@@ -595,7 +595,7 @@ const Analysis = () => {
                   {/* Sources des données */}
                   <div className="mt-6 pt-4 border-t">
                     <p className="text-xs text-muted-foreground">
-                      Sources : INSEE (identité), Infogreffe (juridique), Pappers (compléments)
+                      Sources : INSEE, Infogreffe, Pappers
                     </p>
                   </div>
 

@@ -408,7 +408,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-background border-b shadow-sm">
+      <header className="bg-background border-b shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center space-x-4">
@@ -481,7 +481,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
       </header>
 
       {/* Company Header */}
-      <div className="bg-background border-b">
+      <div className="bg-background border-b sticky top-[73px] z-40">
         <div className="container mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
             <div className="flex items-center space-x-4">
@@ -540,12 +540,14 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
       {/* Main Content */}
       <div className="container mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6">
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="study">Étude approfondie</TabsTrigger>
-            <TabsTrigger value="predictive">Analyse prédictive</TabsTrigger>
-            <TabsTrigger value="reports">Rapports & Actions</TabsTrigger>
-          </TabsList>
+          <div className="sticky top-[183px] z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-6 pb-2">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+              <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+              <TabsTrigger value="study">Étude approfondie</TabsTrigger>
+              <TabsTrigger value="predictive">Analyse prédictive</TabsTrigger>
+              <TabsTrigger value="reports">Rapports & Actions</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Section Qualité des données - Admin Configuration */}

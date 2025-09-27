@@ -1091,9 +1091,10 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
-        </Card>
+         </Card>
+         )}
 
-        {data && (
+         {data && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
@@ -1206,89 +1207,89 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
               </div>
             </CardContent>
           </Card>
-        )}
+         )}
 
          {/* Structuration, Gouvernance et Management */}
-        {(companyData?.enriched?.visibility?.governance !== "false") && (
-        <Card>
-          <Collapsible 
-            open={openSections.governance} 
-            onOpenChange={() => toggleSection('governance')}
-          >
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Crown className="h-5 w-5 text-primary" />
-                    <div>
-                      <CardTitle className="text-lg">Structuration, Gouvernance et Management</CardTitle>
-                      <CardDescription>Organisation, processus de décision et management</CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="default" className="bg-warning text-warning-foreground">
-                      Moyen 6.4/10
-                    </Badge>
-                    {openSections.governance ? 
-                      <ChevronDown className="h-4 w-4" /> : 
-                      <ChevronRight className="h-4 w-4" />
-                    }
-                  </div>
-                </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Structure de Gouvernance</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={governanceStructure}
-                              cx="50%"
-                              cy="50%"
-                              labelLine={false}
-                              outerRadius={80}
-                              fill="#8884d8"
-                              dataKey="value"
-                            />
-                            <RechartsTooltip />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
+         {(companyData?.enriched?.visibility?.governance !== "false") && (
+         <Card>
+           <Collapsible 
+             open={openSections.governance} 
+             onOpenChange={() => toggleSection('governance')}
+           >
+             <CollapsibleTrigger asChild>
+               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                 <div className="flex items-center justify-between">
+                   <div className="flex items-center space-x-3">
+                     <Crown className="h-5 w-5 text-primary" />
+                     <div>
+                       <CardTitle className="text-lg">Structuration, Gouvernance et Management</CardTitle>
+                       <CardDescription>Organisation, processus de décision et management</CardDescription>
+                     </div>
+                   </div>
+                   <div className="flex items-center space-x-2">
+                     <Badge variant="default" className="bg-warning text-warning-foreground">
+                       Moyen 6.4/10
+                     </Badge>
+                     {openSections.governance ? 
+                       <ChevronDown className="h-4 w-4" /> : 
+                       <ChevronRight className="h-4 w-4" />
+                     }
+                   </div>
+                 </div>
+               </CardHeader>
+             </CollapsibleTrigger>
+             
+             <CollapsibleContent>
+               <CardContent className="space-y-6">
+                 <div className="grid md:grid-cols-2 gap-6">
+                   <Card>
+                     <CardHeader>
+                       <CardTitle className="text-base">Structure de Gouvernance</CardTitle>
+                     </CardHeader>
+                     <CardContent>
+                       <div className="h-64">
+                         <ResponsiveContainer width="100%" height="100%">
+                           <PieChart>
+                             <Pie
+                               data={governanceStructure}
+                               cx="50%"
+                               cy="50%"
+                               labelLine={false}
+                               outerRadius={80}
+                               fill="#8884d8"
+                               dataKey="value"
+                             />
+                             <RechartsTooltip />
+                           </PieChart>
+                         </ResponsiveContainer>
+                       </div>
+                     </CardContent>
+                   </Card>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Indicateurs de Management</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {complianceItems.map((item, index) => (
-                          <div key={index} className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              {getStatusIcon(item.status)}
-                              <span className="text-sm">{item.name}</span>
-                            </div>
-                            {getStatusBadge(item.score, item.status)}
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-        )}
+                   <Card>
+                     <CardHeader>
+                       <CardTitle className="text-base">Indicateurs de Management</CardTitle>
+                     </CardHeader>
+                     <CardContent>
+                       <div className="space-y-4">
+                         {complianceItems.map((item, index) => (
+                           <div key={index} className="flex items-center justify-between">
+                             <div className="flex items-center space-x-2">
+                               {getStatusIcon(item.status)}
+                               <span className="text-sm">{item.name}</span>
+                             </div>
+                             {getStatusBadge(item.score, item.status)}
+                           </div>
+                         ))}
+                       </div>
+                     </CardContent>
+                   </Card>
+                 </div>
+               </CardContent>
+             </CollapsibleContent>
+           </Collapsible>
+         </Card>
+         )}
         </div>
       </div>
     </TooltipProvider>

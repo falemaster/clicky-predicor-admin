@@ -207,17 +207,19 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
     <TooltipProvider>
       <div className="space-y-6">
         {/* Executive Summary Component - Synchronized with Admin Editor */}
-        <ExecutiveSummary 
-          scores={{
-            economic: data?.scores?.global || 5.5,
-            financial: data?.scores?.financial || 6.0,
-            legal: data?.scores?.legal || 7.5,
-            fiscal: data?.scores?.fiscal || 6.8,
-            global: data?.scores?.global || 5.5
-          }}
-          companyName={data?.companyInfo?.name || "L'entreprise"}
-          existingSummary={data?.enriched?.executiveSummary}
-        />
+        {(companyData?.enriched?.visibility?.executiveSummary !== "false") && (
+          <ExecutiveSummary 
+            scores={{
+              economic: data?.scores?.global || 5.5,
+              financial: data?.scores?.financial || 6.0,
+              legal: data?.scores?.legal || 7.5,
+              fiscal: data?.scores?.fiscal || 6.8,
+              global: data?.scores?.global || 5.5
+            }}
+            companyName={data?.companyInfo?.name || "L'entreprise"}
+            existingSummary={data?.enriched?.executiveSummary}
+          />
+        )}
 
         {/* Additional AI Analysis Section */}
         {aiAnalysis && (
@@ -655,6 +657,7 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
         </Card>
 
         {/* Mitigation Fiscale */}
+        {(companyData?.enriched?.visibility?.fiscal !== "false") && (
         <Card>
           <Collapsible 
             open={openSections.fiscal} 
@@ -929,9 +932,11 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
-        </Card>
+         </Card>
+        )}
 
         {/* Situation financière */}
+        {(companyData?.enriched?.visibility?.financial !== "false") && (
         <Card>
           <Collapsible 
             open={openSections.financial} 
@@ -1008,9 +1013,11 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
-        </Card>
+         </Card>
+        )}
 
         {/* Analyse économique et commerciale */}
+        {(companyData?.enriched?.visibility?.economic !== "false") && (
         <Card>
           <Collapsible 
             open={openSections.economic} 
@@ -1201,7 +1208,8 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
           </Card>
         )}
 
-        {/* Structuration, Gouvernance et Management */}
+         {/* Structuration, Gouvernance et Management */}
+        {(companyData?.enriched?.visibility?.governance !== "false") && (
         <Card>
           <Collapsible 
             open={openSections.governance} 
@@ -1280,6 +1288,7 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
             </CollapsibleContent>
           </Collapsible>
         </Card>
+        )}
         </div>
       </div>
     </TooltipProvider>

@@ -1012,27 +1012,32 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       onOpenChange={() => toggleSection('compliance')}
                     >
                       <CollapsibleTrigger asChild>
-                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <Shield className="h-5 w-5 text-primary" />
-                              <div>
-                                <CardTitle className="text-lg">Conformités et Obligations Légales</CardTitle>
-                                <CardDescription>Respect des réglementations et audits de conformité</CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <AlertBadge 
-                                {...calculateAlert(displayScores.legal, 'legal')}
-                                score={displayScores.legal}
-                              />
-                              {openSections.compliance ? 
-                                <ChevronDown className="h-4 w-4" /> : 
-                                <ChevronRight className="h-4 w-4" />
-                              }
-                            </div>
-                          </div>
-                        </CardHeader>
+                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                           <div className="flex items-center justify-between">
+                             <div className="flex items-center space-x-3">
+                               <Shield className="h-5 w-5 text-primary" />
+                               <div>
+                                 <CardTitle className="text-lg">Conformités et Obligations Légales</CardTitle>
+                                 <CardDescription>Respect des réglementations et audits de conformité</CardDescription>
+                               </div>
+                             </div>
+                             <div className="flex items-center space-x-2">
+                               <VisibilityToggle
+                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'compliance']) !== "false"}
+                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'compliance'], visible.toString())}
+                                 label="Afficher section"
+                               />
+                               <AlertBadge 
+                                 {...calculateAlert(displayScores.legal, 'legal')}
+                                 score={displayScores.legal}
+                               />
+                               {openSections.compliance ? 
+                                 <ChevronDown className="h-4 w-4" /> : 
+                                 <ChevronRight className="h-4 w-4" />
+                               }
+                             </div>
+                           </div>
+                         </CardHeader>
                       </CollapsibleTrigger>
                       
                       <CollapsibleContent>
@@ -1051,21 +1056,28 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                               onOpenChange={() => toggleSection('certifications')}
                             >
                               <CollapsibleTrigger asChild>
-                                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                      <Award className="h-5 w-5 text-primary" />
-                                      <div>
-                                        <CardTitle className="text-lg">Certifications et Agréments</CardTitle>
-                                        <CardDescription>Standards qualité et agréments administratifs</CardDescription>
-                                      </div>
-                                    </div>
-                                    {openSections.certifications ? 
-                                      <ChevronDown className="h-4 w-4" /> : 
-                                      <ChevronRight className="h-4 w-4" />
-                                    }
-                                  </div>
-                                </CardHeader>
+                                 <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                                   <div className="flex items-center justify-between">
+                                     <div className="flex items-center space-x-3">
+                                       <Award className="h-5 w-5 text-primary" />
+                                       <div>
+                                         <CardTitle className="text-lg">Certifications et Agréments</CardTitle>
+                                         <CardDescription>Standards qualité et agréments administratifs</CardDescription>
+                                       </div>
+                                     </div>
+                                     <div className="flex items-center space-x-2">
+                                       <VisibilityToggle
+                                         isVisible={getNestedValue(formData, ['enriched', 'visibility', 'certifications']) !== "false"}
+                                         onToggle={(visible) => updateField(['enriched', 'visibility', 'certifications'], visible.toString())}
+                                         label="Afficher sous-section"
+                                       />
+                                       {openSections.certifications ? 
+                                         <ChevronDown className="h-4 w-4" /> : 
+                                         <ChevronRight className="h-4 w-4" />
+                                       }
+                                     </div>
+                                   </div>
+                                 </CardHeader>
                               </CollapsibleTrigger>
                               
                               <CollapsibleContent>
@@ -1164,21 +1176,28 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                               onOpenChange={() => toggleSection('procedures')}
                             >
                               <CollapsibleTrigger asChild>
-                                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                      <Scale className="h-5 w-5 text-primary" />
-                                      <div>
-                                        <CardTitle className="text-lg">Procédures Judiciaires et Légales</CardTitle>
-                                        <CardDescription>Gestion des procédures précontentieuses et judiciaires</CardDescription>
-                                      </div>
-                                    </div>
-                                    {openSections.procedures ? 
-                                      <ChevronDown className="h-4 w-4" /> : 
-                                      <ChevronRight className="h-4 w-4" />
-                                    }
-                                  </div>
-                                </CardHeader>
+                                 <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                                   <div className="flex items-center justify-between">
+                                     <div className="flex items-center space-x-3">
+                                       <Scale className="h-5 w-5 text-primary" />
+                                       <div>
+                                         <CardTitle className="text-lg">Procédures Judiciaires et Légales</CardTitle>
+                                         <CardDescription>Gestion des procédures précontentieuses et judiciaires</CardDescription>
+                                       </div>
+                                     </div>
+                                     <div className="flex items-center space-x-2">
+                                       <VisibilityToggle
+                                         isVisible={getNestedValue(formData, ['enriched', 'visibility', 'procedures']) !== "false"}
+                                         onToggle={(visible) => updateField(['enriched', 'visibility', 'procedures'], visible.toString())}
+                                         label="Afficher sous-section"
+                                       />
+                                       {openSections.procedures ? 
+                                         <ChevronDown className="h-4 w-4" /> : 
+                                         <ChevronRight className="h-4 w-4" />
+                                       }
+                                     </div>
+                                   </div>
+                                 </CardHeader>
                               </CollapsibleTrigger>
                               
                               <CollapsibleContent>
@@ -1291,27 +1310,32 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       onOpenChange={() => toggleSection('fiscal')}
                     >
                       <CollapsibleTrigger asChild>
-                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <CreditCard className="h-5 w-5 text-primary" />
-                              <div>
-                                <CardTitle className="text-lg">Mitigation Fiscale</CardTitle>
-                                <CardDescription>Optimisation et stratégies de gestion fiscale</CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <AlertBadge 
-                                {...calculateAlert(displayScores.fiscal, 'fiscal')}
-                                score={displayScores.fiscal}
-                              />
-                              {openSections.fiscal ? 
-                                <ChevronDown className="h-4 w-4" /> : 
-                                <ChevronRight className="h-4 w-4" />
-                              }
-                            </div>
-                          </div>
-                        </CardHeader>
+                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                           <div className="flex items-center justify-between">
+                             <div className="flex items-center space-x-3">
+                               <CreditCard className="h-5 w-5 text-primary" />
+                               <div>
+                                 <CardTitle className="text-lg">Mitigation Fiscale</CardTitle>
+                                 <CardDescription>Optimisation et stratégies de gestion fiscale</CardDescription>
+                               </div>
+                             </div>
+                             <div className="flex items-center space-x-2">
+                               <VisibilityToggle
+                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'fiscal']) !== "false"}
+                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'fiscal'], visible.toString())}
+                                 label="Afficher section"
+                               />
+                               <AlertBadge 
+                                 {...calculateAlert(displayScores.fiscal, 'fiscal')}
+                                 score={displayScores.fiscal}
+                               />
+                               {openSections.fiscal ? 
+                                 <ChevronDown className="h-4 w-4" /> : 
+                                 <ChevronRight className="h-4 w-4" />
+                               }
+                             </div>
+                           </div>
+                         </CardHeader>
                       </CollapsibleTrigger>
                       
                       <CollapsibleContent>
@@ -1340,27 +1364,32 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       onOpenChange={() => toggleSection('financial')}
                     >
                       <CollapsibleTrigger asChild>
-                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <CreditCard className="h-5 w-5 text-primary" />
-                              <div>
-                                <CardTitle className="text-lg">Situation Financière</CardTitle>
-                                <CardDescription>Santé financière et ratios de gestion</CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <AlertBadge 
-                                {...calculateAlert(displayScores.financial, 'financial')}
-                                score={displayScores.financial}
-                              />
-                              {openSections.financial ? 
-                                <ChevronDown className="h-4 w-4" /> : 
-                                <ChevronRight className="h-4 w-4" />
-                              }
-                            </div>
-                          </div>
-                        </CardHeader>
+                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                           <div className="flex items-center justify-between">
+                             <div className="flex items-center space-x-3">
+                               <CreditCard className="h-5 w-5 text-primary" />
+                               <div>
+                                 <CardTitle className="text-lg">Situation Financière</CardTitle>
+                                 <CardDescription>Santé financière et ratios de gestion</CardDescription>
+                               </div>
+                             </div>
+                             <div className="flex items-center space-x-2">
+                               <VisibilityToggle
+                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'financial']) !== "false"}
+                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'financial'], visible.toString())}
+                                 label="Afficher section"
+                               />
+                               <AlertBadge 
+                                 {...calculateAlert(displayScores.financial, 'financial')}
+                                 score={displayScores.financial}
+                               />
+                               {openSections.financial ? 
+                                 <ChevronDown className="h-4 w-4" /> : 
+                                 <ChevronRight className="h-4 w-4" />
+                               }
+                             </div>
+                           </div>
+                         </CardHeader>
                       </CollapsibleTrigger>
                       
                       <CollapsibleContent>
@@ -1383,27 +1412,32 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       onOpenChange={() => toggleSection('economic')}
                     >
                       <CollapsibleTrigger asChild>
-                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <TrendingUp className="h-5 w-5 text-primary" />
-                              <div>
-                                <CardTitle className="text-lg">Analyse Économique et Commerciale</CardTitle>
-                                <CardDescription>Configuration des données de marché</CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <AlertBadge 
-                                {...calculateAlert(displayScores.economic, 'economic')}
-                                score={displayScores.economic}
-                              />
-                              {openSections.economic ? 
-                                <ChevronDown className="h-4 w-4" /> : 
-                                <ChevronRight className="h-4 w-4" />
-                              }
-                            </div>
-                          </div>
-                        </CardHeader>
+                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                           <div className="flex items-center justify-between">
+                             <div className="flex items-center space-x-3">
+                               <TrendingUp className="h-5 w-5 text-primary" />
+                               <div>
+                                 <CardTitle className="text-lg">Analyse Économique et Commerciale</CardTitle>
+                                 <CardDescription>Configuration des données de marché</CardDescription>
+                               </div>
+                             </div>
+                             <div className="flex items-center space-x-2">
+                               <VisibilityToggle
+                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'economic']) !== "false"}
+                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'economic'], visible.toString())}
+                                 label="Afficher section"
+                               />
+                               <AlertBadge 
+                                 {...calculateAlert(displayScores.economic, 'economic')}
+                                 score={displayScores.economic}
+                               />
+                               {openSections.economic ? 
+                                 <ChevronDown className="h-4 w-4" /> : 
+                                 <ChevronRight className="h-4 w-4" />
+                               }
+                             </div>
+                           </div>
+                         </CardHeader>
                       </CollapsibleTrigger>
                       
                       <CollapsibleContent>
@@ -1426,27 +1460,32 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                       onOpenChange={() => toggleSection('governance')}
                     >
                       <CollapsibleTrigger asChild>
-                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <Crown className="h-5 w-5 text-primary" />
-                              <div>
-                                <CardTitle className="text-lg">Structuration, Gouvernance et Management</CardTitle>
-                                <CardDescription>Organisation, processus de décision et management</CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <AlertBadge 
-                                {...calculateAlert(displayScores.legal, 'legal')}
-                                score={displayScores.legal}
-                              />
-                              {openSections.governance ? 
-                                <ChevronDown className="h-4 w-4" /> : 
-                                <ChevronRight className="h-4 w-4" />
-                              }
-                            </div>
-                          </div>
-                        </CardHeader>
+                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                           <div className="flex items-center justify-between">
+                             <div className="flex items-center space-x-3">
+                               <Crown className="h-5 w-5 text-primary" />
+                               <div>
+                                 <CardTitle className="text-lg">Structuration, Gouvernance et Management</CardTitle>
+                                 <CardDescription>Organisation, processus de décision et management</CardDescription>
+                               </div>
+                             </div>
+                             <div className="flex items-center space-x-2">
+                               <VisibilityToggle
+                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'governance']) !== "false"}
+                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'governance'], visible.toString())}
+                                 label="Afficher section"
+                               />
+                               <AlertBadge 
+                                 {...calculateAlert(displayScores.legal, 'legal')}
+                                 score={displayScores.legal}
+                               />
+                               {openSections.governance ? 
+                                 <ChevronDown className="h-4 w-4" /> : 
+                                 <ChevronRight className="h-4 w-4" />
+                               }
+                             </div>
+                           </div>
+                         </CardHeader>
                       </CollapsibleTrigger>
                       
                       <CollapsibleContent>

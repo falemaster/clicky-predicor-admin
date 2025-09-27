@@ -56,6 +56,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
   };
 
   const enrichedData = data.enriched;
+  const legalCapital = data.pappers?.capitalSocial ?? data.infogreffe?.capitalSocial;
 
   return (
     <div className="space-y-6">
@@ -168,9 +169,7 @@ const EnrichedDataDisplayAI: React.FC<EnrichedDataDisplayAIProps> = ({ data, onD
               <span className="text-sm text-muted-foreground">Capital social</span>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">
-                  {data.infogreffe?.capitalSocial?.toLocaleString() + ' €' || 
-                   data.pappers?.capitalSocial?.toLocaleString() + ' €' ||
-                   "Non renseigné"}
+                  {typeof legalCapital === 'number' ? `${legalCapital.toLocaleString('fr-FR')} €` : "Non renseigné"}
                 </span>
               </div>
             </div>

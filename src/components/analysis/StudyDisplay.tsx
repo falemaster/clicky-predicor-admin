@@ -666,14 +666,14 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                   <CardContent>
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Capital social</span>
-                          <DataWithSource source="PORTALIS" lastUpdate="2023-12-31T12:00:00Z">
-                            <span className="font-medium">
-                              {companyData?.infogreffe?.capitalSocial?.toLocaleString() || '50 000'} €
-                            </span>
-                          </DataWithSource>
-                        </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">Capital social</span>
+                            <DataWithSource source="PAPPERS" lastUpdate={companyData?.pappers?.derniereMiseAJour || companyData?.lastUpdate}>
+                              <span className="font-medium">
+                                {(companyData?.pappers?.capitalSocial ?? companyData?.infogreffe?.capitalSocial)?.toLocaleString('fr-FR') || 'Non renseigné'} €
+                              </span>
+                            </DataWithSource>
+                          </div>
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Nombre d'actions</span>
                           <DataWithSource source="PORTALIS" lastUpdate="2023-12-31T12:00:00Z">

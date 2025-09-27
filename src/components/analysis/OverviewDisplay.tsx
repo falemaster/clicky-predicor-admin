@@ -284,25 +284,28 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
         </Card>
       </div>
 
-      {/* Section Qualité des données */}
-      <DataQualitySection 
-        config={{
-          completeness: 85,
-          lastUpdate: new Date().toISOString(),
-          apis: {
-            insee: { status: 'active', label: 'INSEE/SIRENE', category: 'Données officielles' },
-            pappers: { status: 'active', label: 'Pappers API', category: 'Données financières' },
-            rubypayeur: { status: 'active', label: 'RubyPayeur', category: 'Score crédit' },
-            infogreffe: { status: 'active', label: 'Infogreffe', category: 'Données juridiques' },
-            ai_enrichment: { status: 'warning', label: 'IA Enrichissement', category: 'Données simulées' },
-            sirius: { status: 'active', label: 'SIRIUS', category: 'Données fiscales' },
-            dgfip: { status: 'active', label: 'DGFIP', category: 'Données fiscales' },
-            portalis: { status: 'active', label: 'PORTALIS', category: 'Données judiciaires' },
-            opale: { status: 'active', label: 'OPALE', category: 'Données sociales' }
-          },
-          overallStatus: 'Données fiables'
-        }}
-      />
+      {/* Section Qualité des données - Synchronisée avec admin */}
+      {companyData?.adminSettings?.showDataQualitySection !== false && (
+        <DataQualitySection 
+          config={{
+            completeness: companyData?.enriched?.dataQuality?.completeness || 85,
+            lastUpdate: companyData?.enriched?.dataQuality?.lastUpdate || new Date().toISOString(),
+            apis: companyData?.enriched?.dataQuality?.apis || {
+              insee: { status: 'active', label: 'INSEE/SIRENE', category: 'Données officielles' },
+              pappers: { status: 'active', label: 'Pappers API', category: 'Données financières' },
+              rubypayeur: { status: 'active', label: 'RubyPayeur', category: 'Score crédit' },
+              infogreffe: { status: 'active', label: 'Infogreffe', category: 'Données juridiques' },
+              ai_enrichment: { status: 'warning', label: 'IA Enrichissement', category: 'Données simulées' },
+              sirius: { status: 'active', label: 'SIRIUS', category: 'Données fiscales' },
+              dgfip: { status: 'active', label: 'DGFIP', category: 'Données fiscales' },
+              portalis: { status: 'active', label: 'PORTALIS', category: 'Données judiciaires' },
+              opale: { status: 'active', label: 'OPALE', category: 'Données sociales' }
+            },
+            overallStatus: companyData?.enriched?.dataQuality?.overallStatus || 'Données fiables',
+            isVisible: companyData?.adminSettings?.showDataQualitySection !== false
+          }}
+        />
+      )}
     </div>
   );
 }

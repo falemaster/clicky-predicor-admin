@@ -90,10 +90,31 @@ export function AdminAnalytics() {
     try {
       setLoading(true);
 
+      // Calculate date range based on timeRange
+      const endDate = new Date();
+      const startDate = new Date();
+      switch (timeRange) {
+        case '1d':
+          startDate.setDate(endDate.getDate() - 1);
+          break;
+        case '7d':
+          startDate.setDate(endDate.getDate() - 7);
+          break;
+        case '30d':
+          startDate.setDate(endDate.getDate() - 30);
+          break;
+        case '90d':
+          startDate.setDate(endDate.getDate() - 90);
+          break;
+        default:
+          startDate.setDate(endDate.getDate() - 7);
+      }
+
       // Get overview stats
       const { count: totalSearches } = await supabase
         .from('admin_search_history')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', startDate.toISOString());
 
       const { count: uniqueUsers } = await supabase
         .from('admin_users')
@@ -103,57 +124,117 @@ export function AdminAnalytics() {
         .from('admin_companies')
         .select('*', { count: 'exact', head: true });
 
-      // Get time series data (mock for now)
-      const timeSeriesData = Array.from({ length: 30 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
+      // Get previous period for growth calculation
+      const prevStartDate = new Date(startDate);
+      const daysDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      prevStartDate.setDate(prevStartDate.getDate() - daysDiff);
+
+      const { count: prevSearches } = await supabase
+        .from('admin_search_history')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', prevStartDate.toISOString())
+        .lt('created_at', startDate.toISOString());
+
+      // Calculate growth rates
+      const searchGrowth = prevSearches && prevSearches > 0 
+        ? ((totalSearches || 0) - prevSearches) / prevSearches * 100 
+        : 0;
+
+      // Get real time series data
+      const { data: timeSeriesRaw } = await supabase
+        .from('admin_search_history')
+        .select('created_at')
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: true });
+
+      // Group by date
+      const timeSeriesMap = new Map();
+      timeSeriesRaw?.forEach(record => {
+        const date = record.created_at.split('T')[0];
+        timeSeriesMap.set(date, (timeSeriesMap.get(date) || 0) + 1);
+      });
+
+      const timeSeriesData = Array.from({ length: Math.min(daysDiff, 30) }, (_, i) => {
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
         return {
-          date: date.toISOString().split('T')[0],
-          searches: Math.floor(Math.random() * 100) + 20,
-          uniqueUsers: Math.floor(Math.random() * 50) + 10,
-          apiCalls: Math.floor(Math.random() * 500) + 100
+          date: dateStr,
+          searches: timeSeriesMap.get(dateStr) || 0,
+          uniqueUsers: Math.floor((timeSeriesMap.get(dateStr) || 0) * 0.7), // Estimate
+          apiCalls: (timeSeriesMap.get(dateStr) || 0) * 3 // Estimate
         };
-      }).reverse();
+      });
 
-      // Mock search type data
-      const searchTypeData = [
-        { type: 'SIREN', count: 1250, percentage: 45 },
-        { type: 'SIRET', count: 890, percentage: 32 },
-        { type: 'Raison Sociale', count: 640, percentage: 23 }
-      ];
+      // Get real search type data
+      const { data: searchTypeRaw } = await supabase
+        .from('admin_search_history')
+        .select('search_type')
+        .gte('created_at', startDate.toISOString());
 
-      // Mock device data
+      const searchTypeCounts = searchTypeRaw?.reduce((acc, record) => {
+        acc[record.search_type] = (acc[record.search_type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>) || {};
+
+      const totalSearchTypeCount = Object.values(searchTypeCounts).reduce((a, b) => a + b, 0);
+      const searchTypeData = Object.entries(searchTypeCounts).map(([type, count]) => ({
+        type,
+        count,
+        percentage: totalSearchTypeCount > 0 ? Math.round((count / totalSearchTypeCount) * 100) : 0
+      }));
+
+      // Get real top searches
+      const { data: topSearchesRaw } = await supabase
+        .from('admin_search_history')
+        .select('search_query, created_at')
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: false });
+
+      const searchCounts = topSearchesRaw?.reduce((acc, record) => {
+        const query = record.search_query;
+        if (!acc[query]) {
+          acc[query] = { count: 0, lastSearched: record.created_at };
+        }
+        acc[query].count++;
+        if (record.created_at > acc[query].lastSearched) {
+          acc[query].lastSearched = record.created_at;
+        }
+        return acc;
+      }, {} as Record<string, { count: number; lastSearched: string }>) || {};
+
+      const topSearches = Object.entries(searchCounts)
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, 5)
+        .map(([query, data]) => ({
+          query,
+          count: data.count,
+          lastSearched: data.lastSearched
+        }));
+
+      // Estimate device data (since we don't have this in user_agent parsing yet)
       const deviceData = [
-        { device: 'Desktop', count: 1680, percentage: 60 },
-        { device: 'Mobile', count: 840, percentage: 30 },
-        { device: 'Tablet', count: 280, percentage: 10 }
+        { device: 'Desktop', count: Math.floor((totalSearches || 0) * 0.6), percentage: 60 },
+        { device: 'Mobile', count: Math.floor((totalSearches || 0) * 0.3), percentage: 30 },
+        { device: 'Tablet', count: Math.floor((totalSearches || 0) * 0.1), percentage: 10 }
       ];
 
-      // Mock top searches
-      const topSearches = [
-        { query: 'TechCorp SARL', count: 45, lastSearched: '2024-01-20T10:30:00Z' },
-        { query: '123456789', count: 38, lastSearched: '2024-01-20T09:15:00Z' },
-        { query: 'Innovation SAS', count: 32, lastSearched: '2024-01-20T08:45:00Z' },
-        { query: '987654321', count: 28, lastSearched: '2024-01-19T16:20:00Z' },
-        { query: 'Digital Solutions', count: 24, lastSearched: '2024-01-19T14:10:00Z' }
-      ];
-
-      // Mock performance data
+      // Estimate performance data (would need edge function logs for real data)
       const performanceData = [
-        { endpoint: 'SIREN Search', avgResponseTime: 1250, successRate: 98.5, totalCalls: 2340 },
-        { endpoint: 'Company Details', avgResponseTime: 890, successRate: 99.2, totalCalls: 1890 },
-        { endpoint: 'SIRET Lookup', avgResponseTime: 1100, successRate: 97.8, totalCalls: 1560 },
-        { endpoint: 'Enrichment API', avgResponseTime: 2300, successRate: 94.2, totalCalls: 890 }
+        { endpoint: 'SIRENE Search', avgResponseTime: 1250, successRate: 98.5, totalCalls: searchTypeCounts['sirene'] || 0 },
+        { endpoint: 'Company Details', avgResponseTime: 890, successRate: 99.2, totalCalls: Math.floor((totalSearches || 0) * 0.8) },
+        { endpoint: 'SIREN Lookup', avgResponseTime: 1100, successRate: 97.8, totalCalls: searchTypeCounts['siren'] || 0 },
+        { endpoint: 'Enrichment API', avgResponseTime: 2300, successRate: 94.2, totalCalls: Math.floor((totalSearches || 0) * 0.3) }
       ];
 
       setAnalytics({
         overview: {
-          totalSearches: totalSearches || 2780,
-          uniqueUsers: uniqueUsers || 342,
-          totalCompanies: totalCompanies || 1256,
+          totalSearches: totalSearches || 0,
+          uniqueUsers: uniqueUsers || 0,
+          totalCompanies: totalCompanies || 0,
           averageResponseTime: 1180,
-          searchGrowth: 15.2,
-          userGrowth: 8.7
+          searchGrowth,
+          userGrowth: 8.7 // Would need user creation tracking for real data
         },
         timeSeriesData,
         searchTypeData,

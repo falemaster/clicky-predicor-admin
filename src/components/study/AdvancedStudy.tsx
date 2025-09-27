@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ExecutiveSummary } from "@/components/admin/ExecutiveSummary";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -205,73 +206,82 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Carte principale avec synthèse exécutive */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-xl">Synthèse Exécutive</CardTitle>
-                <CardDescription>
-                  Analyse globale et recommandations stratégiques
-                </CardDescription>
-              </div>
-              <Button
-                onClick={generateAIAnalysis}
-                disabled={isGeneratingAI}
-                variant="outline"
-                size="sm"
-              >
-                {isGeneratingAI ? "Génération..." : "Générer analyse IA"}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {aiAnalysis ? (
-              <div className="space-y-4">
-                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <h4 className="font-semibold text-primary mb-2">Analyse IA - Synthèse Exécutive</h4>
-                  <p className="text-sm text-muted-foreground">{aiAnalysis.executiveSynthesis}</p>
+        {/* Executive Summary Component - Synchronized with Admin Editor */}
+        <ExecutiveSummary 
+          scores={{
+            economic: data?.scores?.global || 5.5,
+            financial: data?.scores?.financial || 6.0,
+            legal: data?.scores?.legal || 7.5,
+            fiscal: data?.scores?.fiscal || 6.8,
+            global: data?.scores?.global || 5.5
+          }}
+          companyName={data?.companyInfo?.name || "L'entreprise"}
+          existingSummary={data?.enriched?.executiveSummary}
+        />
+
+        {/* Additional AI Analysis Section */}
+        {aiAnalysis && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Analyse IA Approfondie</CardTitle>
+              <CardDescription>
+                Insights complémentaires générés par intelligence artificielle
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <h5 className="font-medium mb-2">Profil de Risque</h5>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Niveau: <span className="font-medium">{aiAnalysis.riskProfile.level}</span>
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    {aiAnalysis.riskProfile.factors.slice(0, 3).map((factor, idx) => (
+                      <li key={idx}>• {factor}</li>
+                    ))}
+                  </ul>
                 </div>
                 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-muted/30 rounded-lg">
-                    <h5 className="font-medium mb-2">Profil de Risque</h5>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Niveau: <span className="font-medium">{aiAnalysis.riskProfile.level}</span>
-                    </p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      {aiAnalysis.riskProfile.factors.slice(0, 3).map((factor, idx) => (
-                        <li key={idx}>• {factor}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div className="p-4 bg-muted/30 rounded-lg">
-                    <h5 className="font-medium mb-2">Recommandations Prioritaires</h5>
-                    <div className="space-y-2">
-                      {aiAnalysis.recommendations.slice(0, 3).map((rec, idx) => (
-                        <div key={idx} className="text-xs">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">{rec.action}</span>
-                            <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'default' : 'secondary'} className="text-xs">
-                              {rec.priority}
-                            </Badge>
-                          </div>
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <h5 className="font-medium mb-2">Recommandations Prioritaires</h5>
+                  <div className="space-y-2">
+                    {aiAnalysis.recommendations.slice(0, 3).map((rec, idx) => (
+                      <div key={idx} className="text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{rec.action}</span>
+                          <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'default' : 'secondary'} className="text-xs">
+                            {rec.priority}
+                          </Badge>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">
-                  Cliquez sur "Générer analyse IA" pour obtenir une synthèse détaillée et des recommandations personnalisées.
+            </CardContent>
+          </Card>
+        )}
+
+        {/* AI Analysis Generation Button */}
+        {!aiAnalysis && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Button
+                  onClick={generateAIAnalysis}
+                  disabled={isGeneratingAI}
+                  variant="outline"
+                  size="sm"
+                >
+                  {isGeneratingAI ? "Génération..." : "Générer analyse IA complémentaire"}
+                </Button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Obtenez des insights supplémentaires par intelligence artificielle
                 </p>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="space-y-4">
         {/* Conformités et obligations légales */}

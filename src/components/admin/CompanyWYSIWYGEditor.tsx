@@ -61,7 +61,8 @@ import {
   Eye,
   EyeOff,
   Database,
-  Clock
+  Clock,
+  FileCheck
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -201,9 +202,10 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     economic: false,
     financial: false,
     compliance: false,
+    certifications: false,
+    procedures: false,
     fiscal: false,
-    governance: false,
-    procedures: false
+    governance: false
   });
 
   useEffect(() => {
@@ -1041,6 +1043,119 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                             onSave={(value) => updateField(['enriched', 'compliance', 'analysis'], value)}
                             multiline
                           />
+                          
+                          {/* Certifications et Agréments */}
+                          <Card>
+                            <Collapsible 
+                              open={openSections.certifications} 
+                              onOpenChange={() => toggleSection('certifications')}
+                            >
+                              <CollapsibleTrigger asChild>
+                                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                      <Award className="h-5 w-5 text-primary" />
+                                      <div>
+                                        <CardTitle className="text-lg">Certifications et Agréments</CardTitle>
+                                        <CardDescription>Standards qualité et agréments administratifs</CardDescription>
+                                      </div>
+                                    </div>
+                                    {openSections.certifications ? 
+                                      <ChevronDown className="h-4 w-4" /> : 
+                                      <ChevronRight className="h-4 w-4" />
+                                    }
+                                  </div>
+                                </CardHeader>
+                              </CollapsibleTrigger>
+                              
+                              <CollapsibleContent>
+                                <CardContent className="space-y-6">
+                                  <div className="grid md:grid-cols-2 gap-6">
+                                    {/* Certifications Qualité */}
+                                    <Card>
+                                      <CardHeader>
+                                        <CardTitle className="text-base flex items-center">
+                                          <Award className="h-4 w-4 mr-2 text-blue-500" />
+                                          Certifications Qualité
+                                        </CardTitle>
+                                        <CardDescription>Standards et certifications sectorielles</CardDescription>
+                                      </CardHeader>
+                                      <CardContent>
+                                        <div className="space-y-3">
+                                          {[
+                                            { label: 'ISO 9001:2015', slug: 'iso_9001_2015' },
+                                            { label: 'ISO 14001', slug: 'iso_14001' },
+                                            { label: 'OHSAS 18001', slug: 'ohsas_18001' },
+                                            { label: 'Certification RGE', slug: 'certification_rge' }
+                                          ].map(({ label, slug }) => (
+                                            <div key={slug} className="flex items-center justify-between space-x-2">
+                                              <span className="text-sm font-medium flex-1">{label}</span>
+                                              <Select
+                                                value={getNestedValue(formData, ['enriched', 'compliance', 'certifications', slug]) || 'Non certifiée'}
+                                                onValueChange={(value) => updateField(['enriched', 'compliance', 'certifications', slug], value)}
+                                              >
+                                                <SelectTrigger className="w-32">
+                                                  <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  <SelectItem value="Non certifiée">Non certifiée</SelectItem>
+                                                  <SelectItem value="Certifiée">Certifiée</SelectItem>
+                                                  <SelectItem value="En cours">En cours</SelectItem>
+                                                  <SelectItem value="Valide">Valide</SelectItem>
+                                                  <SelectItem value="Expirée">Expirée</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                    
+                                    {/* Agréments Administratifs */}
+                                    <Card>
+                                      <CardHeader>
+                                        <CardTitle className="text-base flex items-center">
+                                          <FileCheck className="h-4 w-4 mr-2 text-green-500" />
+                                          Agréments Administratifs
+                                        </CardTitle>
+                                        <CardDescription>Autorisations et agréments obtenus</CardDescription>
+                                      </CardHeader>
+                                      <CardContent>
+                                        <div className="space-y-3">
+                                          {[
+                                            { label: 'Agrément préfectoral', slug: 'agrement_prefectoral' },
+                                            { label: 'Licence d\'exploitation', slug: 'licence_exploitation' },
+                                            { label: 'Homologation produits', slug: 'homologation_produits' },
+                                            { label: 'Autorisation ICPE', slug: 'autorisation_icpe' }
+                                          ].map(({ label, slug }) => (
+                                            <div key={slug} className="flex items-center justify-between space-x-2">
+                                              <span className="text-sm font-medium flex-1">{label}</span>
+                                              <Select
+                                                value={getNestedValue(formData, ['enriched', 'compliance', 'agreements', slug]) || 'Non applicable'}
+                                                onValueChange={(value) => updateField(['enriched', 'compliance', 'agreements', slug], value)}
+                                              >
+                                                <SelectTrigger className="w-32">
+                                                  <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  <SelectItem value="Non applicable">Non applicable</SelectItem>
+                                                  <SelectItem value="Valide">Valide</SelectItem>
+                                                  <SelectItem value="Obtenue">Obtenue</SelectItem>
+                                                  <SelectItem value="En cours">En cours</SelectItem>
+                                                  <SelectItem value="Renouvellement">Renouvellement</SelectItem>
+                                                  <SelectItem value="Expirée">Expirée</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  </div>
+                                </CardContent>
+                              </CollapsibleContent>
+                            </Collapsible>
+                          </Card>
                           
                           {/* Procédures Judiciaires et Légales */}
                           <Card>

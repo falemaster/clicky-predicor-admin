@@ -88,7 +88,9 @@ const Analysis = () => {
     naf: realData.sirene.naf,
     employees: realData.sirene.effectifs,
     address: realData.sirene.adresse,
-    director: realData.pappers?.dirigeants?.[0] ? `${realData.pappers.dirigeants[0].prenom} ${realData.pappers.dirigeants[0].nom}` : 'Non renseigné',
+    director: realData.pappers?.dirigeants?.[0] ? 
+      `${realData.pappers.dirigeants[0].prenom || ''} ${realData.pappers.dirigeants[0].nom || ''}`.trim() || 'Non renseigné' : 
+      'Non renseigné',
     phone: realData.enriched?.contactInfo?.phone || 'Non renseigné',
     email: realData.enriched?.contactInfo?.email || 'Non renseigné',
     foundedYear: new Date(realData.sirene.dateCreation).getFullYear().toString(),
@@ -633,7 +635,7 @@ const Analysis = () => {
                             >
                               <button className="text-left hover:bg-muted/50 p-2 rounded-md transition-colors w-full">
                                 <div className="font-medium text-sm text-primary hover:underline">
-                                  {dirigeant.prenom} {dirigeant.nom}
+                                  {[dirigeant.prenom, dirigeant.nom].filter(Boolean).join(' ') || 'Nom non disponible'}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
                                   {dirigeant.fonction || dirigeant.qualite || 'Dirigeant'}

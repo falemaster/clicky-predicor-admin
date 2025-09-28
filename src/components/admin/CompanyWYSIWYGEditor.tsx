@@ -1042,6 +1042,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                                                   <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
+                                                  <SelectItem value="NC">NC</SelectItem>
                                                   <SelectItem value="Non certifiée">Non certifiée</SelectItem>
                                                   <SelectItem value="Certifiée">Certifiée</SelectItem>
                                                   <SelectItem value="En cours">En cours</SelectItem>
@@ -1082,6 +1083,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                                                   <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
+                                                  <SelectItem value="NC">NC</SelectItem>
                                                   <SelectItem value="Non applicable">Non applicable</SelectItem>
                                                   <SelectItem value="Valide">Valide</SelectItem>
                                                   <SelectItem value="Obtenue">Obtenue</SelectItem>

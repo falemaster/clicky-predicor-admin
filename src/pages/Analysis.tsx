@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { OverviewDisplay } from "@/components/analysis/OverviewDisplay";
 import { StudyDisplay } from "@/components/analysis/StudyDisplay";
 import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
+import { FallbackScoreBadge } from "@/components/analysis/FallbackScoreBadge";
 import { useAnalysisData } from "@/hooks/useAnalysisData";
 import { useCompanyData } from "@/hooks/useCompanyData";
 import { getScoreTheme } from "@/utils/scoreUtils";

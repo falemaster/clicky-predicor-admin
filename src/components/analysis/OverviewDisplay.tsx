@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExecutiveSummary } from "@/components/admin/ExecutiveSummary";
+import { FallbackScoreBadge } from "./FallbackScoreBadge";
 import { calculateFinancialScore, calculateRiskScore, getRubyPayeurStatus } from "@/utils/scoreCalculator";
 import { DataQualitySection } from "@/components/ui/data-quality-section";
 import { 
@@ -99,9 +100,16 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
               <Shield className="h-5 w-5 mr-2" />
               Surveillance des risques
             </div>
-            <Badge variant="outline">
-              Score Global: {scores?.global || '5.5'}/10
-            </Badge>
+            <div className="flex items-center space-x-2">
+              <Badge variant="outline">
+                Score Global: {scores?.global || '5.5'}/10
+              </Badge>
+              <FallbackScoreBadge 
+                isFallback={companyData?.predictor?.isFallbackScore}
+                fallbackReason={companyData?.predictor?.fallbackReason}
+                fallbackExplanation={companyData?.predictor?.fallbackExplanation}
+              />
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -114,9 +122,17 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
               <div className="text-2xl font-bold text-primary mb-1">
                 {scores?.global || '5.5'}/10
               </div>
-              <Badge variant="secondary" className="text-xs">
-                {scores?.global >= 7 ? 'Bon' : scores?.global >= 5 ? 'Moyen' : 'Faible'}
-              </Badge>
+              <div className="flex flex-col items-center space-y-1">
+                <Badge variant="secondary" className="text-xs">
+                  {scores?.global >= 7 ? 'Bon' : scores?.global >= 5 ? 'Moyen' : 'Faible'}
+                </Badge>
+                {companyData?.predictor?.isFallbackScore && (
+                  <div className="flex items-center space-x-1">
+                    <AlertTriangle className="h-3 w-3 text-warning" />
+                    <span className="text-xs text-warning">Signaux faibles</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="text-center p-4 bg-muted/30 rounded-lg">

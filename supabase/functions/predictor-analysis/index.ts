@@ -1,6 +1,20 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+// Import du calculateur fallback (réimplémenté pour Deno)
+interface FallbackScoreResult {
+  score: number;
+  isFallback: true;
+  reason: string;
+  explanation: string;
+  breakdown: {
+    obligationsLegales: { penalite: number; details: string[] };
+    proceduresLegales: { penalite: number; details: string[] };
+    paiementsReputation: { penalite: number; bonus: number; details: string[] };
+    profilStructurel: { penalite: number; details: string[] };
+  };
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -31,31 +45,65 @@ serve(async (req) => {
 
     console.log(`Analyzing company data for SIREN: ${siren}`);
 
-    // Calcul des scores basés sur les données disponibles
-    const scores = calculateScores(companyData);
+    // Vérifier si on doit utiliser le score fallback
+    const shouldUseFallback = checkShouldUseFallbackScore(companyData);
     
-    // Analyse prédictive basée sur les facteurs de risque
-    const probabiliteDefaut = calculateDefaultProbability(companyData, scores);
+    let analysis: any;
     
-    // Identification des facteurs explicatifs
-    const facteursExplicatifs = identifyRiskFactors(companyData, scores);
-    
-    // Génération d'alertes basées sur les seuils
-    const alertes = generateAlerts(companyData, scores, probabiliteDefaut);
-    
-    // Recommandations personnalisées
-    const recommandations = await generateRecommendations(companyData, scores, facteursExplicatifs);
-
-    const analysis = {
-      siren,
-      scores,
-      probabiliteDefaut,
-      facteursExplicatifs,
-      alertes,
-      recommandations,
-      analysisDate: new Date().toISOString(),
-      version: '1.0'
-    };
+    if (shouldUseFallback) {
+      console.log(`Using fallback score for SIREN: ${siren} due to insufficient financial data`);
+      
+      // Calculer le score fallback
+      const fallbackResult = calculateFallbackScore(companyData);
+      
+      // Adapter les scores pour le format existant
+      const adaptedScores = {
+        global: fallbackResult.score / 10, // Convertir 0-70 vers 0-7
+        financier: 0, // Pas de données financières
+        legal: calculateLegalScore(companyData),
+        fiscal: 5.0, // Score neutre par défaut
+        prediction: fallbackResult.score / 10
+      };
+      
+      const probabiliteDefaut = calculateDefaultProbability(companyData, adaptedScores);
+      const facteursExplicatifs = identifyRiskFactorsFromFallback(companyData, fallbackResult);
+      const alertes = generateAlerts(companyData, adaptedScores, probabiliteDefaut);
+      const recommandations = await generateRecommendationsForFallback(companyData, fallbackResult);
+      
+      analysis = {
+        siren,
+        scores: adaptedScores,
+        probabiliteDefaut,
+        facteursExplicatifs,
+        alertes,
+        recommandations,
+        isFallbackScore: true,
+        fallbackReason: fallbackResult.reason,
+        fallbackExplanation: fallbackResult.explanation,
+        fallbackBreakdown: fallbackResult.breakdown,
+        analysisDate: new Date().toISOString(),
+        version: '1.1-fallback'
+      };
+    } else {
+      // Calcul normal avec données financières disponibles
+      const scores = calculateScores(companyData);
+      const probabiliteDefaut = calculateDefaultProbability(companyData, scores);
+      const facteursExplicatifs = identifyRiskFactors(companyData, scores);
+      const alertes = generateAlerts(companyData, scores, probabiliteDefaut);
+      const recommandations = await generateRecommendations(companyData, scores, facteursExplicatifs);
+      
+      analysis = {
+        siren,
+        scores,
+        probabiliteDefaut,
+        facteursExplicatifs,
+        alertes,
+        recommandations,
+        isFallbackScore: false,
+        analysisDate: new Date().toISOString(),
+        version: '1.1'
+      };
+    }
 
     console.log(`Analysis completed for SIREN: ${siren}`);
 
@@ -260,4 +308,351 @@ Génère 2-3 recommandations spécifiques et actionnables pour réduire les risq
   }
 
   return recommendations.slice(0, 6); // Limiter à 6 recommandations max
+}
+
+// ====== FONCTIONS POUR LE SCORE FALLBACK ======
+
+function checkShouldUseFallbackScore(companyData: any): boolean {
+  // Critères pour activer le fallback
+  const hasRecentBilans = companyData.pappers?.bilans?.some((bilan: any) => {
+    const currentYear = new Date().getFullYear();
+    return bilan.annee >= currentYear - 2;
+  });
+
+  const hasInfogreffeScores = !!(
+    companyData.infogreffe?.notapmeScores || 
+    companyData.infogreffe?.afdccScore
+  );
+
+  const hasFinancialData = hasRecentBilans || hasInfogreffeScores;
+  return !hasFinancialData;
+}
+
+function calculateFallbackScore(companyData: any): FallbackScoreResult {
+  let scoreBase = 100;
+  let totalBonus = 0;
+  
+  const breakdown = {
+    obligationsLegales: { penalite: 0, details: [] as string[] },
+    proceduresLegales: { penalite: 0, details: [] as string[] },
+    paiementsReputation: { penalite: 0, bonus: 0, details: [] as string[] },
+    profilStructurel: { penalite: 0, details: [] as string[] }
+  };
+
+  // 1. OBLIGATIONS LÉGALES (40%)
+  const obligationsLegales = analyzeFallbackObligationsLegales(companyData);
+  breakdown.obligationsLegales = obligationsLegales;
+  scoreBase -= obligationsLegales.penalite;
+
+  // 2. PROCÉDURES LÉGALES (30%)
+  const proceduresLegales = analyzeFallbackProceduresLegales(companyData);
+  breakdown.proceduresLegales = proceduresLegales;
+  scoreBase -= proceduresLegales.penalite;
+
+  // 3. PAIEMENTS & RÉPUTATION (20%)
+  const paiementsReputation = analyzeFallbackPaiementsReputation(companyData);
+  breakdown.paiementsReputation = paiementsReputation;
+  scoreBase -= paiementsReputation.penalite;
+  totalBonus += paiementsReputation.bonus;
+
+  // 4. PROFIL STRUCTUREL (10%)
+  const profilStructurel = analyzeFallbackProfilStructurel(companyData);
+  breakdown.profilStructurel = profilStructurel;
+  scoreBase -= profilStructurel.penalite;
+
+  // Score final avec bonus mais plafonné à 70
+  const finalScore = Math.min(70, Math.max(0, scoreBase + totalBonus));
+  
+  const explanation = generateFallbackExplanation(finalScore, companyData);
+  const reason = determineFallbackReason(companyData);
+
+  return {
+    score: Math.round(finalScore),
+    isFallback: true,
+    reason,
+    explanation,
+    breakdown
+  };
+}
+
+function analyzeFallbackObligationsLegales(companyData: any) {
+  let penalite = 0;
+  const details: string[] = [];
+  
+  const depotComptes = companyData.pappers?.depotComptes;
+  if (depotComptes === false || !companyData.pappers?.bilans?.length) {
+    const dateCreation = companyData.sirene?.dateCreation;
+    if (dateCreation) {
+      const ageAnnees = (new Date().getTime() - new Date(dateCreation).getTime()) / (365 * 24 * 60 * 60 * 1000);
+      if (ageAnnees > 2) {
+        penalite += 25;
+        details.push('Absence de dépôt de comptes depuis 2+ ans');
+      } else if (ageAnnees > 1) {
+        penalite += 15;
+        details.push('Retard dans le dépôt des comptes annuels');
+      }
+    }
+  }
+
+  const hasBasicInfo = !!(companyData.sirene?.denomination && companyData.sirene?.adresse);
+  if (!hasBasicInfo) {
+    penalite += 15;
+    details.push('Informations administratives incomplètes');
+  }
+
+  return { penalite: Math.min(40, penalite), details };
+}
+
+function analyzeFallbackProceduresLegales(companyData: any) {
+  let penalite = 0;
+  const details: string[] = [];
+
+  const procedures = companyData.bodacc?.annonces?.filter((a: any) => 
+    a.type === 'Procédure collective' && 
+    new Date(a.date) > new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000)
+  ) || [];
+
+  if (procedures.length > 0) {
+    const procedureRecente = procedures.find((p: any) => 
+      new Date(p.date) > new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+    );
+    
+    if (procedureRecente) {
+      penalite += 20;
+      details.push(`Procédure collective récente: ${procedureRecente.contenu}`);
+    } else {
+      penalite += 10;
+      details.push('Antécédents de procédures collectives');
+    }
+  }
+
+  if (companyData.infogreffe?.procedures?.length > 0) {
+    penalite += 5;
+    details.push('Procédures judiciaires en cours');
+  }
+
+  return { penalite: Math.min(30, penalite), details };
+}
+
+function analyzeFallbackPaiementsReputation(companyData: any) {
+  let penalite = 0;
+  let bonus = 0;
+  const details: string[] = [];
+
+  const rubyData = companyData.rubyPayeur;
+  if (rubyData && !rubyData.serviceStatus) {
+    if (rubyData.nbIncidents > 5) {
+      penalite += 15;
+      details.push(`${rubyData.nbIncidents} incidents de paiement recensés`);
+    } else if (rubyData.nbIncidents > 2) {
+      penalite += 8;
+      details.push('Quelques incidents de paiement');
+    }
+
+    if (rubyData.retardsMoyens > 30) {
+      penalite += 5;
+      details.push(`Retards moyens: ${rubyData.retardsMoyens} jours`);
+    }
+
+    if (rubyData.nbIncidents === 0 && rubyData.retardsMoyens < 10) {
+      bonus += 8;
+      details.push('Excellent comportement de paiement');
+    } else if (rubyData.nbIncidents < 2 && rubyData.retardsMoyens < 20) {
+      bonus += 4;
+      details.push('Bon comportement de paiement');
+    }
+  } else {
+    penalite += 5;
+    details.push('Données de paiement non disponibles');
+  }
+
+  return { 
+    penalite: Math.min(20, penalite), 
+    bonus: Math.min(10, bonus),
+    details 
+  };
+}
+
+function analyzeFallbackProfilStructurel(companyData: any) {
+  let penalite = 0;
+  const details: string[] = [];
+
+  const dateCreation = companyData.sirene?.dateCreation;
+  if (dateCreation) {
+    const ageAnnees = (new Date().getTime() - new Date(dateCreation).getTime()) / (365 * 24 * 60 * 60 * 1000);
+    if (ageAnnees < 2) {
+      penalite += 5;
+      details.push(`Entreprise jeune: ${Math.round(ageAnnees * 10) / 10} ans`);
+    }
+  }
+
+  const effectifs = companyData.sirene?.effectifs;
+  if (effectifs && (effectifs.includes('0') || effectifs === '0 salarié')) {
+    penalite += 3;
+    details.push('Aucun salarié déclaré');
+  }
+
+  const naf = companyData.sirene?.naf;
+  const secteursRisque = ['47', '56', '68.2', '77', '81', '95'];
+  if (naf && secteursRisque.some(secteur => naf.startsWith(secteur))) {
+    penalite += 2;
+    details.push('Secteur d\'activité à risque élevé');
+  }
+
+  return { penalite: Math.min(10, penalite), details };
+}
+
+function generateFallbackExplanation(score: number, companyData: any): string {
+  const nomEntreprise = companyData.sirene?.denomination || 'Cette entreprise';
+  
+  if (score >= 60) {
+    return `${nomEntreprise} présente un profil de risque acceptable malgré l'absence de données financières complètes. Les signaux faibles analysés sont globalement favorables.`;
+  } else if (score >= 40) {
+    return `${nomEntreprise} présente quelques signaux d'alerte nécessitant une vigilance accrue. L'absence de données financières complètes limite l'évaluation précise du risque.`;
+  } else if (score >= 20) {
+    return `${nomEntreprise} cumule plusieurs facteurs de risque significatifs. Une analyse approfondie et des garanties supplémentaires sont fortement recommandées.`;
+  } else {
+    return `${nomEntreprise} présente un profil à haut risque avec de multiples signaux d'alerte. Les relations commerciales doivent être évitées ou strictement encadrées.`;
+  }
+}
+
+function determineFallbackReason(companyData: any): string {
+  const reasons: string[] = [];
+  
+  if (!companyData.pappers?.bilans?.length) {
+    reasons.push('Bilans financiers indisponibles');
+  }
+  
+  if (!companyData.infogreffe?.notapmeScores) {
+    reasons.push('Scores Infogreffe NOTAPME indisponibles');
+  }
+  
+  if (!companyData.infogreffe?.afdccScore) {
+    reasons.push('Score AFDCC indisponible');
+  }
+
+  return reasons.join(', ') || 'Données financières limitées';
+}
+
+function calculateLegalScore(companyData: any): number {
+  if (companyData.bodacc?.annonces?.length > 0) {
+    const proceduresRecentes = companyData.bodacc.annonces.filter((a: any) => 
+      a.type === 'Procédure collective' && 
+      new Date(a.date) > new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+    );
+    return proceduresRecentes.length > 0 ? 2.0 : 8.0;
+  }
+  return 7.0;
+}
+
+function identifyRiskFactorsFromFallback(companyData: any, fallbackResult: FallbackScoreResult) {
+  const factors = [];
+
+  // Facteurs basés sur le breakdown du fallback
+  Object.entries(fallbackResult.breakdown).forEach(([category, data]) => {
+    if (data.penalite > 0) {
+      factors.push({
+        nom: getCategoryLabel(category),
+        impact: -Math.min(1, data.penalite / 20),
+        importance: getCategoryImportance(category),
+        explication: data.details.join(', ') || 'Facteur de risque détecté'
+      });
+    }
+  });
+
+  // Ajouter facteur global fallback
+  factors.push({
+    nom: 'Score basé sur signaux faibles',
+    impact: (fallbackResult.score - 35) / 35, // Normalisé autour de 35 (milieu de 0-70)
+    importance: 0.9,
+    explication: 'Analyse basée sur les données publiques disponibles'
+  });
+
+  return factors;
+}
+
+function getCategoryLabel(category: string): string {
+  const labels: { [key: string]: string } = {
+    'obligationsLegales': 'Obligations légales',
+    'proceduresLegales': 'Procédures légales',
+    'paiementsReputation': 'Réputation de paiement',
+    'profilStructurel': 'Profil structurel'
+  };
+  return labels[category] || category;
+}
+
+function getCategoryImportance(category: string): number {
+  const importance: { [key: string]: number } = {
+    'obligationsLegales': 0.8,
+    'proceduresLegales': 0.9,
+    'paiementsReputation': 0.7,
+    'profilStructurel': 0.5
+  };
+  return importance[category] || 0.6;
+}
+
+async function generateRecommendationsForFallback(companyData: any, fallbackResult: FallbackScoreResult) {
+  const recommendations = [];
+
+  // Recommandations basées sur le score fallback
+  if (fallbackResult.score < 40) {
+    recommendations.push('Score basé sur signaux faibles - Demander analyse financière complète');
+    recommendations.push('Exiger des garanties supplémentaires avant toute relation commerciale');
+  } else if (fallbackResult.score < 60) {
+    recommendations.push('Surveillance renforcée recommandée - Données financières à obtenir');
+    recommendations.push('Vérifier les références commerciales auprès d\'autres fournisseurs');
+  }
+
+  recommendations.push('Obtenir les derniers bilans comptables pour affiner l\'analyse');
+  
+  // Recommandations spécifiques selon les pénalités
+  if (fallbackResult.breakdown.obligationsLegales.penalite > 15) {
+    recommendations.push('Vérifier le statut des obligations déclaratives de l\'entreprise');
+  }
+  
+  if (fallbackResult.breakdown.proceduresLegales.penalite > 10) {
+    recommendations.push('Surveiller étroitement les publications BODACC et tribunaux de commerce');
+  }
+
+  // IA recommendations pour scores fallback faibles
+  if (OPENAI_API_KEY && fallbackResult.score < 50) {
+    try {
+      const prompt = `Une entreprise a un score de risque fallback de ${fallbackResult.score}/70 (basé sur signaux faibles car données financières manquantes).
+Raison: ${fallbackResult.reason}
+Secteur: ${companyData.sirene?.naf || 'Non spécifié'}
+
+Génère 2 recommandations spécifiques pour gérer ce risque en l'absence de données financières.`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: 'Tu es un expert en analyse de risque. Réponds de manière concise et professionnelle pour des scores fallback.' },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 200,
+          temperature: 0.7
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const aiRecommendations = data.choices[0].message.content
+          .split('\n')
+          .filter((line: string) => line.trim().length > 0)
+          .slice(0, 2);
+        
+        recommendations.push(...aiRecommendations);
+      }
+    } catch (error) {
+      console.error('Error generating AI recommendations for fallback:', error);
+    }
+  }
+
+  return recommendations.slice(0, 6);
 }

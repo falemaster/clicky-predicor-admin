@@ -223,6 +223,16 @@ export interface PredictorAnalysis {
   facteursExplicatifs: PredictorFactor[];
   alertes: PredictorAlert[];
   recommandations: string[];
+  // Champs pour le score fallback
+  isFallbackScore?: boolean;
+  fallbackReason?: string;
+  fallbackExplanation?: string;
+  fallbackBreakdown?: {
+    obligationsLegales: { penalite: number; details: string[] };
+    proceduresLegales: { penalite: number; details: string[] };
+    paiementsReputation: { penalite: number; bonus: number; details: string[] };
+    profilStructurel: { penalite: number; details: string[] };
+  };
 }
 
 export interface PredictorFactor {

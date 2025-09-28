@@ -329,7 +329,8 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     );
   }
 
-  if (errors.length > 0) {
+  // Only show critical errors if no data is available at all
+  if (errors.length > 0 && (!companyData || !companyData.sirene)) {
     return (
       <div className="space-y-4">
         <Card>
@@ -444,6 +445,26 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
                 }
                 return null;
               })()}
+              {/* Show non-critical API errors as info badge */}
+              {errors.length > 0 && companyData && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                      <Info className="h-3 w-3 mr-1" />
+                      API partiellement indisponible
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="space-y-1">
+                      {errors.map((error, index) => (
+                        <div key={index} className="text-xs">
+                          <strong>{error.source}:</strong> {error.message}
+                        </div>
+                      ))}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
             <div className="flex items-center space-x-3">
               <Button 

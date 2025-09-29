@@ -7,6 +7,7 @@ import {
   BarChart3, 
   Settings, 
   Edit3,
+  Database,
   Shield,
   LogOut,
   Menu,
@@ -46,6 +47,11 @@ const adminNavItems = [
     title: "Éditeur WYSIWYG",
     url: "/admin/editor",
     icon: Edit3,
+  },
+  {
+    title: "Data Mapping",
+    url: "/admin/data-mapping",
+    icon: Database,
   },
   {
     title: "Configuration",

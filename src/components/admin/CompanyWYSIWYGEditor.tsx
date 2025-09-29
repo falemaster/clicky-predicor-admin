@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useCompanyData } from "@/hooks/useCompanyData";
+import { useWYSIWYGTracking } from "@/hooks/useWYSIWYGTracking";
+import { EditLogsDialog } from "./EditLogsDialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AIDataIndicator } from "@/components/ui/ai-data-indicator";
 import { Button } from "@/components/ui/button";
@@ -193,6 +195,7 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     autoFetch: true 
   });
   const { toast } = useToast();
+  const { logEdit, logBatchEdits } = useWYSIWYGTracking(siren);
   
   const [activeTab, setActiveTab] = useState("overview");
   const [formData, setFormData] = useState<Partial<CompanyFullData>>({});
@@ -222,7 +225,9 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     }
   }, [companyData]);
 
-  const updateField = (path: string[], value: string) => {
+  const updateField = useCallback((path: string[], value: string) => {
+    const oldValue = getNestedValue(formData, path);
+    
     setFormData(prevData => {
       const newData = { ...prevData };
       let current: any = newData;
@@ -237,8 +242,14 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
       current[path[path.length - 1]] = value;
       return newData;
     });
+
+    // Log the field change
+    if (oldValue !== value) {
+      logEdit(path.join('.'), oldValue, value);
+    }
+
     setHasChanges(true);
-  };
+  }, [formData, logEdit]);
 
   const getNestedValue = (obj: any, path: string[]): string => {
     return path.reduce((current, key) => current?.[key], obj) || '';

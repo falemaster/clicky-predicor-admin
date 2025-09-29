@@ -30,6 +30,8 @@ interface DashboardStats {
   infogreffeCredits: number | null;
   infogreffeStatus: 'active' | 'expired' | 'error';
   recentEditedCompanies: EditedCompany[];
+  recentEditsCount: number;
+  totalEditedCompanies: number;
 }
 
 interface EditedCompany {
@@ -47,7 +49,9 @@ export function AdminDashboard() {
     totalCompanies: 0,
     infogreffeCredits: null,
     infogreffeStatus: 'error',
-    recentEditedCompanies: []
+    recentEditedCompanies: [],
+    recentEditsCount: 0,
+    totalEditedCompanies: 0
   });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -108,13 +112,27 @@ export function AdminDashboard() {
         .order('edited_at', { ascending: false })
         .limit(10);
 
+      // Get recent edit activity count
+      const { count: recentEditsCount } = await supabase
+        .from('admin_edit_logs')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()); // Last 24h
+
+      // Get total edited companies count
+      const { count: totalEditedCompanies } = await supabase
+        .from('admin_companies')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_manually_edited', true);
+
       setStats({
         sirenSearches: sirenSearches || 0,
         siretSearches: siretSearches || 0,
         totalCompanies: totalCompanies || 0,
         infogreffeCredits: infogreffeStatus.credits,
         infogreffeStatus: infogreffeStatus.status,
-        recentEditedCompanies: recentEditedCompanies || []
+        recentEditedCompanies: recentEditedCompanies || [],
+        recentEditsCount: recentEditsCount || 0,
+        totalEditedCompanies: totalEditedCompanies || 0
       });
 
     } catch (error) {

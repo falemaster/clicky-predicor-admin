@@ -113,6 +113,59 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_edit_logs: {
+        Row: {
+          change_type: string
+          company_id: string | null
+          created_at: string
+          editor_id: string | null
+          field_changed: string
+          id: string
+          ip_address: unknown | null
+          new_value: Json | null
+          old_value: Json | null
+          session_id: string | null
+          siren: string
+          user_agent: string | null
+        }
+        Insert: {
+          change_type?: string
+          company_id?: string | null
+          created_at?: string
+          editor_id?: string | null
+          field_changed: string
+          id?: string
+          ip_address?: unknown | null
+          new_value?: Json | null
+          old_value?: Json | null
+          session_id?: string | null
+          siren: string
+          user_agent?: string | null
+        }
+        Update: {
+          change_type?: string
+          company_id?: string | null
+          created_at?: string
+          editor_id?: string | null
+          field_changed?: string
+          id?: string
+          ip_address?: unknown | null
+          new_value?: Json | null
+          old_value?: Json | null
+          session_id?: string | null
+          siren?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_edit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_search_history: {
         Row: {
           company_id: string | null
@@ -280,6 +333,20 @@ export type Database = {
       get_infogreffe_cache: {
         Args: { p_endpoint: string; p_millesime?: number; p_siren: string }
         Returns: Json
+      }
+      log_admin_edit: {
+        Args: {
+          p_change_type?: string
+          p_editor_id?: string
+          p_field_changed: string
+          p_ip_address?: unknown
+          p_new_value?: Json
+          p_old_value?: Json
+          p_session_id?: string
+          p_siren: string
+          p_user_agent?: string
+        }
+        Returns: string
       }
       log_search_activity: {
         Args: {

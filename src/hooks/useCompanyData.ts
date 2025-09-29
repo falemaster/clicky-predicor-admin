@@ -81,13 +81,38 @@ export const useCompanyData = ({
         showDataQualityDashboard = adminDataResult.data.show_data_quality_dashboard || false;
       }
 
-      // 2. SMART API STRATEGY: INSEE Sirene → Infogreffe → Pappers (fallback)
-      console.log(`📡 Phase 1: Appel API INSEE pour ${type}: ${identifier}`);
-      let sireneResult = type === 'siren' 
-        ? await sireneService.getCompanyBySiren(identifier)
-        : await sireneService.getCompanyBySiret(identifier);
+      // 2. SMART API STRATEGY: Primary Sirene → INSEE → Pappers (fallback)
+      console.log(`📡 Phase 1: Appel API Sirene pour ${type}: ${identifier}`);
       
-      console.log(`📊 Résultat API INSEE:`, sireneResult);
+      // Try sirene-search first (most reliable)
+      let sireneResult = { data: null, error: null };
+      try {
+        const { data: sireneSearchData, error: sireneSearchError } = await supabase.functions.invoke('sirene-search', {
+          body: { 
+            type: type,
+            query: identifier,
+            limit: 1
+          }
+        });
+        
+        if (sireneSearchData && !sireneSearchError) {
+          sireneResult.data = sireneSearchData;
+          console.log(`✅ Données Sirene trouvées:`, sireneSearchData);
+        } else {
+          console.log(`⚠️ Sirene-search échec, fallback vers INSEE...`);
+          // Fallback to INSEE API
+          sireneResult = type === 'siren' 
+            ? await sireneService.getCompanyBySiren(identifier)
+            : await sireneService.getCompanyBySiret(identifier);
+        }
+      } catch (error) {
+        console.log(`⚠️ Erreur sirene-search, fallback vers INSEE...`);
+        sireneResult = type === 'siren' 
+          ? await sireneService.getCompanyBySiren(identifier)
+          : await sireneService.getCompanyBySiret(identifier);
+      }
+      
+      console.log(`📊 Résultat final Sirene/INSEE:`, sireneResult);
 
       if (sireneResult.error || !sireneResult.data) {
         if (sireneResult.error) {
@@ -203,23 +228,27 @@ export const useCompanyData = ({
         console.error('❌ Erreur réseau Infogreffe:', error);
       }
 
-      // 5. Analyse Predictor (via edge function)
+      // 5. Analyse Predictor (via edge function) - seulement si on a des données Sirene
       try {
-        const { data: predictorData, error: predictorError } = await supabase.functions.invoke('predictor-analysis', {
-          body: { 
-            siren: sireneResult.data.siren,
-            companyData: companyData
-          }
-        });
-
-        if (predictorData && !predictorError) {
-          companyData.predictor = predictorData;
-        } else if (predictorError) {
-          allErrors.push({
-            code: 'PREDICTOR_FUNCTION_ERROR',
-            message: `Erreur analyse Predictor: ${predictorError.message}`,
-            source: 'PREDICTOR'
+        if (sireneResult.data?.siren) {
+          const { data: predictorData, error: predictorError } = await supabase.functions.invoke('predictor-analysis', {
+            body: { 
+              siren: sireneResult.data.siren,
+              companyData: companyData
+            }
           });
+
+          if (predictorData && !predictorError) {
+            companyData.predictor = predictorData;
+          } else if (predictorError) {
+            allErrors.push({
+              code: 'PREDICTOR_FUNCTION_ERROR',
+              message: `Erreur analyse Predictor: ${predictorError.message}`,
+              source: 'PREDICTOR'
+            });
+          }
+        } else {
+          console.log('⚠️ Pas de SIREN disponible pour l\'analyse Predictor');
         }
       } catch (error) {
         allErrors.push({
@@ -229,20 +258,24 @@ export const useCompanyData = ({
         });
       }
 
-      // 6. RubyPayeur (via edge function)
+      // 6. RubyPayeur (via edge function) - seulement si on a des données Sirene
       try {
-        const { data: rubyPayeurData, error: rubyPayeurError } = await supabase.functions.invoke('rubypayeur-api', {
-          body: { siren: sireneResult.data.siren }
-        });
-
-        if (rubyPayeurData && !rubyPayeurError) {
-          companyData.rubyPayeur = rubyPayeurData;
-        } else if (rubyPayeurError) {
-          allErrors.push({
-            code: 'RUBYPAYEUR_FUNCTION_ERROR',
-            message: `Erreur RubyPayeur: ${rubyPayeurError.message}`,
-            source: 'RUBYPAYEUR'
+        if (sireneResult.data?.siren) {
+          const { data: rubyPayeurData, error: rubyPayeurError } = await supabase.functions.invoke('rubypayeur-api', {
+            body: { siren: sireneResult.data.siren }
           });
+
+          if (rubyPayeurData && !rubyPayeurError) {
+            companyData.rubyPayeur = rubyPayeurData;
+          } else if (rubyPayeurError) {
+            allErrors.push({
+              code: 'RUBYPAYEUR_FUNCTION_ERROR',
+              message: `Erreur RubyPayeur: ${rubyPayeurError.message}`,
+              source: 'RUBYPAYEUR'
+            });
+          }
+        } else {
+          console.log('⚠️ Pas de SIREN disponible pour RubyPayeur');
         }
       } catch (error) {
         allErrors.push({
@@ -254,13 +287,21 @@ export const useCompanyData = ({
 
       // 7. Enrichissement IA des données manquantes
       try {
-        const enrichmentData = {
+        // Utiliser les données Sirene si disponibles, sinon des données minimales
+        const enrichmentData = sireneResult.data ? {
           name: sireneResult.data.denomination,
-          siren: sireneResult.data.siren,
+          siren: sireneResult.data.siren || extractedSiren,
           naf: sireneResult.data.naf,
           address: sireneResult.data.adresse,
           employees: sireneResult.data.effectifs,
           foundedYear: sireneResult.data.dateCreation?.substring(0, 4)
+        } : {
+          name: `Entreprise ${extractedSiren}`,
+          siren: extractedSiren,
+          naf: null,
+          address: null,
+          employees: null,
+          foundedYear: null
         };
 
         const { data: enrichedData, error: enrichedError } = await supabase.functions.invoke('enrich-company-data', {
@@ -284,18 +325,20 @@ export const useCompanyData = ({
         });
       }
 
-      // Vérifier qu'on a au moins quelques données minimales
-      if (!companyData.sirene && !companyData.pappers && !companyData.infogreffe) {
-        // Si aucune API n'a fonctionné, retourner une erreur claire
-        const noDataError: ApiError = {
-          code: 'NO_DATA_FOUND',
-          message: `Aucune données trouvées pour ${type === 'siren' ? 'le SIREN' : 'le SIRET'} ${identifier}. Vérifiez que le numéro est correct et que l'entreprise existe.`,
-          source: 'PREDICTOR'
-        };
-        allErrors.push(noDataError);
-        setErrors(allErrors);
-        setLoading(false);
-        return;
+      // Vérifier qu'on a au moins quelques données minimales pour continuer
+      if (!companyData.sirene && !companyData.pappers && !companyData.infogreffe && !companyData.enriched) {
+        // Si vraiment aucune API n'a fonctionné, mais on a quand même l'enriched data
+        if (!companyData.enriched) {
+          const noDataError: ApiError = {
+            code: 'NO_DATA_FOUND',
+            message: `Aucune donnée trouvée pour ${type === 'siren' ? 'le SIREN' : 'le SIRET'} ${identifier}. Vérifiez que le numéro est correct et que l'entreprise existe.`,
+            source: 'SIRENE'
+          };
+          allErrors.push(noDataError);
+          setErrors(allErrors);
+          setLoading(false);
+          return;
+        }
       }
 
       // 8. Merger les données admin avec les données API (admin prioritaire)

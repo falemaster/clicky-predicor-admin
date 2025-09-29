@@ -4,6 +4,7 @@ import { ExecutiveSummary } from "@/components/admin/ExecutiveSummary";
 import { FallbackScoreBadge } from "./FallbackScoreBadge";
 import { calculateFinancialScore, calculateRiskScore, getRubyPayeurStatus } from "@/utils/scoreCalculator";
 import { DataQualitySection } from "@/components/ui/data-quality-section";
+import { EditableField } from "@/components/ui/editable-field";
 import { 
   Building2, 
   MapPin, 
@@ -61,32 +62,41 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{companyData.address}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Dirigeant: {companyData.director}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Créée en {companyData.foundedYear}</span>
-              </div>
+              <EditableField
+                value={companyData.address}
+                field="address"
+                icon={<MapPin className="h-4 w-4 text-muted-foreground" />}
+              />
+              <EditableField
+                value={companyData.director}
+                field="director"
+                icon={<User className="h-4 w-4 text-muted-foreground" />}
+                displayValue={`Dirigeant: ${companyData.director}`}
+              />
+              <EditableField
+                value={companyData.foundedYear}
+                field="foundedYear"
+                icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
+                displayValue={`Créée en ${companyData.foundedYear}`}
+              />
             </div>
             <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{companyData.phone}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{companyData.email}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Effectif: {companyData.employees} salariés</span>
-              </div>
+              <EditableField
+                value={companyData.phone}
+                field="phone"
+                icon={<Phone className="h-4 w-4 text-muted-foreground" />}
+              />
+              <EditableField
+                value={companyData.email}
+                field="email"
+                icon={<Mail className="h-4 w-4 text-muted-foreground" />}
+              />
+              <EditableField
+                value={companyData.employees}
+                field="employees"
+                icon={<User className="h-4 w-4 text-muted-foreground" />}
+                displayValue={`Effectif: ${companyData.employees} salariés`}
+              />
             </div>
           </div>
         </CardContent>

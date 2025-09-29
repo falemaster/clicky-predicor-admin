@@ -16,6 +16,7 @@ import { OverviewDisplay } from "@/components/analysis/OverviewDisplay";
 import { StudyDisplay } from "@/components/analysis/StudyDisplay";
 import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
 import { RESULT_TABS } from "./resultTabs";
+import { EditingProvider } from "./EditingContext";
 import type { DisplayCompanyData, DisplayScores, DisplayEnrichedData } from "@/utils/buildCompanyDisplay";
 
 export interface ResultPageProps {
@@ -51,43 +52,45 @@ export function ResultPage({
   const currentTab = onTabChange ? activeTab : internalActiveTab;
 
   return (
-    <div className="w-full">
-      <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
-          {RESULT_TABS.map((tab) => (
-            <TabsTrigger key={tab.key} value={tab.key}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+    <EditingProvider mode={mode} onEdit={onEdit}>
+      <div className="w-full">
+        <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            {RESULT_TABS.map((tab) => (
+              <TabsTrigger key={tab.key} value={tab.key}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <OverviewDisplay 
-            companyData={enrichedData} 
-            scores={scores}
-          />
-        </TabsContent>
+          <TabsContent value="overview" className="space-y-6">
+            <OverviewDisplay 
+              companyData={enrichedData} 
+              scores={scores}
+            />
+          </TabsContent>
 
-        <TabsContent value="study" className="space-y-6">
-          <StudyDisplay 
-            companyData={enrichedData}
-          />
-        </TabsContent>
+          <TabsContent value="study" className="space-y-6">
+            <StudyDisplay 
+              companyData={enrichedData}
+            />
+          </TabsContent>
 
-        <TabsContent value="predictive" className="space-y-6">
-          <PredictiveAnalysis 
-            companyData={enrichedData}
-            scores={scores}
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="predictive" className="space-y-6">
+            <PredictiveAnalysis 
+              companyData={enrichedData}
+              scores={scores}
+            />
+          </TabsContent>
+        </Tabs>
 
-      {/* Debug info pour le mode admin */}
-      {mode === 'admin' && process.env.NODE_ENV === 'development' && (
-        <div className="mt-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
-          Mode: {mode} | Onglet actif: {currentTab} | Édition: {onEdit ? 'activée' : 'désactivée'}
-        </div>
-      )}
-    </div>
+        {/* Debug info pour le mode admin */}
+        {mode === 'admin' && process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+            Mode: {mode} | Onglet actif: {currentTab} | Édition: {onEdit ? 'activée' : 'désactivée'}
+          </div>
+        )}
+      </div>
+    </EditingProvider>
   );
 }

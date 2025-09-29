@@ -7,24 +7,60 @@ const corsHeaders = {
 };
 
 const RUBYPAYEUR_API_KEY = Deno.env.get('RUBYPAYEUR_API_KEY');
-// URL corrigée - test avec domaine alternatif si DNS principal échoue
-const RUBYPAYEUR_BASE_URL = 'https://api.rubypayeur.com/v1';
+const RUBYPAYEUR_BASE_URL = 'https://rubypayeur.com/api';
 
-// Endpoints to test in order of preference avec URLs alternatives
-const ENDPOINTS = [
-  '/companies/{siren}',
-  '/company/{siren}', 
-  '/companies?siren={siren}',
-  '/companies/{siren}/risk',
-  '/companies/{siren}/risk-score'
-];
+// Cache simple pour l'auth_token (valable 24h selon la doc)
+let authTokenCache: { token: string; expiresAt: number } | null = null;
 
-// URLs alternatives à tester si le principal échoue
-const ALTERNATIVE_BASE_URLS = [
-  'https://api.rubypayeur.com/v1',
-  'https://api.rubypayeur.fr/v1',
-  'https://rubypayeur-api.herokuapp.com/v1'
-];
+// Fonction pour obtenir un token d'authentification valide
+async function getAuthToken(): Promise<string | null> {
+  // Vérifier si on a un token en cache et qu'il n'est pas expiré
+  if (authTokenCache && authTokenCache.expiresAt > Date.now()) {
+    console.log('Using cached auth token');
+    return authTokenCache.token;
+  }
+
+  console.log('Authenticating with RubyPayeur...');
+  
+  try {
+    const authResponse = await fetch(`${RUBYPAYEUR_BASE_URL}/auth`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        token: RUBYPAYEUR_API_KEY
+      })
+    });
+
+    if (!authResponse.ok) {
+      console.error(`Authentication failed: ${authResponse.status} ${authResponse.statusText}`);
+      const errorText = await authResponse.text();
+      console.error('Auth error response:', errorText);
+      return null;
+    }
+
+    const authData = await authResponse.json();
+    console.log('Authentication successful');
+    
+    if (!authData.auth_token) {
+      console.error('No auth_token in response:', authData);
+      return null;
+    }
+
+    // Mettre en cache le token pour 23 heures (un peu moins que 24h pour être sûr)
+    authTokenCache = {
+      token: authData.auth_token,
+      expiresAt: Date.now() + (23 * 60 * 60 * 1000)
+    };
+
+    return authData.auth_token;
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return null;
+  }
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -67,62 +103,17 @@ serve(async (req) => {
 
     console.log(`Fetching RubyPayeur data for SIREN: ${siren}`);
 
-    // Try endpoints and alternative URLs until one works
-    let data = null;
-    let successfulEndpoint = null;
-    let successfulBaseUrl = null;
-    
-    for (const baseUrl of ALTERNATIVE_BASE_URLS) {
-      if (data) break; // Si on a déjà des données, on arrête
+    // Obtenir un token d'authentification valide
+    const authToken = await getAuthToken();
+    if (!authToken) {
+      console.error('Failed to authenticate with RubyPayeur');
       
-      for (const endpointTemplate of ENDPOINTS) {
-        try {
-          let url;
-          if (endpointTemplate.includes('?siren=')) {
-            url = `${baseUrl}${endpointTemplate.replace('{siren}', siren)}`;
-          } else {
-            url = `${baseUrl}${endpointTemplate.replace('{siren}', siren)}`;
-          }
-          
-          console.log(`Testing endpoint: ${url}`);
-          
-          const response = await fetch(url, {
-            headers: {
-              'Authorization': `Bearer ${RUBYPAYEUR_API_KEY}`,
-              'Accept': 'application/json',
-              'User-Agent': 'Predicor/1.0'
-            },
-          });
-
-          if (response.ok) {
-            data = await response.json();
-            successfulEndpoint = endpointTemplate;
-            successfulBaseUrl = baseUrl;
-            console.log(`Success with endpoint: ${endpointTemplate} on ${baseUrl}`);
-            console.log('API Response structure:', JSON.stringify(data, null, 2));
-            break;
-          } else {
-            console.log(`Endpoint ${endpointTemplate} on ${baseUrl} failed: ${response.status} ${response.statusText}`);
-          }
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          console.log(`Endpoint ${endpointTemplate} on ${baseUrl} error:`, errorMessage);
-        }
-      }
-    }
-
-    if (!data) {
-      console.error('All RubyPayeur endpoints failed - Service unavailable');
-      
-      // Service indisponible - toutes les API ont échoué
       const unavailableData = {
         siren,
         serviceStatus: 'indisponible',
-        message: 'Service RubyPayeur temporairement indisponible - Toutes les API ont échoué',
+        message: 'Service RubyPayeur temporairement indisponible - Échec d\'authentification',
         derniereMAJ: new Date().toISOString(),
-        source: 'api_unavailable',
-        testedEndpoints: ENDPOINTS.length,
-        testedUrls: ALTERNATIVE_BASE_URLS.length
+        source: 'auth_failed'
       };
 
       return new Response(JSON.stringify(unavailableData), {
@@ -130,24 +121,81 @@ serve(async (req) => {
       });
     }
 
-    console.log(`RubyPayeur data fetched successfully for SIREN: ${siren} using endpoint: ${successfulEndpoint} on ${successfulBaseUrl}`);
+    // Faire la requête vers l'API RubyPayeur avec l'endpoint correct
+    const url = `${RUBYPAYEUR_BASE_URL}/companies?siren=${siren}&include=bodacc_events,balances,scorings,sanctions`;
+    
+    console.log(`Making request to: ${url}`);
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`RubyPayeur API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('API error response:', errorText);
+      
+      const unavailableData = {
+        siren,
+        serviceStatus: 'indisponible',
+        message: `Service RubyPayeur temporairement indisponible - Erreur API ${response.status}`,
+        derniereMAJ: new Date().toISOString(),
+        source: 'api_error',
+        httpStatus: response.status
+      };
+
+      return new Response(JSON.stringify(unavailableData), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const data = await response.json();
+    console.log('RubyPayeur API Response structure:', JSON.stringify(data, null, 2));
+
+    // Vérifier si des données ont été trouvées
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      console.log(`No data found for SIREN: ${siren}`);
+      
+      const noDataResponse = {
+        siren,
+        serviceStatus: 'aucune_donnee',
+        message: 'Aucune donnée disponible pour cette entreprise sur RubyPayeur',
+        derniereMAJ: new Date().toISOString(),
+        source: 'no_data'
+      };
+
+      return new Response(JSON.stringify(noDataResponse), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`RubyPayeur data fetched successfully for SIREN: ${siren}`);
 
     // Transformer les données RubyPayeur au format attendu
+    // Note: Ajuster le mapping selon la structure réelle des données
+    const companyData = Array.isArray(data) ? data[0] : data;
+    
     const transformedData = {
-      siren: data.siren || siren,
-      scoreGlobal: data.global_score || data.score || 5,
-      scorePaiement: data.payment_score || data.score || 5,
-      retardsMoyens: data.average_delay_days || 0,
-      nbIncidents: data.incidents_count || 0,
-      tendance: mapTendance(data.trend || 'stable'),
-      derniereMAJ: data.last_update || new Date().toISOString(),
-      alertes: (data.alerts || []).map((alert: any) => ({
+      siren: companyData.siren || siren,
+      scoreGlobal: companyData.global_score || companyData.score || 5,
+      scorePaiement: companyData.payment_score || companyData.score || 5,
+      retardsMoyens: companyData.average_delay_days || 0,
+      nbIncidents: companyData.incidents_count || 0,
+      tendance: mapTendance(companyData.trend || 'stable'),
+      derniereMAJ: companyData.last_update || new Date().toISOString(),
+      alertes: (companyData.alerts || []).map((alert: any) => ({
         type: mapAlertType(alert.type),
         date: alert.date,
         montant: alert.amount,
         description: alert.message,
         gravite: mapSeverity(alert.severity)
-      }))
+      })),
+      sourceStatus: 'disponible',
+      source: 'rubypayeur_api'
     };
 
     return new Response(JSON.stringify(transformedData), {

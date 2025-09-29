@@ -269,11 +269,11 @@ export function buildCompanyDisplay(realData: CompanyFullData | null): BuildComp
       compteStatus: realData.pappers?.depotComptes || false
     },
     paymentScore: {
-      scoreGlobal: realData.rubyPayeur?.scoreGlobal || 0,
-      scorePaiement: realData.rubyPayeur?.scorePaiement || 0,
-      retardsMoyens: realData.rubyPayeur?.retardsMoyens || 0,
-      tendance: realData.rubyPayeur?.tendance || 'Stable',
-      alertes: realData.rubyPayeur?.alertes || []
+      scoreGlobal: (realData.rubyPayeur as any)?.scoreGlobal || 0,
+      scorePaiement: (realData.rubyPayeur as any)?.scorePaiement || 0,
+      retardsMoyens: (realData.rubyPayeur as any)?.retardsMoyens || 0,
+      tendance: (realData.rubyPayeur as any)?.tendance || 'Stable',
+      alertes: (realData.rubyPayeur as any)?.alertes || []
     },
     predictor: realData.predictor || null,
     rawData: realData,

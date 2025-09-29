@@ -31,10 +31,41 @@ export interface RiskScore {
 }
 
 /**
- * Calcule le score financier en priorisant Infogreffe NOTAPME puis les autres sources
+ * Calcule le score financier en priorisant Pappers puis Infogreffe NOTAPME
  */
 export function calculateFinancialScore(companyData: CompanyFullData): FinancialScore {
-  // PRIORITÉ 1: Score NOTAPME Performance d'Infogreffe
+  // PRIORITÉ 1: Scores calculés depuis les bilans Pappers
+  const bilansData = (companyData.pappers as any)?.bilansSummary || companyData.pappers?.bilans;
+  if (bilansData && bilansData.length > 0) {
+    const latestBilan = bilansData[0];
+    
+    // Calcul amélioré basé sur les ratios financiers
+    let score = 5; // Score neutre
+    
+    if (latestBilan.chiffreAffaires > 0) {
+      const ratio = (latestBilan.resultatNet || 0) / latestBilan.chiffreAffaires;
+      if (ratio > 0.1) score = 8;      // Très rentable
+      else if (ratio > 0.05) score = 7; // Rentable
+      else if (ratio > 0) score = 6;    // Légèrement positif
+      else if (ratio > -0.05) score = 4; // Légèrement négatif
+      else score = 3;                   // Difficultés
+      
+      // Ajustement selon l'endettement si disponible
+      if (latestBilan.dettes && latestBilan.totalActif) {
+        const ratioEndettement = latestBilan.dettes / latestBilan.totalActif;
+        if (ratioEndettement > 0.8) score = Math.max(score - 1, 1); // Très endetté
+        else if (ratioEndettement < 0.3) score = Math.min(score + 1, 10); // Peu endetté
+      }
+    }
+    
+    return {
+      score: Math.min(Math.max(Math.round(score), 1), 10),
+      source: 'pappers',
+      sourceLabel: 'Calculé depuis bilans Pappers'
+    };
+  }
+
+  // PRIORITÉ 2: Score NOTAPME Performance d'Infogreffe (fallback)
   const notapmeData = (companyData.infogreffe as any)?.notapmePerformance;
   if (notapmeData) {
     // Calculer score composite basé sur les indices NOTAPME
@@ -63,30 +94,6 @@ export function calculateFinancialScore(companyData: CompanyFullData): Financial
     };
   }
 
-  // PRIORITÉ 2: Scores calculés depuis les bilans Pappers
-  const bilansData = (companyData.pappers as any)?.bilansSummary || companyData.pappers?.bilans;
-  if (bilansData && bilansData.length > 0) {
-    const latestBilan = bilansData[0];
-    
-    // Calcul simple basé sur les ratios financiers
-    let score = 5; // Score neutre
-    
-    if (latestBilan.chiffreAffaires > 0) {
-      const ratio = (latestBilan.resultatNet || 0) / latestBilan.chiffreAffaires;
-      if (ratio > 0.1) score = 8;      // Très rentable
-      else if (ratio > 0.05) score = 7; // Rentable
-      else if (ratio > 0) score = 6;    // Légèrement positif
-      else if (ratio > -0.05) score = 4; // Légèrement négatif
-      else score = 3;                   // Difficultés
-    }
-    
-    return {
-      score: Math.min(Math.max(Math.round(score), 1), 10),
-      source: 'pappers',
-      sourceLabel: 'Calculé depuis bilans Pappers'
-    };
-  }
-
   // PRIORITÉ 3: Analyse prédictive interne
   const predictorScore = (companyData.predictor as any)?.scoreFinancier || (companyData.predictor as any)?.scoreEconomique;
   if (predictorScore !== undefined) {
@@ -106,10 +113,35 @@ export function calculateFinancialScore(companyData: CompanyFullData): Financial
 }
 
 /**
- * Calcule le score de risque en priorisant Infogreffe AFDCC puis RubyPayeur
+ * Calcule le score de risque en priorisant RubyPayeur puis Infogreffe AFDCC
  */
 export function calculateRiskScore(companyData: CompanyFullData): RiskScore {
-  // PRIORITÉ 1: Score AFDCC d'Infogreffe
+  // PRIORITÉ 1: RubyPayeur (service de paiement prioritaire)
+  const rubyData = companyData.rubyPayeur as any;
+  if (rubyData && rubyData.source !== 'service_unavailable' && rubyData.source !== 'auth_failed' && rubyData.source !== 'api_error') {
+    // Service RubyPayeur opérationnel avec vraies données
+    const globalScore = rubyData.scoreGlobal || rubyData.scorePaiement || 5;
+    
+    // Convertir le score RubyPayeur (0-100) vers échelle 1-10
+    let convertedScore = globalScore;
+    if (globalScore > 10) {
+      // Si le score est sur 100, le convertir
+      convertedScore = Math.round((globalScore / 100) * 10);
+    }
+    
+    return {
+      score: Math.min(Math.max(convertedScore, 1), 10),
+      source: 'rubypayeur',
+      sourceLabel: 'RubyPayeur',
+      paymentBehavior: {
+        delaisMoyens: rubyData.retardsMoyens || 0,
+        incidents: rubyData.nbIncidents || 0,
+        tendance: rubyData.tendance || 'Stable'
+      }
+    };
+  }
+
+  // PRIORITÉ 2: Score AFDCC d'Infogreffe (fallback)
   const afdccData = (companyData.infogreffe as any)?.afdccScore;
   if (afdccData) {
     // Mapper la notation AFDCC vers un score 1-10
@@ -134,24 +166,6 @@ export function calculateRiskScore(companyData: CompanyFullData): RiskScore {
       score,
       source: 'infogreffe',
       sourceLabel: 'Infogreffe AFDCC'
-    };
-  }
-
-  // PRIORITÉ 2: RubyPayeur (uniquement si service fonctionnel)
-  const rubyData = companyData.rubyPayeur as any;
-  if (rubyData && !rubyData.serviceStatus) {
-    // Service RubyPayeur opérationnel
-    const globalScore = rubyData.scoreGlobal || rubyData.scorePaiement || 5;
-    
-    return {
-      score: Math.min(Math.max(Math.round(globalScore), 1), 10),
-      source: 'rubypayeur',
-      sourceLabel: 'RubyPayeur',
-      paymentBehavior: {
-        delaisMoyens: rubyData.retardsMoyens || 0,
-        incidents: rubyData.nbIncidents || 0,
-        tendance: rubyData.tendance || 'Stable'
-      }
     };
   }
 

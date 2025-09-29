@@ -176,18 +176,20 @@ serve(async (req) => {
     console.log(`RubyPayeur data fetched successfully for SIREN: ${siren}`);
 
     // Transformer les données RubyPayeur au format attendu
-    // Note: Ajuster le mapping selon la structure réelle des données
-    const companyData = Array.isArray(data) ? data[0] : data;
+    // La structure est: { data: { attributes: { ... } } }
+    const companyData = Array.isArray(data.data) ? data.data[0] : data.data;
+    const attributes = companyData?.attributes || companyData || {};
     
+    // Mapping correct selon la structure réelle de l'API RubyPayeur
     const transformedData = {
-      siren: companyData.siren || siren,
-      scoreGlobal: companyData.global_score || companyData.score || 5,
-      scorePaiement: companyData.payment_score || companyData.score || 5,
-      retardsMoyens: companyData.average_delay_days || 0,
-      nbIncidents: companyData.incidents_count || 0,
-      tendance: mapTendance(companyData.trend || 'stable'),
-      derniereMAJ: companyData.last_update || new Date().toISOString(),
-      alertes: (companyData.alerts || []).map((alert: any) => ({
+      siren: attributes.siren || siren,
+      scoreGlobal: attributes.current_scoring || attributes.global_score || 5,
+      scorePaiement: attributes.current_scoring || attributes.payment_score || 5,
+      retardsMoyens: Math.round((attributes.late_payment_total_days || 0) / Math.max(attributes.late_payment_count || 1, 1)),
+      nbIncidents: attributes.late_payment_count || 0,
+      tendance: mapTendance(attributes.trend || 'stable'),
+      derniereMAJ: attributes.updated_at || new Date().toISOString(),
+      alertes: (attributes.alerts || []).map((alert: any) => ({
         type: mapAlertType(alert.type),
         date: alert.date,
         montant: alert.amount,

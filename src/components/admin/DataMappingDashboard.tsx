@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -31,6 +32,8 @@ interface DataSourceInfo {
   status: 'active' | 'fallback' | 'error';
 }
 
+type StatusType = 'active' | 'fallback' | 'error';
+
 interface MappingRule {
   field: string;
   sources: DataSourceInfo[];
@@ -56,6 +59,47 @@ export function DataMappingDashboard() {
   const [editLogs, setEditLogs] = useState<EditLog[]>([]);
   const [mappingRules, setMappingRules] = useState<MappingRule[]>([]);
 
+  // Fonction pour déterminer le statut d'une source API
+  const getAPIStatus = (source: string): StatusType => {
+    if (!companyData) return 'error';
+
+    // Vérifier s'il y a des erreurs spécifiques pour cette source
+    const hasError = companyData.errors?.some(error => 
+      error.source?.toLowerCase().includes(source.toLowerCase())
+    );
+    if (hasError) return 'error';
+
+    switch (source) {
+      case 'admin':
+        return companyData?.enriched?.adminScores ? 'active' : 'fallback';
+      
+      case 'sirene':
+        return companyData?.sirene?.siren ? 'active' : 'error';
+      
+      case 'pappers':
+        // Pappers peut avoir des données même sans dirigeants
+        return companyData?.pappers?.siren ? 'active' : 'error';
+      
+      case 'infogreffe':
+        // Vérifier si Infogreffe a des données réelles (pas juste un objet vide)
+        const infogreffeData = companyData?.infogreffe;
+        const hasInfogreffeData = infogreffeData && (
+          infogreffeData.comptes?.length > 0 ||
+          infogreffeData.procedures?.length > 0 ||
+          infogreffeData.siren !== undefined
+        );
+        return hasInfogreffeData ? 'active' : 'fallback';
+      
+      case 'bodacc':
+        // Bodacc peut avoir des records vides, c'est normal
+        const bodaccData = companyData?.bodacc;
+        return bodaccData ? 'active' : 'fallback';
+      
+      default:
+        return 'error';
+    }
+  };
+
   const dataSources: DataSourceInfo[] = [
     {
       name: "Données Admin",
@@ -63,7 +107,7 @@ export function DataMappingDashboard() {
       color: "bg-purple-500",
       priority: 1,
       fields: ["company_name", "activity", "address", "scores", "financial_data"],
-      status: companyData?.enriched?.adminScores ? 'active' : 'fallback'
+      status: getAPIStatus('admin')
     },
     {
       name: "API Sirene",
@@ -71,7 +115,7 @@ export function DataMappingDashboard() {
       color: "bg-blue-500",
       priority: 2,
       fields: ["company_name", "siret", "naf_code", "legal_form", "activity"],
-      status: companyData?.sirene ? 'active' : 'error'
+      status: getAPIStatus('sirene')
     },
     {
       name: "API Pappers",
@@ -79,7 +123,7 @@ export function DataMappingDashboard() {
       color: "bg-green-500",
       priority: 3,
       fields: ["financial_data", "dirigeants", "effectifs", "creation_date"],
-      status: companyData?.pappers ? 'active' : 'error'
+      status: getAPIStatus('pappers')
     },
     {
       name: "API Infogreffe",
@@ -87,7 +131,7 @@ export function DataMappingDashboard() {
       color: "bg-orange-500",
       priority: 4,
       fields: ["bilans", "comptes", "procedures", "score_infogreffe"],
-      status: companyData?.infogreffe ? 'active' : 'error'
+      status: getAPIStatus('infogreffe')
     },
     {
       name: "API Bodacc",
@@ -95,7 +139,7 @@ export function DataMappingDashboard() {
       color: "bg-red-500",
       priority: 5,
       fields: ["procedures_collectives", "annonces", "events"],
-      status: companyData?.bodacc ? 'active' : 'error'
+      status: getAPIStatus('bodacc')
     }
   ];
 
@@ -169,19 +213,44 @@ export function DataMappingDashboard() {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      active: { variant: "default" as const, icon: CheckCircle2, color: "text-green-600" },
-      fallback: { variant: "secondary" as const, icon: AlertCircle, color: "text-yellow-600" },
-      error: { variant: "destructive" as const, icon: XCircle, color: "text-red-600" }
+      active: { 
+        variant: "default" as const, 
+        icon: CheckCircle2, 
+        color: "text-green-600",
+        label: "Actif",
+        description: "API fonctionnelle avec données"
+      },
+      fallback: { 
+        variant: "secondary" as const, 
+        icon: AlertCircle, 
+        color: "text-yellow-600",
+        label: "Aucune donnée",
+        description: "API fonctionnelle mais sans données pour cette entreprise"
+      },
+      error: { 
+        variant: "destructive" as const, 
+        icon: XCircle, 
+        color: "text-red-600",
+        label: "Erreur",
+        description: "Erreur lors de l'appel API"
+      }
     };
 
     const config = variants[status as keyof typeof variants];
     const Icon = config.icon;
 
     return (
-      <Badge variant={config.variant} className="text-xs">
-        <Icon className="mr-1 h-3 w-3" />
-        {status}
-      </Badge>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge variant={config.variant} className="text-xs">
+            <Icon className="mr-1 h-3 w-3" />
+            {config.label}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{config.description}</p>
+        </TooltipContent>
+      </Tooltip>
     );
   };
 

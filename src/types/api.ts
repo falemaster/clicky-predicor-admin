@@ -278,13 +278,6 @@ export interface EnrichedData {
     legalProcedures?: Record<string, string>;
     judicialProcedures?: Record<string, string>;
   };
-  adminScores?: {
-    economic: string;
-    financial: string;
-    legal: string;
-    fiscal: string;
-    global: string;
-  };
   metadata: {
     dataQuality: string;
     sources: string;
@@ -296,7 +289,7 @@ export interface EnrichedData {
 export interface ApiError {
   code: string;
   message: string;
-  source: 'SIRENE' | 'PAPPERS' | 'INFOGREFFE' | 'RUBYPAYEUR' | 'BODACC' | 'PREDICTOR' | 'ENRICHMENT' | 'VALIDATION';
+  source: 'SIRENE' | 'PAPPERS' | 'INFOGREFFE' | 'RUBYPAYEUR' | 'BODACC' | 'PREDICTOR' | 'ENRICHMENT';
   metadata?: {
     mock?: boolean;
     reason?: string;

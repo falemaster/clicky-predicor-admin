@@ -11,7 +11,6 @@ import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCompanies from "./pages/AdminCompanies";
 import AdminEditor from "./pages/AdminEditor";
-import AdminDataMapping from "./pages/AdminDataMapping";
 import Analysis from "./pages/Analysis";
 import AnalysisMockupReference from "./pages/AnalysisMockupReference";
 import NotFound from "./pages/NotFound";
@@ -37,8 +36,6 @@ const App = () => (
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="editor" element={<AdminEditor />} />
             <Route path="editor/:siren" element={<AdminEditor />} />
-            <Route path="data-mapping" element={<AdminDataMapping />} />
-            <Route path="data-mapping/:siren" element={<AdminDataMapping />} />
             <Route path="settings" element={<div className="p-6">Configuration - À venir</div>} />
           </Route>
           

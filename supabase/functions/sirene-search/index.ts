@@ -44,9 +44,9 @@ serve(async (req) => {
       const cleanQuery = query.trim().substring(0, 80);
       url = `https://recherche-entreprises.api.gouv.fr/search?q=${encodeURIComponent(cleanQuery)}&page=1&per_page=${limit}&open=true`;
     } else if (type === 'siren' || type === 'siret') {
-      // Recherche directe SIREN/SIRET - SANS open=true pour inclure les entreprises cessées
+      // Recherche directe via l'API publique (pas d'OAuth) pour fiabiliser SIREN/SIRET
       const cleanQuery = query.trim().substring(0, 80);
-      url = `https://recherche-entreprises.api.gouv.fr/search?q=${encodeURIComponent(cleanQuery)}&page=1&per_page=1`;
+      url = `https://recherche-entreprises.api.gouv.fr/search?q=${encodeURIComponent(cleanQuery)}&page=1&per_page=1&open=true`;
     }
 
     console.log(`Fetching: ${url}`);
@@ -78,19 +78,8 @@ serve(async (req) => {
       const results = Array.isArray(data.results) ? data.results.slice(0, limit) : [];
       console.log(`Recherche-Entreprises response: ${results.length} results`);
       
-      // Pour les recherches SIREN/SIRET, essayer l'INSEE en fallback si aucun résultat
+      // Pour les recherches SIREN/SIRET, retourner une erreur plus explicite si aucun résultat
       if ((type === 'siren' || type === 'siret') && results.length === 0) {
-        console.log('Tentative fallback INSEE pour identifier:', query);
-        const inseeResults = await callInseeApiSearch(query);
-        if (inseeResults.length > 0) {
-          return new Response(JSON.stringify({ 
-            results: inseeResults,
-            source: 'insee-fallback'
-          }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-        
         return new Response(JSON.stringify({ 
           error: { 
             code: 'SIRENE_NOT_FOUND', 
@@ -195,14 +184,14 @@ function formatAdresse(adresse: any): string {
   return parts.join(' ');
 }
 
+// Appeler l'API INSEE via notre edge function existante
 async function callInseeApiSearch(query: string): Promise<any[]> {
   try {
-    // Appeler INSEE avec l'endpoint approprié selon la longueur
-    const endpoint = query.length === 14 ? 'siret' : 'siren';
-    const body = query.length === 14 ? { endpoint, siret: query } : { endpoint, siren: query };
-    
     const { data, error } = await supabase.functions.invoke('insee-api', {
-      body
+      body: {
+        endpoint: 'search',
+        query: query
+      }
     });
 
     if (error) {

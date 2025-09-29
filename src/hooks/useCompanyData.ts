@@ -3,10 +3,8 @@ import type { CompanyFullData, ApiError } from '@/types/api';
 import { SireneApiService } from '@/services/sireneApi';
 import { PappersApiService } from '@/services/pappersApi';
 import { BodaccApiService } from '@/services/bodaccApi';
-import { InfogreffeOptimizedService } from '@/services/infogreffeOptimized';
+import { InfogreffeApiService } from '@/services/infogreffeApi';
 import { supabase } from '@/integrations/supabase/client';
-import { calculateModernScore } from '@/utils/scoreCalculator';
-import { generatePremiumRecommendations, calculatePotentialSavings } from '@/utils/infogreffeThresholds';
 
 interface UseCompanyDataOptions {
   siren?: string;
@@ -23,9 +21,6 @@ interface UseCompanyDataReturn {
   clearData: () => void;
   updateData: (updatedData: CompanyFullData) => void;
   isInitialLoad: boolean;
-  hybridScore: ReturnType<typeof calculateModernScore> | null;
-  premiumRecommendations: ReturnType<typeof generatePremiumRecommendations>;
-  costSavings: ReturnType<typeof calculatePotentialSavings> | null;
 }
 
 export const useCompanyData = ({
@@ -42,7 +37,7 @@ export const useCompanyData = ({
     const sireneService = SireneApiService.getInstance();
     const pappersService = PappersApiService.getInstance();
     const bodaccService = BodaccApiService.getInstance();
-    const infogreffeService = InfogreffeOptimizedService.getInstance();
+    const infogreffeService = InfogreffeApiService.getInstance();
 
   const fetchCompanyData = async (identifier: string, type: 'siren' | 'siret') => {
     console.log(`🔍 Début de la recherche ${type.toUpperCase()}: ${identifier}`);
@@ -86,38 +81,13 @@ export const useCompanyData = ({
         showDataQualityDashboard = adminDataResult.data.show_data_quality_dashboard || false;
       }
 
-      // 2. SMART API STRATEGY: Primary Sirene → INSEE → Pappers (fallback)
-      console.log(`📡 Phase 1: Appel API Sirene pour ${type}: ${identifier}`);
+      // 2. SMART API STRATEGY: INSEE Sirene → Infogreffe → Pappers (fallback)
+      console.log(`📡 Phase 1: Appel API INSEE pour ${type}: ${identifier}`);
+      let sireneResult = type === 'siren' 
+        ? await sireneService.getCompanyBySiren(identifier)
+        : await sireneService.getCompanyBySiret(identifier);
       
-      // Try sirene-search first (most reliable)
-      let sireneResult = { data: null, error: null };
-      try {
-        const { data: sireneSearchData, error: sireneSearchError } = await supabase.functions.invoke('sirene-search', {
-          body: { 
-            type: type,
-            query: identifier,
-            limit: 1
-          }
-        });
-        
-        if (sireneSearchData && !sireneSearchError) {
-          sireneResult.data = sireneSearchData;
-          console.log(`✅ Données Sirene trouvées:`, sireneSearchData);
-        } else {
-          console.log(`⚠️ Sirene-search échec, fallback vers INSEE...`);
-          // Fallback to INSEE API
-          sireneResult = type === 'siren' 
-            ? await sireneService.getCompanyBySiren(identifier)
-            : await sireneService.getCompanyBySiret(identifier);
-        }
-      } catch (error) {
-        console.log(`⚠️ Erreur sirene-search, fallback vers INSEE...`);
-        sireneResult = type === 'siren' 
-          ? await sireneService.getCompanyBySiren(identifier)
-          : await sireneService.getCompanyBySiret(identifier);
-      }
-      
-      console.log(`📊 Résultat final Sirene/INSEE:`, sireneResult);
+      console.log(`📊 Résultat API INSEE:`, sireneResult);
 
       if (sireneResult.error || !sireneResult.data) {
         if (sireneResult.error) {
@@ -179,13 +149,13 @@ export const useCompanyData = ({
         });
       }
 
-      // 4. Données Infogreffe OPTIMISÉES - Seulement les données essentielles (fiche identité)
+      // 4. Données Infogreffe (optionnelles) - VRAIES DONNÉES avec SCORES FINANCIERS - utiliser le SIREN extrait
       try {
-        // Récupérer uniquement les données de base (1 crédit seulement)
+        // Données de base de l'entreprise
         const infogreffeResult = await infogreffeService.getCompanyData(extractedSiren);
         if (infogreffeResult.data) {
           companyData.infogreffe = infogreffeResult.data;
-          console.log('📊 Données Infogreffe essentielles récupérées (1 crédit):', infogreffeResult.data);
+          console.log('📊 Données Infogreffe réelles récupérées:', infogreffeResult.data);
         } else if (infogreffeResult.error) {
           allErrors.push(infogreffeResult.error);
           console.warn('⚠️ Erreur Infogreffe:', infogreffeResult.error);
@@ -201,9 +171,29 @@ export const useCompanyData = ({
           }
         }
 
-        // ⚠️ ÉCONOMIES: Les données coûteuses (NOTAPME, AFDCC) ne sont plus récupérées automatiquement
-        // Elles doivent être demandées explicitement via l'interface utilisateur
-        console.log('💰 Optimisation activée: Données financières premium disponibles à la demande uniquement');
+        // NOTAPME Performance - PRIORITAIRE pour les scores financiers
+        const notapmePerformance = await infogreffeService.getNotapmePerformance(extractedSiren);
+        if (notapmePerformance.data) {
+          if (!companyData.infogreffe) companyData.infogreffe = {} as any;
+          (companyData.infogreffe as any).notapmePerformance = notapmePerformance.data;
+          console.log('💰 Scores NOTAPME Performance récupérés (PRIORITAIRE):', notapmePerformance.data);
+        }
+
+        // NOTAPME Essentiel - Ratios clés complémentaires
+        const notapmeEssentiel = await infogreffeService.getNotapmeEssentiel(extractedSiren);
+        if (notapmeEssentiel.data) {
+          if (!companyData.infogreffe) companyData.infogreffe = {} as any;
+          (companyData.infogreffe as any).notapmeEssentiel = notapmeEssentiel.data;
+          console.log('📈 Ratios NOTAPME Essentiel récupérés:', notapmeEssentiel.data);
+        }
+
+        // Score AFDCC - Notation de risque principale
+        const afdccScore = await infogreffeService.getAfdccScore(extractedSiren);
+        if (afdccScore.data) {
+          if (!companyData.infogreffe) companyData.infogreffe = {} as any;
+          (companyData.infogreffe as any).afdccScore = afdccScore.data;
+          console.log('🎯 Score AFDCC récupéré (RISQUE PRINCIPAL):', afdccScore.data);
+        }
       } catch (error) {
         allErrors.push({
           code: 'INFOGREFFE_FETCH_ERROR',
@@ -213,27 +203,23 @@ export const useCompanyData = ({
         console.error('❌ Erreur réseau Infogreffe:', error);
       }
 
-      // 5. Analyse Predictor (via edge function) - seulement si on a des données Sirene
+      // 5. Analyse Predictor (via edge function)
       try {
-        if (sireneResult.data?.siren) {
-          const { data: predictorData, error: predictorError } = await supabase.functions.invoke('predictor-analysis', {
-            body: { 
-              siren: sireneResult.data.siren,
-              companyData: companyData
-            }
-          });
-
-          if (predictorData && !predictorError) {
-            companyData.predictor = predictorData;
-          } else if (predictorError) {
-            allErrors.push({
-              code: 'PREDICTOR_FUNCTION_ERROR',
-              message: `Erreur analyse Predictor: ${predictorError.message}`,
-              source: 'PREDICTOR'
-            });
+        const { data: predictorData, error: predictorError } = await supabase.functions.invoke('predictor-analysis', {
+          body: { 
+            siren: sireneResult.data.siren,
+            companyData: companyData
           }
-        } else {
-          console.log('⚠️ Pas de SIREN disponible pour l\'analyse Predictor');
+        });
+
+        if (predictorData && !predictorError) {
+          companyData.predictor = predictorData;
+        } else if (predictorError) {
+          allErrors.push({
+            code: 'PREDICTOR_FUNCTION_ERROR',
+            message: `Erreur analyse Predictor: ${predictorError.message}`,
+            source: 'PREDICTOR'
+          });
         }
       } catch (error) {
         allErrors.push({
@@ -243,24 +229,20 @@ export const useCompanyData = ({
         });
       }
 
-      // 6. RubyPayeur (via edge function) - seulement si on a des données Sirene
+      // 6. RubyPayeur (via edge function)
       try {
-        if (sireneResult.data?.siren) {
-          const { data: rubyPayeurData, error: rubyPayeurError } = await supabase.functions.invoke('rubypayeur-api', {
-            body: { siren: sireneResult.data.siren }
-          });
+        const { data: rubyPayeurData, error: rubyPayeurError } = await supabase.functions.invoke('rubypayeur-api', {
+          body: { siren: sireneResult.data.siren }
+        });
 
-          if (rubyPayeurData && !rubyPayeurError) {
-            companyData.rubyPayeur = rubyPayeurData;
-          } else if (rubyPayeurError) {
-            allErrors.push({
-              code: 'RUBYPAYEUR_FUNCTION_ERROR',
-              message: `Erreur RubyPayeur: ${rubyPayeurError.message}`,
-              source: 'RUBYPAYEUR'
-            });
-          }
-        } else {
-          console.log('⚠️ Pas de SIREN disponible pour RubyPayeur');
+        if (rubyPayeurData && !rubyPayeurError) {
+          companyData.rubyPayeur = rubyPayeurData;
+        } else if (rubyPayeurError) {
+          allErrors.push({
+            code: 'RUBYPAYEUR_FUNCTION_ERROR',
+            message: `Erreur RubyPayeur: ${rubyPayeurError.message}`,
+            source: 'RUBYPAYEUR'
+          });
         }
       } catch (error) {
         allErrors.push({
@@ -272,21 +254,13 @@ export const useCompanyData = ({
 
       // 7. Enrichissement IA des données manquantes
       try {
-        // Utiliser les données Sirene si disponibles, sinon des données minimales
-        const enrichmentData = sireneResult.data ? {
+        const enrichmentData = {
           name: sireneResult.data.denomination,
-          siren: sireneResult.data.siren || extractedSiren,
+          siren: sireneResult.data.siren,
           naf: sireneResult.data.naf,
           address: sireneResult.data.adresse,
           employees: sireneResult.data.effectifs,
           foundedYear: sireneResult.data.dateCreation?.substring(0, 4)
-        } : {
-          name: `Entreprise ${extractedSiren}`,
-          siren: extractedSiren,
-          naf: null,
-          address: null,
-          employees: null,
-          foundedYear: null
         };
 
         const { data: enrichedData, error: enrichedError } = await supabase.functions.invoke('enrich-company-data', {
@@ -310,20 +284,18 @@ export const useCompanyData = ({
         });
       }
 
-      // Vérifier qu'on a au moins quelques données minimales pour continuer
-      if (!companyData.sirene && !companyData.pappers && !companyData.infogreffe && !companyData.enriched) {
-        // Si vraiment aucune API n'a fonctionné, mais on a quand même l'enriched data
-        if (!companyData.enriched) {
-          const noDataError: ApiError = {
-            code: 'NO_DATA_FOUND',
-            message: `Aucune donnée trouvée pour ${type === 'siren' ? 'le SIREN' : 'le SIRET'} ${identifier}. Vérifiez que le numéro est correct et que l'entreprise existe.`,
-            source: 'SIRENE'
-          };
-          allErrors.push(noDataError);
-          setErrors(allErrors);
-          setLoading(false);
-          return;
-        }
+      // Vérifier qu'on a au moins quelques données minimales
+      if (!companyData.sirene && !companyData.pappers && !companyData.infogreffe) {
+        // Si aucune API n'a fonctionné, retourner une erreur claire
+        const noDataError: ApiError = {
+          code: 'NO_DATA_FOUND',
+          message: `Aucune données trouvées pour ${type === 'siren' ? 'le SIREN' : 'le SIRET'} ${identifier}. Vérifiez que le numéro est correct et que l'entreprise existe.`,
+          source: 'PREDICTOR'
+        };
+        allErrors.push(noDataError);
+        setErrors(allErrors);
+        setLoading(false);
+        return;
       }
 
       // 8. Merger les données admin avec les données API (admin prioritaire)
@@ -442,11 +414,6 @@ export const useCompanyData = ({
     }
   }, [siren, siret]);
 
-  // Calculate derived values
-  const hybridScore = data ? calculateModernScore(data) : null;
-  const premiumRecommendations = data ? generatePremiumRecommendations(data) : [];
-  const costSavings = data ? calculatePotentialSavings(data) : null;
-
   return {
     data,
     loading,
@@ -455,9 +422,6 @@ export const useCompanyData = ({
     refetch,
     clearData,
     updateData,
-    isInitialLoad,
-    hybridScore,
-    premiumRecommendations,
-    costSavings
+    isInitialLoad
   };
 };

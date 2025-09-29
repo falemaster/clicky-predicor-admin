@@ -36,10 +36,11 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
 
   const { isEditing, onEdit } = useEditing();
 
-  // Calculer les nouveaux scores basés sur la prioritisation Infogreffe
-  const financialScore = calculateFinancialScore(companyData);
-  const riskScore = calculateRiskScore(companyData);
-  const rubyPayeurStatus = getRubyPayeurStatus(companyData);
+  // Calculer les scores basés sur la priorisation Pappers (en utilisant les données brutes)
+  const raw = companyData?.rawData || companyData;
+  const financialScore = calculateFinancialScore(raw);
+  const riskScore = calculateRiskScore(raw);
+  const rubyPayeurStatus = getRubyPayeurStatus(raw);
 
   const handleScoresChange = (newScores: {
     economic: number;
@@ -308,11 +309,11 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
             </div>
             <div>
               <span className="text-sm font-medium">RCS:</span>
-              <span className="ml-2 text-sm">{companyData.siren}</span>
+              <span className="ml-2 text-sm">{companyData.companyInfo?.siren}</span>
             </div>
             <div>
               <span className="text-sm font-medium">NAF:</span>
-              <span className="ml-2 text-sm">{companyData.naf}</span>
+              <span className="ml-2 text-sm">{companyData.companyInfo?.naf}</span>
             </div>
           </CardContent>
         </Card>
@@ -336,21 +337,21 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
             </div>
             <div>
               <span className="text-sm font-medium">Code NAF:</span>
-              <span className="ml-2 text-sm">{companyData.naf}</span>
+              <span className="ml-2 text-sm">{companyData.companyInfo?.naf}</span>
             </div>
             <div>
               <span className="text-sm font-medium">Effectif:</span>
               <span className="ml-2 text-sm">
                 {companyData?.pappers?.bilans?.[0]?.effectifs || 
-                 companyData.employees || 
+                 companyData.companyInfo?.employees || 
                  'Non renseigné'} 
-                {(companyData?.pappers?.bilans?.[0]?.effectifs || companyData.employees) && ' salariés'}
+                {(companyData?.pappers?.bilans?.[0]?.effectifs || companyData.companyInfo?.employees) && ' salariés'}
               </span>
             </div>
             <div>
               <span className="text-sm font-medium">Statut:</span>
               <Badge variant="secondary" className="ml-2 bg-success-light text-success">
-                {companyData.status}
+                {companyData.companyInfo?.status}
               </Badge>
             </div>
           </CardContent>

@@ -141,6 +141,12 @@ export interface DisplayEnrichedData {
   };
   predictor: any;
   rawData: CompanyFullData;
+  // Exposition des sources brutes pour compatibilité avec l'UI existante
+  sirene?: any;
+  pappers?: any;
+  infogreffe?: any;
+  rubyPayeur?: any;
+  enriched?: any;
   encartVisibility?: EncartVisibility;
   adminSettings?: {
     showDataQualitySection: boolean;
@@ -277,6 +283,11 @@ export function buildCompanyDisplay(realData: CompanyFullData | null): BuildComp
     },
     predictor: realData.predictor || null,
     rawData: realData,
+    sirene: realData.sirene,
+    pappers: realData.pappers,
+    infogreffe: realData.infogreffe,
+    rubyPayeur: (realData as any).rubyPayeur,
+    enriched: (realData as any).enriched,
     encartVisibility: (realData as any).encartVisibility || {
       overview: {
         company_info: true,

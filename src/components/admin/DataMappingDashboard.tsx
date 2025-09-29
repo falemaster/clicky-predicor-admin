@@ -55,7 +55,11 @@ interface EditLog {
 
 export function DataMappingDashboard() {
   const { siren } = useParams();
-  const { data: companyData, loading } = useCompanyData({ siren, autoFetch: true });
+  const [selectedSiren, setSelectedSiren] = useState<string>(siren || "");
+  const { data: companyData, loading } = useCompanyData({ 
+    siren: selectedSiren, 
+    autoFetch: !!selectedSiren 
+  });
   const [editLogs, setEditLogs] = useState<EditLog[]>([]);
   const [mappingRules, setMappingRules] = useState<MappingRule[]>([]);
 
@@ -145,14 +149,14 @@ export function DataMappingDashboard() {
 
   // Charger les logs d'édition
   useEffect(() => {
-    if (!siren) return;
+    if (!selectedSiren) return;
 
     const loadEditLogs = async () => {
       try {
         const { data, error } = await supabase
           .from('admin_edit_logs')
           .select('*')
-          .eq('siren', siren)
+          .eq('siren', selectedSiren)
           .order('created_at', { ascending: false })
           .limit(50);
 
@@ -164,7 +168,7 @@ export function DataMappingDashboard() {
     };
 
     loadEditLogs();
-  }, [siren]);
+  }, [selectedSiren]);
 
   // Générer les règles de mapping
   useEffect(() => {
@@ -267,17 +271,50 @@ export function DataMappingDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Data Mapping Dashboard</h1>
-          <p className="text-muted-foreground">
-            Visualisation complète des sources de données et règles d'affichage pour {siren}
-          </p>
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold">Mapping des Données</h1>
+        
+        <div className="flex items-center space-x-4">
+          <label htmlFor="siren-input" className="text-sm font-medium">
+            SIREN de l'entreprise:
+          </label>
+          <input
+            id="siren-input"
+            type="text"
+            value={selectedSiren}
+            onChange={(e) => setSelectedSiren(e.target.value)}
+            placeholder="Ex: 123456789"
+            className="px-3 py-2 border border-input rounded-md w-48"
+          />
+          {!selectedSiren && (
+            <span className="text-sm text-muted-foreground">
+              Saisissez un SIREN pour voir le mapping des données
+            </span>
+          )}
         </div>
-        <Badge variant="outline" className="text-sm">
-          Temps réel
-        </Badge>
       </div>
+
+      {!selectedSiren ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Veuillez saisir un numéro SIREN pour voir le mapping des données de l'entreprise.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Dashboard pour {selectedSiren}</h2>
+              <p className="text-muted-foreground">
+                Visualisation complète des sources de données et règles d'affichage
+              </p>
+            </div>
+            <Badge variant="outline" className="text-sm">
+              Temps réel
+            </Badge>
+          </div>
 
       <Tabs defaultValue="mapping" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
@@ -536,6 +573,8 @@ export function DataMappingDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+        </>
+      )}
     </div>
   );
 }

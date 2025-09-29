@@ -412,9 +412,19 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
             activeTab={activeTab}
             onTabChange={setActiveTab}
             onEdit={(field: string, value: any) => {
-              // Adapter l'interface onEdit pour le composant partagé
-              const pathArray = field.split('.');
-              updateField(pathArray, value);
+              // Gérer le cas spécial des scores
+              if (field === 'scores' && typeof value === 'object') {
+                // Mettre à jour tous les scores individuellement
+                updateField(['scores', 'economic'], value.economic.toString());
+                updateField(['scores', 'financial'], value.financial.toString());
+                updateField(['scores', 'legal'], value.legal.toString());
+                updateField(['scores', 'fiscal'], value.fiscal.toString());
+                updateField(['scores', 'global'], value.global.toString());
+              } else {
+                // Adapter l'interface onEdit pour les autres champs
+                const pathArray = field.split('.');
+                updateField(pathArray, value);
+              }
             }}
           />
         </div>

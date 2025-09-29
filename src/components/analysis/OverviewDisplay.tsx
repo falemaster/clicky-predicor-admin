@@ -5,6 +5,8 @@ import { FallbackScoreBadge } from "./FallbackScoreBadge";
 import { calculateFinancialScore, calculateRiskScore, getRubyPayeurStatus } from "@/utils/scoreCalculator";
 import { DataQualitySection } from "@/components/ui/data-quality-section";
 import { EditableField } from "@/components/ui/editable-field";
+import { ScoreEditorModal } from "@/components/admin/ScoreEditorModal";
+import { useEditing } from "@/components/result/EditingContext";
 import { 
   Building2, 
   MapPin, 
@@ -32,10 +34,24 @@ interface OverviewDisplayProps {
 export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
   if (!companyData) return null;
 
+  const { isEditing, onEdit } = useEditing();
+
   // Calculer les nouveaux scores basés sur la prioritisation Infogreffe
   const financialScore = calculateFinancialScore(companyData);
   const riskScore = calculateRiskScore(companyData);
   const rubyPayeurStatus = getRubyPayeurStatus(companyData);
+
+  const handleScoresChange = (newScores: {
+    economic: number;
+    financial: number;
+    legal: number;
+    fiscal: number;
+    global: number;
+  }) => {
+    if (onEdit) {
+      onEdit('scores', newScores);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -111,9 +127,24 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
               Surveillance des risques
             </div>
             <div className="flex items-center space-x-2">
-              <Badge variant="outline">
-                Score Global: {scores?.global || '5.5'}/10
-              </Badge>
+              {isEditing ? (
+                <ScoreEditorModal
+                  globalScore={scores?.global || 5.5}
+                  economicScore={scores?.economic || 5.5}
+                  financialScore={scores?.financial || 6.0}
+                  legalScore={scores?.legal || 7.5}
+                  fiscalScore={scores?.fiscal || 6.8}
+                  onScoresChange={handleScoresChange}
+                >
+                  <Badge variant="outline" className="cursor-pointer hover:bg-muted">
+                    Score Global: {scores?.global || '5.5'}/10
+                  </Badge>
+                </ScoreEditorModal>
+              ) : (
+                <Badge variant="outline">
+                  Score Global: {scores?.global || '5.5'}/10
+                </Badge>
+              )}
               <FallbackScoreBadge 
                 isFallback={companyData?.predictor?.isFallbackScore}
                 fallbackReason={companyData?.predictor?.fallbackReason}

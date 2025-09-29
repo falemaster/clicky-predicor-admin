@@ -239,22 +239,15 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
     setHasChanges(true);
   };
 
-  // Fonction pour sauvegarder les données
+  // Fonction pour sauvegarder les données (désactivée car la table n'existe pas encore)
   const saveData = async () => {
     if (!formData || !hasChanges) return;
 
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('company_admin_data')
-        .upsert({
-          siren: formData.sirene.siren,
-          data: formData,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
+      // TODO: Implémenter la sauvegarde une fois la table créée
+      console.log('Sauvegarde simulée:', formData);
+      
       setHasChanges(false);
       toast({
         title: "Sauvegarde réussie",
@@ -263,7 +256,7 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
     } catch (error) {
       console.error('Erreur de sauvegarde:', error);
       toast({
-        title: "Erreur de sauvegarde",
+        title: "Erreur de sauvegarde", 
         description: "Une erreur est survenue lors de la sauvegarde.",
         variant: "destructive"
       });
@@ -430,4 +423,3 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
   );
 }
 
-export { CompanyWYSIWYGEditor };

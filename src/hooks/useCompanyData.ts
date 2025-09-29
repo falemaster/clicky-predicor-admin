@@ -3,7 +3,7 @@ import type { CompanyFullData, ApiError } from '@/types/api';
 import { SireneApiService } from '@/services/sireneApi';
 import { PappersApiService } from '@/services/pappersApi';
 import { BodaccApiService } from '@/services/bodaccApi';
-import { InfogreffeApiService } from '@/services/infogreffeApi';
+import { InfogreffeOptimizedService } from '@/services/infogreffeOptimized';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UseCompanyDataOptions {
@@ -37,7 +37,7 @@ export const useCompanyData = ({
     const sireneService = SireneApiService.getInstance();
     const pappersService = PappersApiService.getInstance();
     const bodaccService = BodaccApiService.getInstance();
-    const infogreffeService = InfogreffeApiService.getInstance();
+    const infogreffeService = InfogreffeOptimizedService.getInstance();
 
   const fetchCompanyData = async (identifier: string, type: 'siren' | 'siret') => {
     console.log(`🔍 Début de la recherche ${type.toUpperCase()}: ${identifier}`);
@@ -174,13 +174,13 @@ export const useCompanyData = ({
         });
       }
 
-      // 4. Données Infogreffe (optionnelles) - VRAIES DONNÉES avec SCORES FINANCIERS - utiliser le SIREN extrait
+      // 4. Données Infogreffe OPTIMISÉES - Seulement les données essentielles (fiche identité)
       try {
-        // Données de base de l'entreprise
+        // Récupérer uniquement les données de base (1 crédit seulement)
         const infogreffeResult = await infogreffeService.getCompanyData(extractedSiren);
         if (infogreffeResult.data) {
           companyData.infogreffe = infogreffeResult.data;
-          console.log('📊 Données Infogreffe réelles récupérées:', infogreffeResult.data);
+          console.log('📊 Données Infogreffe essentielles récupérées (1 crédit):', infogreffeResult.data);
         } else if (infogreffeResult.error) {
           allErrors.push(infogreffeResult.error);
           console.warn('⚠️ Erreur Infogreffe:', infogreffeResult.error);
@@ -196,29 +196,9 @@ export const useCompanyData = ({
           }
         }
 
-        // NOTAPME Performance - PRIORITAIRE pour les scores financiers
-        const notapmePerformance = await infogreffeService.getNotapmePerformance(extractedSiren);
-        if (notapmePerformance.data) {
-          if (!companyData.infogreffe) companyData.infogreffe = {} as any;
-          (companyData.infogreffe as any).notapmePerformance = notapmePerformance.data;
-          console.log('💰 Scores NOTAPME Performance récupérés (PRIORITAIRE):', notapmePerformance.data);
-        }
-
-        // NOTAPME Essentiel - Ratios clés complémentaires
-        const notapmeEssentiel = await infogreffeService.getNotapmeEssentiel(extractedSiren);
-        if (notapmeEssentiel.data) {
-          if (!companyData.infogreffe) companyData.infogreffe = {} as any;
-          (companyData.infogreffe as any).notapmeEssentiel = notapmeEssentiel.data;
-          console.log('📈 Ratios NOTAPME Essentiel récupérés:', notapmeEssentiel.data);
-        }
-
-        // Score AFDCC - Notation de risque principale
-        const afdccScore = await infogreffeService.getAfdccScore(extractedSiren);
-        if (afdccScore.data) {
-          if (!companyData.infogreffe) companyData.infogreffe = {} as any;
-          (companyData.infogreffe as any).afdccScore = afdccScore.data;
-          console.log('🎯 Score AFDCC récupéré (RISQUE PRINCIPAL):', afdccScore.data);
-        }
+        // ⚠️ ÉCONOMIES: Les données coûteuses (NOTAPME, AFDCC) ne sont plus récupérées automatiquement
+        // Elles doivent être demandées explicitement via l'interface utilisateur
+        console.log('💰 Optimisation activée: Données financières premium disponibles à la demande uniquement');
       } catch (error) {
         allErrors.push({
           code: 'INFOGREFFE_FETCH_ERROR',

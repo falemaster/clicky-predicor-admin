@@ -199,11 +199,88 @@ export type Database = {
         }
         Relationships: []
       }
+      infogreffe_cache: {
+        Row: {
+          created_at: string
+          credits_used: number
+          data: Json
+          endpoint: string
+          expires_at: string
+          id: string
+          millesime: number | null
+          siren: string
+        }
+        Insert: {
+          created_at?: string
+          credits_used?: number
+          data: Json
+          endpoint: string
+          expires_at: string
+          id?: string
+          millesime?: number | null
+          siren: string
+        }
+        Update: {
+          created_at?: string
+          credits_used?: number
+          data?: Json
+          endpoint?: string
+          expires_at?: string
+          id?: string
+          millesime?: number | null
+          siren?: string
+        }
+        Relationships: []
+      }
+      infogreffe_costs: {
+        Row: {
+          cost_euros: number
+          created_at: string
+          credits_used: number
+          endpoint: string
+          id: string
+          ip_address: unknown | null
+          session_id: string
+          siren: string
+          user_agent: string | null
+        }
+        Insert: {
+          cost_euros?: number
+          created_at?: string
+          credits_used?: number
+          endpoint: string
+          id?: string
+          ip_address?: unknown | null
+          session_id: string
+          siren: string
+          user_agent?: string | null
+        }
+        Update: {
+          cost_euros?: number
+          created_at?: string
+          credits_used?: number
+          endpoint?: string
+          id?: string
+          ip_address?: unknown | null
+          session_id?: string
+          siren?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      clean_expired_infogreffe_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_infogreffe_cache: {
+        Args: { p_endpoint: string; p_millesime?: number; p_siren: string }
+        Returns: Json
+      }
       log_search_activity: {
         Args: {
           p_company_id?: string
@@ -214,6 +291,17 @@ export type Database = {
           p_user_agent?: string
         }
         Returns: string
+      }
+      set_infogreffe_cache: {
+        Args: {
+          p_credits_used?: number
+          p_data: Json
+          p_endpoint: string
+          p_millesime?: number
+          p_siren: string
+          p_ttl_hours?: number
+        }
+        Returns: undefined
       }
     }
     Enums: {

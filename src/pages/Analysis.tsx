@@ -23,6 +23,8 @@ import { DirigeantModal } from "@/components/analysis/DirigeantModal";
 import { CollectiveProcedureAlert } from "@/components/analysis/CollectiveProcedureAlert";
 import { AlertSummaryBadge } from "@/components/admin/AlertSummaryBadge";
 import { DataQualitySection } from "@/components/ui/data-quality-section";
+import { InfogreffeCostTracker } from "@/components/analysis/InfogreffeCostTracker";
+import { InfogreffeOnDemand } from "@/components/analysis/InfogreffeOnDemand";
 import { 
   Building2, 
   MapPin, 
@@ -839,7 +841,21 @@ const Analysis = () => {
           </TabsContent>
 
           <TabsContent value="study" className="space-y-6">
-            <StudyDisplay companyData={enrichedData} />
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <StudyDisplay companyData={enrichedData} />
+              </div>
+              <div className="space-y-6">
+                <InfogreffeCostTracker />
+                <InfogreffeOnDemand 
+                  siren={companyData.siren}
+                  onDataFetched={(endpoint, data) => {
+                    console.log(`Données ${endpoint} récupérées:`, data);
+                    // Optionally update the company data
+                  }}
+                />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="predictive" className="space-y-6">
@@ -847,52 +863,58 @@ const Analysis = () => {
           </TabsContent>
 
           <TabsContent value="reports" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Download className="h-5 w-5 mr-2" />
-                    Rapports
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button className="w-full justify-start" variant="outline">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Télécharger rapport complet PDF
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Rapport exécutif (2 pages)
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Analyse prédictive détaillée
-                  </Button>
-                </CardContent>
-              </Card>
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Download className="h-5 w-5 mr-2" />
+                      Rapports
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Button className="w-full justify-start" variant="outline">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Télécharger rapport complet PDF
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Rapport exécutif (2 pages)
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Analyse prédictive détaillée
+                    </Button>
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Bell className="h-5 w-5 mr-2" />
-                    Alertes & Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button className="w-full justify-start" variant="outline">
-                    <Bell className="h-4 w-4 mr-2" />
-                    Configurer les alertes
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Share className="h-4 w-4 mr-2" />
-                    Partager l'analyse
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Ajouter un commentaire admin
-                  </Button>
-                </CardContent>
-              </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Bell className="h-5 w-5 mr-2" />
+                      Alertes & Actions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Button className="w-full justify-start" variant="outline">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Configurer les alertes
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <Share className="h-4 w-4 mr-2" />
+                      Partager l'analyse
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Ajouter un commentaire admin
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div>
+                <InfogreffeCostTracker />
+              </div>
             </div>
           </TabsContent>
         </Tabs>

@@ -64,7 +64,7 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
           fiscal: scores?.fiscal || 6.8,
           global: scores?.global || 5.5
         }}
-        companyName={companyData?.name}
+        companyName={companyData?.companyInfo?.name}
       />
 
       {/* Company Details */}
@@ -79,39 +79,39 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <EditableField
-                value={companyData.address}
+                value={companyData.companyInfo?.address}
                 field="address"
                 icon={<MapPin className="h-4 w-4 text-muted-foreground" />}
               />
               <EditableField
-                value={companyData.director}
+                value={companyData.companyInfo?.director}
                 field="director"
                 icon={<User className="h-4 w-4 text-muted-foreground" />}
-                displayValue={`Dirigeant: ${companyData.director}`}
+                displayValue={`Dirigeant: ${companyData.companyInfo?.director}`}
               />
               <EditableField
-                value={companyData.foundedYear}
+                value={companyData.companyInfo?.foundedYear}
                 field="foundedYear"
                 icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
-                displayValue={`Créée en ${companyData.foundedYear}`}
+                displayValue={`Créée en ${companyData.companyInfo?.foundedYear}`}
               />
             </div>
             <div className="space-y-4">
               <EditableField
-                value={companyData.phone}
+                value={companyData.companyInfo?.phone}
                 field="phone"
                 icon={<Phone className="h-4 w-4 text-muted-foreground" />}
               />
               <EditableField
-                value={companyData.email}
+                value={companyData.companyInfo?.email}
                 field="email"
                 icon={<Mail className="h-4 w-4 text-muted-foreground" />}
               />
               <EditableField
-                value={companyData.employees}
+                value={companyData.companyInfo?.employees}
                 field="employees"
                 icon={<User className="h-4 w-4 text-muted-foreground" />}
-                displayValue={`Effectif: ${companyData.employees} salariés`}
+                displayValue={`Effectif: ${companyData.companyInfo?.employees} salariés`}
               />
             </div>
           </div>

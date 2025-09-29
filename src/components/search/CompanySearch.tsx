@@ -38,10 +38,26 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
     
     if (!searchTerm.trim()) return;
     
-    const cleanTerm = searchTerm.replace(/\s/g, '');
-    const type = cleanTerm.length === 14 ? 'siret' : 'siren';
+    // Validation stricte SIREN/SIRET
+    const cleanTerm = searchTerm.replace(/\D/g, ''); // Ne garder que les chiffres
     
-    await fetchCompanyData(cleanTerm, type);
+    if (cleanTerm.length === 9) {
+      // SIREN valide
+      await fetchCompanyData(cleanTerm, 'siren');
+    } else if (cleanTerm.length === 14) {
+      // SIRET valide
+      await fetchCompanyData(cleanTerm, 'siret');
+    } else {
+      // Identifiant invalide
+      setSearchError({
+        code: 'INVALID_IDENTIFIER',
+        message: 'SIREN = 9 chiffres / SIRET = 14 chiffres',
+        source: 'VALIDATION'
+      });
+      return;
+    }
+    
+    setSearchError(null);
   };
 
   // Autocomplétion par nom
@@ -168,9 +184,14 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
                   type="text"
                   placeholder="Ex: 123456789 ou 12345678900123"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    // Permettre seulement les chiffres et espaces pour la saisie
+                    const value = e.target.value.replace(/[^\d\s]/g, '');
+                    setSearchTerm(value);
+                    setSearchError(null);
+                  }}
                   className="flex-1"
-                  maxLength={14}
+                  maxLength={16} // 14 chiffres + 2 espaces possibles
                 />
                 <Button type="submit" disabled={loading || !searchTerm.trim()}>
                   {loading ? (
@@ -182,7 +203,7 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
                 </Button>
               </form>
               <p className="text-xs text-muted-foreground mt-2">
-                Saisissez un SIREN (9 chiffres) ou SIRET (14 chiffres)
+                Saisissez un SIREN (9 chiffres) ou SIRET (14 chiffres). Seuls les chiffres sont acceptés.
               </p>
             </TabsContent>
 

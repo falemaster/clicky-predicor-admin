@@ -289,7 +289,7 @@ export interface EnrichedData {
 export interface ApiError {
   code: string;
   message: string;
-  source: 'SIRENE' | 'PAPPERS' | 'INFOGREFFE' | 'RUBYPAYEUR' | 'BODACC' | 'PREDICTOR' | 'ENRICHMENT';
+  source: 'SIRENE' | 'PAPPERS' | 'INFOGREFFE' | 'RUBYPAYEUR' | 'BODACC' | 'PREDICTOR' | 'ENRICHMENT' | 'VALIDATION';
   metadata?: {
     mock?: boolean;
     reason?: string;

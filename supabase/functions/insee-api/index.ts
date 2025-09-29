@@ -27,14 +27,11 @@ async function getAccessToken(): Promise<string> {
 
   console.log('Demande d\'un nouveau token OAuth2 INSEE...');
 
-  // Essayer plusieurs endpoints connus (INSEE a migré plusieurs fois)
+  // Utiliser le nouvel endpoint officiel INSEE
   const tokenEndpoints = [
-    'https://api.insee.fr/token',
-    'https://api.insee.fr/oauth2/token',
-    'https://api.insee.fr/catalogue/oauth2/token',
-    // Nouveaux endpoints portail
-    'https://portail-api.insee.fr/oauth2/token',
-    'https://portail-api.insee.fr/token',
+    'https://portail-api.insee.fr/api/oauth2/token', // Endpoint officiel principal
+    'https://portail-api.insee.fr/oauth2/token',     // Fallback 1
+    'https://api.insee.fr/oauth2/token',              // Fallback 2 (ancien)
   ];
 
   let lastErrorText = '';

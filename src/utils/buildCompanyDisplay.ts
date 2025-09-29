@@ -34,6 +34,15 @@ export interface StudyData {
       status: string;
       count: number;
       details: any[];
+      mise_en_demeure?: string;
+      signalement_tae?: string;
+      initie?: string;
+      registre_huissiers?: string;
+      contentieux_marche_public?: string;
+      inscription_privileges?: string;
+      procedure_amiable?: string;
+      prevention_tae?: string;
+      declaration_creance?: string;
     };
     procedures_portalis: {
       status: string;
@@ -209,7 +218,16 @@ export function buildCompanyDisplay(realData: CompanyFullData | null): BuildComp
       procedures_bodacc: {
         status: realData.bodacc?.annonces?.length > 0 ? "actives" : "aucune",
         count: realData.bodacc?.annonces?.length || 0,
-        details: realData.bodacc?.annonces || []
+        details: realData.bodacc?.annonces || [],
+        mise_en_demeure: "aucune",
+        signalement_tae: "aucune",
+        initie: "aucune",
+        registre_huissiers: "aucune",
+        contentieux_marche_public: "aucune",
+        inscription_privileges: "aucune",
+        procedure_amiable: "aucune",
+        prevention_tae: "aucune",
+        declaration_creance: "aucune"
       },
       procedures_portalis: {
         status: realData.infogreffe?.procedures?.length > 0 ? "actives" : "aucune",

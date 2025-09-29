@@ -200,7 +200,7 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
           <Collapsible open={openSections.compliance} onOpenChange={() => toggleSection('compliance')}>
             <CollapsibleContent>
               <CardContent className="space-y-6">
-                {/* Procédures BODACC */}
+                {/* Procédures BODACC - Liste détaillée */}
                 {encartVisibility.procedures_bodacc && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -213,13 +213,101 @@ export function StudyDisplay({ companyData }: StudyDisplayProps) {
                         />
                       )}
                     </div>
-                    <EditableSelect
-                      value={companyData.study.compliance.procedures_bodacc.status}
-                      field="procedures_bodacc_status"
-                      options={procedureStatusOptions}
-                      icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.status)}
-                      badge={<Badge variant="outline">{companyData.study.compliance.procedures_bodacc.count} détectées</Badge>}
-                    />
+                    <div className="space-y-2 bg-muted/30 p-4 rounded-lg">
+                      <div className="text-xs text-muted-foreground mb-3 italic">
+                        Source des données : BODACC
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm py-1.5 border-b border-muted/20">
+                        <span>Mise en demeure</span>
+                        <EditableSelect
+                          value={companyData.study.compliance.procedures_bodacc.mise_en_demeure || "aucune"}
+                          field="procedures_bodacc.mise_en_demeure"
+                          options={procedureStatusOptions}
+                          icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.mise_en_demeure || "aucune")}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm py-1.5 border-b border-muted/20">
+                        <span>Signalement T.A.E.</span>
+                        <EditableSelect
+                          value={companyData.study.compliance.procedures_bodacc.signalement_tae || "aucune"}
+                          field="procedures_bodacc.signalement_tae"
+                          options={procedureStatusOptions}
+                          icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.signalement_tae || "aucune")}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm py-1.5 border-b border-muted/20">
+                        <span>Initié</span>
+                        <EditableSelect
+                          value={companyData.study.compliance.procedures_bodacc.initie || "aucune"}
+                          field="procedures_bodacc.initie"
+                          options={procedureStatusOptions}
+                          icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.initie || "aucune")}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm py-1.5 border-b border-muted/20">
+                        <span className="text-xs">Registre numérique des Huissiers Décret n° 2025-493 du 3 juin 2025</span>
+                        <EditableSelect
+                          value={companyData.study.compliance.procedures_bodacc.registre_huissiers || "aucune"}
+                          field="procedures_bodacc.registre_huissiers"
+                          options={procedureStatusOptions}
+                          icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.registre_huissiers || "aucune")}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm py-1.5 border-b border-muted/20">
+                        <span>Dégradation ou contentieux de marché public</span>
+                        <EditableSelect
+                          value={companyData.study.compliance.procedures_bodacc.contentieux_marche_public || "aucune"}
+                          field="procedures_bodacc.contentieux_marche_public"
+                          options={procedureStatusOptions}
+                          icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.contentieux_marche_public || "aucune")}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm py-1.5 border-b border-muted/20">
+                        <span>Inscription privilèges/nantissements</span>
+                        <EditableSelect
+                          value={companyData.study.compliance.procedures_bodacc.inscription_privileges || "aucune"}
+                          field="procedures_bodacc.inscription_privileges"
+                          options={procedureStatusOptions}
+                          icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.inscription_privileges || "aucune")}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm py-1.5 border-b border-muted/20">
+                        <span>Procédure amiable</span>
+                        <EditableSelect
+                          value={companyData.study.compliance.procedures_bodacc.procedure_amiable || "aucune"}
+                          field="procedures_bodacc.procedure_amiable"
+                          options={procedureStatusOptions}
+                          icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.procedure_amiable || "aucune")}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm py-1.5 border-b border-muted/20">
+                        <span>Prévention des difficultés auprès du Tribunal des Activités Économiques</span>
+                        <EditableSelect
+                          value={companyData.study.compliance.procedures_bodacc.prevention_tae || "aucune"}
+                          field="procedures_bodacc.prevention_tae"
+                          options={procedureStatusOptions}
+                          icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.prevention_tae || "aucune")}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm py-1.5">
+                        <span>Déclaration de créance</span>
+                        <EditableSelect
+                          value={companyData.study.compliance.procedures_bodacc.declaration_creance || "aucune"}
+                          field="procedures_bodacc.declaration_creance"
+                          options={procedureStatusOptions}
+                          icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.declaration_creance || "aucune")}
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
 

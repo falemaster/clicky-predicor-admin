@@ -1,4 +1,5 @@
 import type { CompanyFullData } from '@/types/api';
+import { calculateHybridScore, type HybridScoreResult } from './hybridScoreCalculator';
 
 export interface FinancialScore {
   score: number;
@@ -28,6 +29,13 @@ export interface RiskScore {
     incidents: number;
     tendance: string;
   };
+}
+
+/**
+ * Calcule le score hybride moderne avec tous les indicateurs disponibles
+ */
+export function calculateModernScore(companyData: CompanyFullData): HybridScoreResult {
+  return calculateHybridScore(companyData);
 }
 
 /**

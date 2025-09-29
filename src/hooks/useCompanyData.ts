@@ -5,6 +5,8 @@ import { PappersApiService } from '@/services/pappersApi';
 import { BodaccApiService } from '@/services/bodaccApi';
 import { InfogreffeOptimizedService } from '@/services/infogreffeOptimized';
 import { supabase } from '@/integrations/supabase/client';
+import { calculateModernScore } from '@/utils/scoreCalculator';
+import { generatePremiumRecommendations, calculatePotentialSavings } from '@/utils/infogreffeThresholds';
 
 interface UseCompanyDataOptions {
   siren?: string;
@@ -21,6 +23,9 @@ interface UseCompanyDataReturn {
   clearData: () => void;
   updateData: (updatedData: CompanyFullData) => void;
   isInitialLoad: boolean;
+  hybridScore: ReturnType<typeof calculateModernScore> | null;
+  premiumRecommendations: ReturnType<typeof generatePremiumRecommendations>;
+  costSavings: ReturnType<typeof calculatePotentialSavings> | null;
 }
 
 export const useCompanyData = ({
@@ -437,6 +442,11 @@ export const useCompanyData = ({
     }
   }, [siren, siret]);
 
+  // Calculate derived values
+  const hybridScore = data ? calculateModernScore(data) : null;
+  const premiumRecommendations = data ? generatePremiumRecommendations(data) : [];
+  const costSavings = data ? calculatePotentialSavings(data) : null;
+
   return {
     data,
     loading,
@@ -445,6 +455,9 @@ export const useCompanyData = ({
     refetch,
     clearData,
     updateData,
-    isInitialLoad
+    isInitialLoad,
+    hybridScore,
+    premiumRecommendations,
+    costSavings
   };
 };

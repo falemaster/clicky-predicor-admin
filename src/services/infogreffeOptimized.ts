@@ -4,8 +4,10 @@ import type {
   InfogreffeRepresentant, 
   InfogreffeRepartitionCapital,
   InfogreffeCompte,
+  CompanyFullData
 } from '@/types/api';
 import { supabase } from '@/integrations/supabase/client';
+import { shouldRecommendPremiumAnalysis, type PremiumEndpoint } from '@/utils/infogreffeThresholds';
 
 // Pricing structure based on the uploaded image
 const INFOGREFFE_PRICING = {
@@ -37,6 +39,16 @@ export class InfogreffeOptimizedService {
   
   private constructor() {
     this.sessionId = this.generateSessionId();
+  }
+
+  /**
+   * Évalue si une analyse premium est recommandée pour une entreprise
+   */
+  public shouldFetchPremiumData(
+    companyData: CompanyFullData, 
+    endpoint: PremiumEndpoint
+  ): boolean {
+    return shouldRecommendPremiumAnalysis(companyData, endpoint);
   }
   
   public static getInstance(): InfogreffeOptimizedService {

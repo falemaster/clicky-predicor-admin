@@ -46,9 +46,10 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
 
   // Autocomplétion par nom
   const handleNameSearch = async (query: string) => {
-    if (query.length < 2) {
+    if (query.length < 3) {
       setSearchResults([]);
       setShowDropdown(false);
+      setSearchError(null);
       return;
     }
 
@@ -59,7 +60,16 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
       const { data: companies, error } = await sireneService.searchCompaniesByName(query, 8);
       
       if (error) {
-        setSearchError(error);
+        // Gestion spécifique des erreurs de validation
+        if (error.code === 'QUERY_TOO_SHORT') {
+          setSearchError({
+            code: error.code,
+            message: 'Veuillez saisir au moins 3 caractères pour effectuer une recherche',
+            source: error.source
+          });
+        } else {
+          setSearchError(error);
+        }
         setSearchResults([]);
       } else {
         setSearchResults(companies || []);
@@ -206,6 +216,10 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
                   </div>
                 </div>
                 
+                <p className="text-xs text-muted-foreground mt-2">
+                  Saisissez au moins 3 caractères pour effectuer une recherche
+                </p>
+                
                 {searchError && (
                   <div className="mt-2">
                     <Alert variant="destructive">
@@ -253,12 +267,21 @@ export const CompanySearch: React.FC<CompanySearchProps> = ({
                 )}
                 
                 {/* Message si pas de résultats */}
-                {showDropdown && searchResults.length === 0 && searchTerm.length >= 2 && !isSearching && (
+                {showDropdown && searchResults.length === 0 && searchTerm.length >= 3 && !isSearching && (
                   <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-lg shadow-lg">
                     <div className="px-4 py-3 text-sm text-muted-foreground text-center">
                       Aucune entreprise trouvée pour "{searchTerm}"
                       <br />
                       <span className="text-xs">Essayez "Apple", "Microsoft", "Total", "L'Oreal", "Carrefour"</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Message d'aide pour les requêtes trop courtes */}
+                {searchTerm.length > 0 && searchTerm.length < 3 && !isSearching && (
+                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-lg shadow-lg">
+                    <div className="px-4 py-3 text-sm text-muted-foreground text-center">
+                      Saisissez au moins 3 caractères pour effectuer une recherche
                     </div>
                   </div>
                 )}

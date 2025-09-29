@@ -551,24 +551,46 @@ const AdvancedStudy = ({ companyData }: AdvancedStudyProps) => {
                             <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucune</Badge>
                           </div>
                           <div className="flex justify-between items-center text-sm py-1">
-                            <span>Commandement de payer par huissier</span>
+                            <span>Signalement T.A.E.</span>
+                            <Badge variant="outline" className="text-xs bg-warning-light text-warning border-warning">
+                              <Tooltip>
+                                <TooltipTrigger>Détecté</TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">La Banque de France a reçu un signalement d'un créancier - Information confidentielle</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Initié</span>
+                            <Badge variant="outline" className="text-xs bg-warning-light text-warning border-warning">
+                              <Tooltip>
+                                <TooltipTrigger>En cours</TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">Procédure initiée - Détails en cours de confirmation</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Registre numérique des Huissiers Décret n° 2025-493 du 3 juin 2025</span>
                             <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucun</Badge>
                           </div>
                           <div className="flex justify-between items-center text-sm py-1">
-                            <span>Résiliation de contrat</span>
-                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucune</Badge>
+                            <span>Dégradation ou contentieux de marché public</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucun</Badge>
                           </div>
                           <div className="flex justify-between items-center text-sm py-1">
                             <span>Inscription privilèges/nantissements</span>
                             <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucune</Badge>
                           </div>
                           <div className="flex justify-between items-center text-sm py-1">
-                            <span>Radiation d'office du RCS</span>
-                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Non</Badge>
-                          </div>
-                          <div className="flex justify-between items-center text-sm py-1">
                             <span>Procédure amiable</span>
                             <Badge variant="outline" className="text-xs bg-primary-light text-primary border-primary">1 en cours</Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-sm py-1">
+                            <span>Prévention des difficultés auprès du Tribunal des Activités Économiques</span>
+                            <Badge variant="outline" className="text-xs bg-success-light text-success border-success">Aucune</Badge>
                           </div>
                           <div className="flex justify-between items-center text-sm py-1">
                             <span>Déclaration de créance</span>

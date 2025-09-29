@@ -315,6 +315,22 @@ export function OverviewDisplay({ companyData, scores }: OverviewDisplayProps) {
               <span className="text-sm font-medium">NAF:</span>
               <span className="ml-2 text-sm">{companyData.companyInfo?.naf}</span>
             </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Radiation d'office:</span>
+              {(companyData?.pappers?.statutRadiation === 'Radié' || 
+                companyData?.sirene?.statut === 'Cessée' ||
+                companyData?.companyInfo?.status === 'Radiée') ? (
+                <Badge variant="destructive" className="ml-2">
+                  <AlertTriangle className="h-3 w-3 mr-1" />
+                  Radiée
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="ml-2 bg-success-light text-success border-success">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Non
+                </Badge>
+              )}
+            </div>
           </CardContent>
         </Card>
 

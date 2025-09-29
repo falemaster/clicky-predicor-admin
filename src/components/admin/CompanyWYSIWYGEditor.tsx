@@ -239,25 +239,60 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
     setHasChanges(true);
   };
 
-  // Fonction pour sauvegarder les données (désactivée car la table n'existe pas encore)
+  // Sauvegarde des données vers Supabase
   const saveData = async () => {
-    if (!formData || !hasChanges) return;
+    if (!siren || !formData || !hasChanges) {
+      toast({
+        title: "Aucune donnée à sauvegarder",
+        description: "Aucune modification détectée.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setIsSaving(true);
     try {
-      // TODO: Implémenter la sauvegarde une fois la table créée
-      console.log('Sauvegarde simulée:', formData);
-      
+      // Préparer les données pour la sauvegarde
+      const savePayload = {
+        siren,
+        companyData: formData,
+        scores: displayData.scores,
+        encartVisibility: displayData.enrichedData?.encartVisibility,
+        editorInfo: {
+          userId: null, // TODO: Récupérer l'ID utilisateur authentifié
+          sessionId: crypto.randomUUID(),
+          ipAddress: null,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      console.log('Saving company data for SIREN:', siren);
+
+      const { data, error } = await supabase.functions.invoke('save-company-data', {
+        body: savePayload
+      });
+
+      if (error) {
+        console.error('Save error:', error);
+        throw error;
+      }
+
+      console.log('Save response:', data);
       setHasChanges(false);
       toast({
-        title: "Sauvegarde réussie",
-        description: "Les données ont été sauvegardées avec succès.",
+        title: "Données sauvegardées",
+        description: "Les modifications ont été enregistrées avec succès.",
       });
-    } catch (error) {
-      console.error('Erreur de sauvegarde:', error);
+      
+      // Refresh des données après sauvegarde
+      await refetch();
+      
+    } catch (error: any) {
+      console.error('Error saving company data:', error);
       toast({
-        title: "Erreur de sauvegarde", 
-        description: "Une erreur est survenue lors de la sauvegarde.",
+        title: "Erreur de sauvegarde",
+        description: `Erreur lors de la sauvegarde: ${error.message || 'Erreur inconnue'}`,
         variant: "destructive"
       });
     } finally {
@@ -420,6 +455,10 @@ export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
                 updateField(['scores', 'legal'], value.legal.toString());
                 updateField(['scores', 'fiscal'], value.fiscal.toString());
                 updateField(['scores', 'global'], value.global.toString());
+              } else if (field.startsWith('encartVisibility.')) {
+                // Gérer les changements de visibilité des encarts
+                const pathArray = field.split('.');
+                updateField(pathArray, value);
               } else {
                 // Adapter l'interface onEdit pour les autres champs
                 const pathArray = field.split('.');

@@ -56,6 +56,7 @@ export type Database = {
           created_at: string
           edited_at: string | null
           edited_by: string | null
+          encart_visibility: Json | null
           enriched_data: Json | null
           id: string
           is_manually_edited: boolean | null
@@ -77,6 +78,7 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           edited_by?: string | null
+          encart_visibility?: Json | null
           enriched_data?: Json | null
           id?: string
           is_manually_edited?: boolean | null
@@ -98,6 +100,7 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           edited_by?: string | null
+          encart_visibility?: Json | null
           enriched_data?: Json | null
           id?: string
           is_manually_edited?: boolean | null
@@ -112,6 +115,59 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      admin_edit_logs: {
+        Row: {
+          change_type: string
+          company_id: string | null
+          created_at: string
+          editor_id: string | null
+          field_changed: string
+          id: string
+          ip_address: unknown | null
+          new_value: Json | null
+          old_value: Json | null
+          session_id: string | null
+          siren: string
+          user_agent: string | null
+        }
+        Insert: {
+          change_type?: string
+          company_id?: string | null
+          created_at?: string
+          editor_id?: string | null
+          field_changed: string
+          id?: string
+          ip_address?: unknown | null
+          new_value?: Json | null
+          old_value?: Json | null
+          session_id?: string | null
+          siren: string
+          user_agent?: string | null
+        }
+        Update: {
+          change_type?: string
+          company_id?: string | null
+          created_at?: string
+          editor_id?: string | null
+          field_changed?: string
+          id?: string
+          ip_address?: unknown | null
+          new_value?: Json | null
+          old_value?: Json | null
+          session_id?: string | null
+          siren?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_edit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       admin_search_history: {
         Row: {
@@ -199,11 +255,102 @@ export type Database = {
         }
         Relationships: []
       }
+      infogreffe_cache: {
+        Row: {
+          created_at: string
+          credits_used: number
+          data: Json
+          endpoint: string
+          expires_at: string
+          id: string
+          millesime: number | null
+          siren: string
+        }
+        Insert: {
+          created_at?: string
+          credits_used?: number
+          data: Json
+          endpoint: string
+          expires_at: string
+          id?: string
+          millesime?: number | null
+          siren: string
+        }
+        Update: {
+          created_at?: string
+          credits_used?: number
+          data?: Json
+          endpoint?: string
+          expires_at?: string
+          id?: string
+          millesime?: number | null
+          siren?: string
+        }
+        Relationships: []
+      }
+      infogreffe_costs: {
+        Row: {
+          cost_euros: number
+          created_at: string
+          credits_used: number
+          endpoint: string
+          id: string
+          ip_address: unknown | null
+          session_id: string
+          siren: string
+          user_agent: string | null
+        }
+        Insert: {
+          cost_euros?: number
+          created_at?: string
+          credits_used?: number
+          endpoint: string
+          id?: string
+          ip_address?: unknown | null
+          session_id: string
+          siren: string
+          user_agent?: string | null
+        }
+        Update: {
+          cost_euros?: number
+          created_at?: string
+          credits_used?: number
+          endpoint?: string
+          id?: string
+          ip_address?: unknown | null
+          session_id?: string
+          siren?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      clean_expired_infogreffe_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_infogreffe_cache: {
+        Args: { p_endpoint: string; p_millesime?: number; p_siren: string }
+        Returns: Json
+      }
+      log_admin_edit: {
+        Args: {
+          p_change_type?: string
+          p_editor_id?: string
+          p_field_changed: string
+          p_ip_address?: unknown
+          p_new_value?: Json
+          p_old_value?: Json
+          p_session_id?: string
+          p_siren: string
+          p_user_agent?: string
+        }
+        Returns: string
+      }
       log_search_activity: {
         Args: {
           p_company_id?: string
@@ -214,6 +361,17 @@ export type Database = {
           p_user_agent?: string
         }
         Returns: string
+      }
+      set_infogreffe_cache: {
+        Args: {
+          p_credits_used?: number
+          p_data: Json
+          p_endpoint: string
+          p_millesime?: number
+          p_siren: string
+          p_ttl_hours?: number
+        }
+        Returns: undefined
       }
     }
     Enums: {

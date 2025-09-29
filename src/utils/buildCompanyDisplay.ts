@@ -28,6 +28,27 @@ export interface DisplayScores {
   defaultRisk: string;
 }
 
+export interface EncartVisibility {
+  overview: {
+    company_info: boolean;
+    scores: boolean;
+    surveillance: boolean;
+    data_quality: boolean;
+  };
+  study: {
+    compliance: boolean;
+    fiscal: boolean;
+    financial: boolean;
+    economic: boolean;
+    governance: boolean;
+  };
+  predictive: {
+    risk_analysis: boolean;
+    explanatory_factors: boolean;
+    alerts: boolean;
+  };
+}
+
 export interface DisplayEnrichedData {
   companyInfo: DisplayCompanyData;
   scores: DisplayScores;
@@ -52,6 +73,10 @@ export interface DisplayEnrichedData {
   };
   predictor: any;
   rawData: CompanyFullData;
+  encartVisibility?: EncartVisibility;
+  adminSettings?: {
+    showDataQualitySection: boolean;
+  };
 }
 
 export interface BuildCompanyDisplayResult {
@@ -128,7 +153,30 @@ export function buildCompanyDisplay(realData: CompanyFullData | null): BuildComp
       alertes: realData.rubyPayeur?.alertes || []
     },
     predictor: realData.predictor || null,
-    rawData: realData
+    rawData: realData,
+    encartVisibility: (realData as any).encartVisibility || {
+      overview: {
+        company_info: true,
+        scores: true,
+        surveillance: true,
+        data_quality: true
+      },
+      study: {
+        compliance: true,
+        fiscal: true,
+        financial: true,
+        economic: true,
+        governance: true
+      },
+      predictive: {
+        risk_analysis: true,
+        explanatory_factors: true,
+        alerts: true
+      }
+    },
+    adminSettings: {
+      showDataQualitySection: (realData as any).show_data_quality_dashboard || false
+    }
   };
 
   return {

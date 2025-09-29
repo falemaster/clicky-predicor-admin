@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DataWithSource } from "@/components/ui/data-with-source";
+import { EditableField } from "@/components/ui/editable-field";
+import { VisibilityToggle } from "@/components/admin/VisibilityToggle";
+import { useEditing } from "@/components/result/EditingContext";
 import { calculateFinancialScore, calculateRiskScore } from "@/utils/scoreCalculator";
 import { 
   TrendingUp, 
@@ -38,6 +41,7 @@ interface StudyDisplayProps {
 }
 
 export function StudyDisplay({ companyData }: StudyDisplayProps) {
+  const { isEditing, onEdit } = useEditing();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     compliance: false,
     fiscal: false,

@@ -61,25 +61,6 @@ serve(async (req) => {
     if (!response.ok) {
       console.error(`SIRENE API error: ${response.status} ${response.statusText}`);
       
-      // Si l'API publique échoue pour une recherche par nom, essayer l'API INSEE
-      if (type === 'name') {
-        console.log(`Fallback to INSEE API for query: "${query}"`);
-        try {
-          const inseeResults = await callInseeApiSearch(query);
-          if (inseeResults.length > 0) {
-            console.log(`INSEE API returned ${inseeResults.length} results`);
-            return new Response(JSON.stringify({ 
-              results: inseeResults, 
-              source: 'insee' 
-            }), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          }
-        } catch (inseeError) {
-          console.error('INSEE API fallback failed:', inseeError);
-        }
-      }
-
       return new Response(JSON.stringify({ 
         error: { 
           code: `SIRENE_API_${response.status}`, 
@@ -97,23 +78,17 @@ serve(async (req) => {
       const results = Array.isArray(data.results) ? data.results.slice(0, limit) : [];
       console.log(`Recherche-Entreprises response: ${results.length} results`);
       
-      // Si aucun résultat trouvé pour une recherche de nom, essayer l'API INSEE
-      if (type === 'name' && results.length === 0 && query.trim().length >= 3) {
-        console.log(`No results from gouvernement API, trying INSEE API for: "${query}"`);
-        try {
-          const inseeResults = await callInseeApiSearch(query);
-          if (inseeResults.length > 0) {
-            console.log(`INSEE API returned ${inseeResults.length} results as fallback`);
-            return new Response(JSON.stringify({ 
-              results: inseeResults, 
-              source: 'insee' 
-            }), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          }
-        } catch (inseeError) {
-          console.error('INSEE API fallback failed:', inseeError);
-        }
+      // Pour les recherches SIREN/SIRET, retourner une erreur plus explicite si aucun résultat
+      if ((type === 'siren' || type === 'siret') && results.length === 0) {
+        return new Response(JSON.stringify({ 
+          error: { 
+            code: 'SIRENE_NOT_FOUND', 
+            message: `Aucune entreprise trouvée pour le ${type.toUpperCase()} ${query}. Vérifiez que le numéro est correct et que l'entreprise existe.` 
+          } 
+        }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
       
       return new Response(JSON.stringify({ results, source: 'recherche-entreprises' }), {

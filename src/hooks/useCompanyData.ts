@@ -90,21 +90,28 @@ export const useCompanyData = ({
       console.log(`📊 Résultat API INSEE:`, sireneResult);
 
       if (sireneResult.error || !sireneResult.data) {
-        if (sireneResult.error) allErrors.push(sireneResult.error);
-        setErrors(allErrors);
-        setLoading(false);
-        return;
+        if (sireneResult.error) {
+          allErrors.push(sireneResult.error);
+          console.log(`⚠️ Échec API INSEE, tentative avec autres sources...`);
+        }
+        
+        // Ne pas s'arrêter, continuer avec les autres APIs comme fallback
+        // On créera des données minimales si toutes les APIs échouent
       }
 
       const companyData: Partial<CompanyFullData> = {
-        sirene: sireneResult.data,
+        sirene: sireneResult.data || null,
         lastUpdate: new Date().toISOString(),
         errors: []
       };
 
-      // 2. Données Pappers (optionnelles)
+      // Si on n'a pas de données SIRENE de base, essayer quand même les autres APIs
+      // avec le SIREN extrait de l'identifier
+      const extractedSiren = type === 'siren' ? identifier : identifier.substring(0, 9);
+
+      // 2. Données Pappers (optionnelles) - utiliser le SIREN extrait
       try {
-        const pappersResult = await pappersService.getCompanyData(sireneResult.data.siren);
+        const pappersResult = await pappersService.getCompanyData(extractedSiren);
         if (pappersResult.data) {
           companyData.pappers = pappersResult.data;
         } else if (pappersResult.error) {
@@ -118,9 +125,9 @@ export const useCompanyData = ({
         });
       }
 
-      // 3. Données BODACC (optionnelles)
+      // 3. Données BODACC (optionnelles) - utiliser le SIREN extrait
       try {
-        const bodaccResult = await bodaccService.getCompanyAnnouncements(sireneResult.data.siren);
+        const bodaccResult = await bodaccService.getCompanyAnnouncements(extractedSiren);
         if (bodaccResult.data) {
           companyData.bodacc = bodaccResult.data;
         } else if (bodaccResult.error) {
@@ -128,7 +135,7 @@ export const useCompanyData = ({
         }
 
         // Ajout des procédures collectives BODACC
-        const proceduresResult = await bodaccService.getProcedureCollective(sireneResult.data.siren);
+        const proceduresResult = await bodaccService.getProcedureCollective(extractedSiren);
         if (proceduresResult.data) {
           companyData.procedures = proceduresResult.data;
         } else if (proceduresResult.error) {
@@ -142,10 +149,10 @@ export const useCompanyData = ({
         });
       }
 
-      // 4. Données Infogreffe (optionnelles) - VRAIES DONNÉES avec SCORES FINANCIERS
+      // 4. Données Infogreffe (optionnelles) - VRAIES DONNÉES avec SCORES FINANCIERS - utiliser le SIREN extrait
       try {
         // Données de base de l'entreprise
-        const infogreffeResult = await infogreffeService.getCompanyData(sireneResult.data.siren);
+        const infogreffeResult = await infogreffeService.getCompanyData(extractedSiren);
         if (infogreffeResult.data) {
           companyData.infogreffe = infogreffeResult.data;
           console.log('📊 Données Infogreffe réelles récupérées:', infogreffeResult.data);
@@ -165,7 +172,7 @@ export const useCompanyData = ({
         }
 
         // NOTAPME Performance - PRIORITAIRE pour les scores financiers
-        const notapmePerformance = await infogreffeService.getNotapmePerformance(sireneResult.data.siren);
+        const notapmePerformance = await infogreffeService.getNotapmePerformance(extractedSiren);
         if (notapmePerformance.data) {
           if (!companyData.infogreffe) companyData.infogreffe = {} as any;
           (companyData.infogreffe as any).notapmePerformance = notapmePerformance.data;
@@ -173,7 +180,7 @@ export const useCompanyData = ({
         }
 
         // NOTAPME Essentiel - Ratios clés complémentaires
-        const notapmeEssentiel = await infogreffeService.getNotapmeEssentiel(sireneResult.data.siren);
+        const notapmeEssentiel = await infogreffeService.getNotapmeEssentiel(extractedSiren);
         if (notapmeEssentiel.data) {
           if (!companyData.infogreffe) companyData.infogreffe = {} as any;
           (companyData.infogreffe as any).notapmeEssentiel = notapmeEssentiel.data;
@@ -181,7 +188,7 @@ export const useCompanyData = ({
         }
 
         // Score AFDCC - Notation de risque principale
-        const afdccScore = await infogreffeService.getAfdccScore(sireneResult.data.siren);
+        const afdccScore = await infogreffeService.getAfdccScore(extractedSiren);
         if (afdccScore.data) {
           if (!companyData.infogreffe) companyData.infogreffe = {} as any;
           (companyData.infogreffe as any).afdccScore = afdccScore.data;
@@ -277,6 +284,20 @@ export const useCompanyData = ({
         });
       }
 
+      // Vérifier qu'on a au moins quelques données minimales
+      if (!companyData.sirene && !companyData.pappers && !companyData.infogreffe) {
+        // Si aucune API n'a fonctionné, retourner une erreur claire
+        const noDataError: ApiError = {
+          code: 'NO_DATA_FOUND',
+          message: `Aucune données trouvées pour ${type === 'siren' ? 'le SIREN' : 'le SIRET'} ${identifier}. Vérifiez que le numéro est correct et que l'entreprise existe.`,
+          source: 'PREDICTOR'
+        };
+        allErrors.push(noDataError);
+        setErrors(allErrors);
+        setLoading(false);
+        return;
+      }
+
       // 8. Merger les données admin avec les données API (admin prioritaire)
       let finalData = companyData as CompanyFullData;
       if (adminData) {
@@ -293,8 +314,11 @@ export const useCompanyData = ({
       setData(finalData);
       setErrors(allErrors);
 
-      // Sauvegarder en localStorage pour la cache
-      localStorage.setItem(`company-data-${sireneResult.data.siren}`, JSON.stringify(finalData));
+      // Sauvegarder en localStorage pour la cache - utiliser le SIREN extrait
+      if (finalData.sirene?.siren || extractedSiren) {
+        const sirenForCache = finalData.sirene?.siren || extractedSiren;
+        localStorage.setItem(`company-data-${sirenForCache}`, JSON.stringify(finalData));
+      }
 
     } catch (error) {
       const globalError: ApiError = {

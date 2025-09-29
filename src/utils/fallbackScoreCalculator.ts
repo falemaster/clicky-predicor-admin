@@ -31,7 +31,7 @@ export interface FallbackScoreResult {
  * Plafonné à 70/100 maximum
  */
 export function calculateFallbackScore(companyData: CompanyFullData): FallbackScoreResult {
-  let scoreBase = 100;
+  let scoreBase = 60; // Base pessimiste : données manquantes = risque
   let totalBonus = 0;
   
   const breakdown = {
@@ -85,27 +85,27 @@ function analyzeObligationsLegales(companyData: CompanyFullData) {
   let penalite = 0;
   const details: string[] = [];
   
-  // Retards de dépôt des comptes (0-25 points)
+  // Retards de dépôt des comptes (0-35 points) - pénalité renforcée
   const depotComptes = companyData.pappers?.depotComptes;
   if (depotComptes === false || (companyData.pappers?.bilans?.length === 0)) {
     const dateCreation = companyData.sirene?.dateCreation;
     if (dateCreation) {
       const ageAnnees = (new Date().getTime() - new Date(dateCreation).getTime()) / (365 * 24 * 60 * 60 * 1000);
       if (ageAnnees > 2) {
-        penalite += 25;
-        details.push('Absence de dépôt de comptes depuis 2+ ans');
+        penalite += 35; // Pénalité renforcée
+        details.push('Absence totale de comptes déposés depuis 2+ ans');
       } else if (ageAnnees > 1) {
-        penalite += 15;
-        details.push('Retard dans le dépôt des comptes annuels');
+        penalite += 20; // Pénalité augmentée
+        details.push('Retard significatif dans le dépôt des comptes annuels');
       }
     }
   }
 
-  // Obligations administratives manquantes (0-15 points)
+  // Obligations administratives manquantes (0-20 points) - pénalité renforcée
   const hasBasicInfo = !!(companyData.sirene?.denomination && companyData.sirene?.adresse);
   if (!hasBasicInfo) {
-    penalite += 15;
-    details.push('Informations administratives incomplètes');
+    penalite += 20; // Pénalité augmentée
+    details.push('Informations administratives critiques manquantes');
   }
 
   return { penalite: Math.min(40, penalite), details };
@@ -182,9 +182,9 @@ function analyzePaiementsReputation(companyData: CompanyFullData) {
       details.push('Bon comportement de paiement');
     }
   } else {
-    // RubyPayeur indisponible - pénalité modérée
-    penalite += 5;
-    details.push('Données de paiement non disponibles');
+    // RubyPayeur indisponible - pénalité renforcée pour données manquantes
+    penalite += 15; // Pénalité sévère : pas de visibilité sur le comportement de paiement
+    details.push('Aucune donnée de paiement - Risque non évalué');
   }
 
   return { 

@@ -39,8 +39,8 @@ export function calculateFinancialScore(companyData: CompanyFullData): Financial
   if (bilansData && bilansData.length > 0) {
     const latestBilan = bilansData[0];
     
-    // Calcul amélioré basé sur les ratios financiers
-    let score = 5; // Score neutre
+    // Calcul amélioré basé sur les ratios financiers - approche pessimiste
+    let score = 3; // Score bas par défaut (approche prudente)
     
     if (latestBilan.chiffreAffaires > 0) {
       const ratio = (latestBilan.resultatNet || 0) / latestBilan.chiffreAffaires;
@@ -48,7 +48,7 @@ export function calculateFinancialScore(companyData: CompanyFullData): Financial
       else if (ratio > 0.05) score = 7; // Rentable
       else if (ratio > 0) score = 6;    // Légèrement positif
       else if (ratio > -0.05) score = 4; // Légèrement négatif
-      else score = 3;                   // Difficultés
+      else score = 2;                   // Difficultés importantes
       
       // Ajustement selon l'endettement si disponible
       if (latestBilan.dettes && latestBilan.totalActif) {
@@ -61,7 +61,16 @@ export function calculateFinancialScore(companyData: CompanyFullData): Financial
     return {
       score: Math.min(Math.max(Math.round(score), 1), 10),
       source: 'pappers',
-      sourceLabel: 'Calculé depuis bilans Pappers'
+      sourceLabel: latestBilan.chiffreAffaires > 0 ? 'Calculé depuis bilans Pappers' : 'Données Pappers partielles - Risque élevé'
+    };
+  }
+  
+  // Données Pappers incomplètes - score très bas
+  if (bilansData && bilansData.length > 0 && bilansData[0].chiffreAffaires === 0) {
+    return {
+      score: 2,
+      source: 'pappers',
+      sourceLabel: 'Données financières insuffisantes - Approche prudente'
     };
   }
 
@@ -104,11 +113,11 @@ export function calculateFinancialScore(companyData: CompanyFullData): Financial
     };
   }
 
-  // Aucune source disponible
+  // Aucune source disponible - score pessimiste par défaut
   return {
-    score: 0,
+    score: 2,
     source: 'unavailable',
-    sourceLabel: 'Score non disponible'
+    sourceLabel: 'Données insuffisantes - Risque élevé'
   };
 }
 
@@ -120,7 +129,7 @@ export function calculateRiskScore(companyData: CompanyFullData): RiskScore {
   const rubyData = companyData.rubyPayeur as any;
   if (rubyData && rubyData.source !== 'service_unavailable' && rubyData.source !== 'auth_failed' && rubyData.source !== 'api_error') {
     // Service RubyPayeur opérationnel avec vraies données
-    const globalScore = rubyData.scoreGlobal || rubyData.scorePaiement || 5;
+    const globalScore = rubyData.scoreGlobal || rubyData.scorePaiement || 2; // Score pessimiste si données manquantes
     
     // Convertir le score RubyPayeur (0-100) vers échelle 1-10
     let convertedScore = globalScore;
@@ -144,8 +153,8 @@ export function calculateRiskScore(companyData: CompanyFullData): RiskScore {
   // PRIORITÉ 2: Score AFDCC d'Infogreffe (fallback)
   const afdccData = (companyData.infogreffe as any)?.afdccScore;
   if (afdccData) {
-    // Mapper la notation AFDCC vers un score 1-10
-    let score = 5;
+    // Mapper la notation AFDCC vers un score 1-10 - approche pessimiste
+    let score = 3; // Score bas par défaut si notation inconnue
     const notation = afdccData.notation || afdccData.score || afdccData.note;
     
     if (typeof notation === 'string') {
@@ -179,11 +188,11 @@ export function calculateRiskScore(companyData: CompanyFullData): RiskScore {
     };
   }
 
-  // Aucune source disponible
+  // Aucune source disponible - score pessimiste par défaut
   return {
-    score: 0,
+    score: 2,
     source: 'unavailable',
-    sourceLabel: 'Score non disponible'
+    sourceLabel: 'Évaluation impossible - Prudence requise'
   };
 }
 

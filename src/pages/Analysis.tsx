@@ -1,28 +1,25 @@
+/**
+ * ⚠️ NE PAS MODIFIER L'UI DES RÉSULTATS ICI !
+ * L'UI des résultats est dans src/components/result/ResultPage.tsx
+ * Ce fichier ne gère que la recherche et l'enveloppe utilisateur
+ */
+
 import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AIDataIndicator } from "@/components/ui/ai-data-indicator";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { OverviewDisplay } from "@/components/analysis/OverviewDisplay";
-import { StudyDisplay } from "@/components/analysis/StudyDisplay";
-import PredictiveAnalysis from "@/components/predictive/PredictiveAnalysis";
+import { ResultPage } from "@/components/result/ResultPage";
+import { RESULT_TABS } from "@/components/result/resultTabs";
+import { buildCompanyDisplay } from "@/utils/buildCompanyDisplay";
 import { FallbackScoreBadge } from "@/components/analysis/FallbackScoreBadge";
 import { useAnalysisData } from "@/hooks/useAnalysisData";
 import { useCompanyData } from "@/hooks/useCompanyData";
 import { getScoreTheme } from "@/utils/scoreUtils";
 import { CompanySearch } from "@/components/search/CompanySearch";
 import { Link, useSearchParams } from "react-router-dom";
-import EnrichedDataDisplayAI from "@/components/analysis/EnrichedDataDisplayAI";
 import LoadingProgress from "@/components/analysis/LoadingProgress";
 import AnalysisSkeleton from "@/components/analysis/AnalysisSkeleton";
-import { SourceBadge } from "@/components/ui/source-badge";
-import { DataWithSource } from "@/components/ui/data-with-source";
-import { DirigeantModal } from "@/components/analysis/DirigeantModal";
-import { CollectiveProcedureAlert } from "@/components/analysis/CollectiveProcedureAlert";
 import { AlertSummaryBadge } from "@/components/admin/AlertSummaryBadge";
-import { DataQualitySection } from "@/components/ui/data-quality-section";
 import { 
   Building2, 
   MapPin, 
@@ -52,7 +49,7 @@ import {
 } from "lucide-react";
 
 const Analysis = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(RESULT_TABS[0].key);
   const [selectedSiren, setSelectedSiren] = useState<string>("");
   const [showSearch, setShowSearch] = useState(true);
   const [searchParams] = useSearchParams();
@@ -73,77 +70,25 @@ const Analysis = () => {
     }
   }, [searchParams, realData, loading, fetchCompanyData]);
 
+  // ⚠️ UTILISATION DU BUILDER PARTAGÉ - Ne pas dupliquer la logique de mapping !
+  const { companyData, scores, enrichedData, hasRealData } = buildCompanyDisplay(realData);
+  
   // Déterminer l'état de l'application
-  const hasRealData = realData && realData.sirene;
   const isLoadingRealData = loading && !isInitialLoad;
   
   // États: idle (recherche) | loading (chargement) | loaded (données chargées)
   const appState = hasRealData ? 'loaded' : (isLoadingRealData ? 'loading' : 'idle');
-  
-  // Construire les données d'affichage (seulement si on a des vraies données)
-  const companyData = hasRealData ? {
-    name: realData.sirene.denomination,
-    siren: realData.sirene.siren,
-    siret: realData.sirene.siret,
-    naf: realData.sirene.naf,
-    employees: realData.sirene.effectifs,
-    address: realData.sirene.adresse,
-    director: realData.pappers?.dirigeants?.[0] ? 
-      `${realData.pappers.dirigeants[0].prenom || ''} ${realData.pappers.dirigeants[0].nom || ''}`.trim() || 'Non renseigné' : 
-      'Non renseigné',
-    phone: realData.enriched?.contactInfo?.phone || 'Non renseigné',
-    email: realData.enriched?.contactInfo?.email || 'Non renseigné',
-    foundedYear: new Date(realData.sirene.dateCreation).getFullYear().toString(),
-    status: realData.sirene.statut
-  } : null;
-
-  const scores = hasRealData ? {
-    global: realData.predictor?.scores?.global || 5.5,
-    financial: realData.predictor?.scores?.financier || 6.0,
-    legal: realData.predictor?.scores?.legal || 7.5,
-    fiscal: realData.predictor?.scores?.fiscal || 6.8,
-    defaultRisk: realData.predictor?.probabiliteDefaut ? 
-      `${(realData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1)}%` : 
-      'Faible'
-  } : null;
-
-  // Données enrichies pour les composants enfants
-  const enrichedData = hasRealData ? {
-    companyInfo: companyData,
-    scores,
-    financial: {
-      bilans: realData.pappers?.bilans || [],
-      chiffreAffaires: realData.pappers?.bilans?.[0]?.chiffreAffaires || 0,
-      resultatNet: realData.pappers?.bilans?.[0]?.resultatNet || 0,
-      endettement: realData.pappers?.bilans?.[0]?.dettes || 0,
-      effectifs: realData.pappers?.bilans?.[0]?.effectifs || 0
-    },
-    legal: {
-      procedures: realData.infogreffe?.procedures || [],
-      bodaccAnnonces: realData.bodacc?.annonces || [],
-      compteStatus: realData.pappers?.depotComptes || false
-    },
-    paymentScore: {
-      scoreGlobal: realData.rubyPayeur?.scoreGlobal || 0,
-      scorePaiement: realData.rubyPayeur?.scorePaiement || 0,
-      retardsMoyens: realData.rubyPayeur?.retardsMoyens || 0,
-      tendance: realData.rubyPayeur?.tendance || 'Stable',
-      alertes: realData.rubyPayeur?.alertes || []
-    },
-    predictor: realData.predictor || null,
-    rawData: realData
-  } : null;
 
   const handleCompanySelected = async (siren: string) => {
     setSelectedSiren(siren);
     setShowSearch(false);
     await fetchCompanyData(siren, 'siren');
-    setActiveTab("overview");
+    setActiveTab(RESULT_TABS[0].key);
   };
 
   const handleShowSearch = () => {
     setShowSearch(true);
-    setActiveTab("overview");
+    setActiveTab(RESULT_TABS[0].key);
   };
 
   // États de l'application
@@ -342,560 +287,22 @@ const Analysis = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - ⚠️ COMPOSANT PARTAGÉ */}
       <div className="container mx-auto px-6 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6">
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="study">Étude approfondie</TabsTrigger>
-            <TabsTrigger value="predictive">Analyse prédictive</TabsTrigger>
-            <TabsTrigger value="reports">Rapports & Actions</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            {/* Company Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Building2 className="h-5 w-5 mr-2" />
-                  Informations générales
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{companyData.address}</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Dirigeant: {companyData.director}</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Créée en {companyData.foundedYear}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{companyData.phone}</span>
-                      {hasRealData && realData.enriched?.contactInfo?.phone && (
-                        <AIDataIndicator variant="mini" />
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{companyData.email}</span>
-                      {hasRealData && realData.enriched?.contactInfo?.email && (
-                        <AIDataIndicator variant="mini" />
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Effectif: {companyData.employees} salariés</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Scores */}
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center">
-                    {(() => {
-                      const theme = getScoreTheme(scores.financial, 'financial');
-                      const HeaderIcon = theme.icon;
-                      return <HeaderIcon className={`h-4 w-4 mr-2 ${theme.iconColor}`} />;
-                    })()}
-                    Santé financière
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-2xl font-bold mb-2 ${getScoreTheme(scores.financial, 'financial').textColor}`}>
-                    {scores.financial}/10
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {getScoreTheme(scores.financial, 'financial').description}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center">
-                    {(() => {
-                      const theme = getScoreTheme(scores.legal, 'legal');
-                      const HeaderIcon = theme.icon;
-                      return <HeaderIcon className={`h-4 w-4 mr-2 ${theme.iconColor}`} />;
-                    })()}
-                    Conformité légale
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-2xl font-bold mb-2 ${getScoreTheme(scores.legal, 'legal').textColor}`}>
-                    {scores.legal}/10
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {getScoreTheme(scores.legal, 'legal').description}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center">
-                    {(() => {
-                      // Convert defaultRisk from string to number for theming
-                      const riskValue = typeof scores.defaultRisk === 'string' 
-                        ? scores.defaultRisk === 'Faible' 
-                          ? 1 
-                          : parseFloat(scores.defaultRisk.replace('%', '')) / 10 
-                        : scores.defaultRisk;
-                      const theme = getScoreTheme(riskValue, 'risk');
-                      const HeaderIcon = theme.icon;
-                      return <HeaderIcon className={`h-4 w-4 mr-2 ${theme.iconColor}`} />;
-                    })()}
-                    Risque prédictif 12m
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-2xl font-bold mb-2 ${(() => {
-                    const riskValue = typeof scores.defaultRisk === 'string' 
-                      ? scores.defaultRisk === 'Faible' 
-                        ? 1 
-                        : parseFloat(scores.defaultRisk.replace('%', '')) / 10 
-                      : scores.defaultRisk;
-                    return getScoreTheme(riskValue, 'risk').textColor;
-                  })()}`}>
-                    {scores.defaultRisk}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {(() => {
-                      const riskValue = typeof scores.defaultRisk === 'string' 
-                        ? scores.defaultRisk === 'Faible' 
-                          ? 1 
-                          : parseFloat(scores.defaultRisk.replace('%', '')) / 10 
-                        : scores.defaultRisk;
-                      return getScoreTheme(riskValue, 'risk').description;
-                    })()}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Informations juridiques détaillées */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center">
-                      <FileText className="h-5 w-5 mr-2" />
-                      Informations juridiques
-                    </CardTitle>
-                    <div className="flex items-center space-x-2">
-                       {realData?.infogreffe && (
-                         <SourceBadge 
-                           source="INFOGREFFE" 
-                           className="mr-2"
-                         />
-                       )}
-                      <Button size="sm" variant="outline">
-                        <FileText className="h-4 w-4 mr-1" />
-                        Avis situation SIRENE
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   {/* Alertes procédures collectives */}
-                   {realData?.infogreffe?.procedures && realData.infogreffe.procedures.length > 0 && (
-                     <CollectiveProcedureAlert 
-                       procedures={realData.infogreffe.procedures.map(proc => ({
-                         type: proc.type,
-                         status: proc.statut,
-                         dateDebut: proc.date,
-                         description: `Tribunal: ${proc.tribunal}`
-                       }))}
-                       className="mb-4"
-                     />
-                   )}
-                  
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">SIREN :</span>
-                      <div className="font-medium">
-                        <DataWithSource source="INSEE">
-                          {companyData.siren}
-                        </DataWithSource>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">SIRET (siège) :</span>
-                      <div className="font-medium">
-                        <DataWithSource source="INSEE">
-                          {companyData.siret}
-                        </DataWithSource>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Forme juridique :</span>
-                      <div className="font-medium">
-                        <DataWithSource source="PORTALIS">
-                          {realData?.infogreffe?.formeJuridique || 'SAS, société par actions simplifiée'}
-                        </DataWithSource>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Numéro de TVA :</span>
-                      <div className="font-medium">FR{companyData.siren.replace(/\s/g, '')}</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Inscription RCS :</span>
-                      <div className="font-medium text-success">
-                        <CheckCircle className="h-3 w-3 inline mr-1" />
-                        <DataWithSource source="ALPAGE">
-                          {realData?.infogreffe?.dateImmatriculation ? 
-                            `INSCRIT (le ${new Date(realData.infogreffe.dateImmatriculation).toLocaleDateString('fr-FR')})` :
-                            realData?.pappers?.dateCreation ? 
-                              `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
-                              'INSCRIT (au greffe de PARIS, le 15/03/2015)'
-                          }
-                        </DataWithSource>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Inscription RNE :</span>
-                      <div className="font-medium text-success">
-                        <CheckCircle className="h-3 w-3 inline mr-1" />
-                        <DataWithSource source="PAPPERS">
-                          {realData?.pappers?.dateCreation ? 
-                            `INSCRIT (le ${new Date(realData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
-                            'INSCRIT (le 15/03/2015)'
-                          }
-                        </DataWithSource>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Numéro RCS :</span>
-                      <div className="font-medium">{companyData.siren} R.C.S. Paris</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Capital social :</span>
-                      <div className="font-medium">
-                        {(() => {
-                          const preferPappers = !!realData?.pappers?.capitalSocial && 
-                            ((realData as any)?.flags?.infogreffeUnavailable || !realData?.infogreffe?.capitalSocial);
-                          const capital = preferPappers ? realData.pappers.capitalSocial : realData?.infogreffe?.capitalSocial;
-                          const source = preferPappers ? "PAPPERS" : "INFOGREFFE";
-                          
-                          return (
-                            <DataWithSource source={source}>
-                              {typeof capital === 'number' ? `${capital.toLocaleString('fr-FR')} €` : 
-                               (realData?.pappers?.capitalSocial ? `${realData.pappers.capitalSocial.toLocaleString('fr-FR')} €` : 'Non renseigné')}
-                            </DataWithSource>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Sources des données */}
-                  <div className="mt-6 pt-4 border-t">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">
-                        Sources : INSEE, Infogreffe, Pappers
-                      </p>
-                      {(realData as any)?.flags?.infogreffeUnavailable && (
-                        <Badge variant="outline" className="text-xs">
-                          Infogreffe indisponible - Pappers utilisé
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Dirigeants interactifs */}
-                  {((realData?.infogreffe as any)?.representants || (realData?.pappers as any)?.representants) && (
-                    <>
-                      <Separator />
-                      <div>
-                        <span className="text-sm text-muted-foreground mb-2 block">Dirigeants :</span>
-                        <div className="space-y-2">
-                          {((realData?.infogreffe as any)?.representants || (realData?.pappers as any)?.representants || []).slice(0, 2).map((dirigeant: any, index: number) => (
-                            <DirigeantModal
-                              key={index}
-                              dirigeant={{
-                                nom: dirigeant.nom || 'N/A',
-                                prenom: dirigeant.prenom || '',
-                                fonction: dirigeant.fonction || dirigeant.qualite || 'Dirigeant'
-                              }}
-                            >
-                              <button className="text-left hover:bg-muted/50 p-2 rounded-md transition-colors w-full">
-                                <div className="font-medium text-sm text-primary hover:underline">
-                                  {[dirigeant.prenom, dirigeant.nom].filter(Boolean).join(' ') || 'Nom non disponible'}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {dirigeant.fonction || dirigeant.qualite || 'Dirigeant'}
-                                </div>
-                              </button>
-                            </DirigeantModal>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  
-                  <Separator />
-                  
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Building2 className="h-5 w-5 mr-2" />
-                    Activité
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <span className="text-sm text-muted-foreground">Activité principale déclarée :</span>
-                    <div className="font-medium mt-1">
-                      {realData?.pappers?.libelleNaf || realData?.sirene?.naf || 'Conseil en systèmes et logiciels informatiques, développement de solutions digitales sur mesure'}
-                    </div>
-                  </div>
-                  
-                   <div className="grid grid-cols-2 gap-4 text-sm">
-                     <div>
-                        <span className="text-muted-foreground">Code NAF ou APE :</span>
-                        <DataWithSource source="INSEE">
-                          <div className="font-medium">
-                            {realData?.sirene?.naf || realData?.pappers?.codeNaf || 'Non renseigné'}
-                            {realData?.sirene?.naf && (
-                              <Badge variant="outline" className="ml-1 text-xs">
-                                {realData.sirene.naf.startsWith('62') ? 'Services' : 
-                                 realData.sirene.naf.startsWith('70') ? 'Conseil' :
-                                 realData.sirene.naf.startsWith('46') ? 'Commerce' : 'Autre'}
-                              </Badge>
-                            )}
-                          </div>
-                        </DataWithSource>
-                       <div className="text-xs text-muted-foreground mt-1">
-                         ({realData?.pappers?.libelleNaf || 'Libellé non disponible'})
-                       </div>
-                     </div>
-                     <div>
-                        <span className="text-muted-foreground">Domaine d'activité :</span>
-                        <DataWithSource source="INSEE">
-                          <div className="font-medium">
-                            {realData?.sirene?.naf?.startsWith('62') ? 'Services informatiques' :
-                             realData?.sirene?.naf?.startsWith('70') ? 'Activités spécialisées' :
-                             realData?.sirene?.naf?.startsWith('46') ? 'Commerce de gros' :
-                             'Non déterminé'}
-                          </div>
-                        </DataWithSource>
-                     </div>
-                     <div>
-                       <span className="text-muted-foreground">Forme d'exercice :</span>
-                       <DataWithSource source="PORTALIS">
-                         <div className="font-medium">
-                           {realData?.infogreffe?.formeJuridique?.includes('Commercial') ? 'Commerciale' :
-                            realData?.infogreffe?.formeJuridique?.includes('Civil') ? 'Civile' :
-                            realData?.pappers?.formeJuridique?.includes('SARL') ? 'Commerciale' :
-                            realData?.pappers?.formeJuridique?.includes('SAS') ? 'Commerciale' : 'Non déterminé'}
-                         </div>
-                       </DataWithSource>
-                     </div>
-                     <div>
-                        <span className="text-muted-foreground">Convention collective :</span>
-                        <DataWithSource source="PAPPERS">
-                          <div className="font-medium">
-                            {realData?.sirene?.naf?.startsWith('62') ? 'Syntec - IDCC 1486' :
-                             realData?.sirene?.naf?.startsWith('70') ? 'Bureaux d\'études techniques - IDCC 1486' :
-                             'Non déterminée'}
-                            <Badge variant="outline" className="ml-1 text-xs">supposée</Badge>
-                          </div>
-                        </DataWithSource>
-                     </div>
-                     <div>
-                       <span className="text-muted-foreground">Date de clôture exercice :</span>
-                       <DataWithSource source="DGFIP">
-                         <div className="font-medium">
-                           {realData?.infogreffe?.dateClotureExercice || 'Non renseignée'}
-                         </div>
-                       </DataWithSource>
-                     </div>
-                     <div>
-                       <span className="text-muted-foreground">Durée exercice :</span>
-                       <DataWithSource source="DGFIP">
-                         <div className="font-medium">
-                           {realData?.infogreffe?.dureePersonneMorale || '12 mois'}
-                         </div>
-                       </DataWithSource>
-                     </div>
-                   </div>
-
-                  <Separator />
-
-                   <div>
-                     <h4 className="font-semibold mb-2">Activités secondaires</h4>
-                     <DataWithSource source="PAPPERS">
-                       <div className="space-y-2 text-sm">
-                         {realData?.pappers?.dernieresMutations?.some(m => m.type === 'activite_secondaire') ? (
-                           realData.pappers.dernieresMutations
-                             .filter(m => m.type === 'activite_secondaire')
-                             .slice(0, 3)
-                             .map((mutation: any, index: number) => (
-                               <div key={index} className="flex justify-between">
-                                 <span>{mutation.description}</span>
-                                 <Badge variant="outline" className="text-xs">NAF</Badge>
-                               </div>
-                             ))
-                         ) : (
-                           <div className="text-muted-foreground italic">Aucune activité secondaire renseignée</div>
-                         )}
-                       </div>
-                     </DataWithSource>
-                   </div>
-                  </CardContent>
-                </Card>
-             </div>
-
-            {/* Section Qualité des données - Déplacée en fin */}
-            <DataQualitySection 
-              config={{
-                completeness: 85,
-                lastUpdate: new Date().toISOString(),
-                apis: {
-                  insee: { status: 'active', label: 'INSEE/SIRENE', category: 'Données officielles' },
-                  pappers: { status: 'active', label: 'Pappers API', category: 'Données financières' },
-                  rubypayeur: { status: 'active', label: 'RubyPayeur', category: 'Score crédit' },
-                  infogreffe: { status: 'active', label: 'Infogreffe', category: 'Données juridiques' },
-                  ai_enrichment: { status: 'warning', label: 'IA Enrichissement', category: 'Données simulées' },
-                  sirius: { status: 'active', label: 'SIRIUS', category: 'Données fiscales' },
-                  dgfip: { status: 'active', label: 'DGFIP', category: 'Données fiscales' },
-                  portalis: { status: 'active', label: 'PORTALIS', category: 'Données judiciaires' },
-                  opale: { status: 'active', label: 'OPALE', category: 'Données sociales' }
-                },
-                overallStatus: 'Données fiables'
-              }}
-            />
-
-            {/* Analyse IA globale - Déplacée en fin */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Analyse IA globale
-                  {loading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-slate-100 rounded-lg p-4">
-                  {hasRealData && realData.predictor?.recommandations ? (
-                    <div className="space-y-3">
-                      <p className="text-sm leading-relaxed">
-                        <strong>{companyData.name}</strong> - Analyse basée sur les données réelles :
-                      </p>
-                      <ul className="text-sm space-y-2">
-                        {realData.predictor.recommandations.slice(0, 4).map((rec, index) => (
-                          <li key={index} className="flex items-start space-x-2">
-                            <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      
-                      {/* Facteurs de risque principaux */}
-                      {realData.predictor.facteursExplicatifs && realData.predictor.facteursExplicatifs.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-slate-200">
-                          <p className="text-sm font-medium mb-2">Facteurs clés identifiés :</p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {realData.predictor.facteursExplicatifs.slice(0, 4).map((facteur, index) => (
-                              <div key={index} className="flex items-center justify-between text-xs">
-                                <span>{facteur.nom}</span>
-                                <Badge variant={facteur.impact > 0 ? "default" : "destructive"} className="text-xs">
-                                  {facteur.impact > 0 ? '+' : ''}{(facteur.impact * 100).toFixed(0)}%
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-sm leading-relaxed">
-                      <strong>{companyData.name}</strong> - Analyse basée sur des données simulées. 
-                      Recherchez une entreprise réelle pour obtenir une analyse prédictive complète 
-                      basée sur les dernières données SIRENE, BODACC, et les scores de paiement financier.
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="study" className="space-y-6">
-            <StudyDisplay companyData={enrichedData} />
-          </TabsContent>
-
-          <TabsContent value="predictive" className="space-y-6">
-            <PredictiveAnalysis companyData={enrichedData} />
-          </TabsContent>
-
-          <TabsContent value="reports" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Download className="h-5 w-5 mr-2" />
-                    Rapports
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button className="w-full justify-start" variant="outline">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Télécharger rapport complet PDF
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Rapport exécutif (2 pages)
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Analyse prédictive détaillée
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Bell className="h-5 w-5 mr-2" />
-                    Alertes & Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button className="w-full justify-start" variant="outline">
-                    <Bell className="h-4 w-4 mr-2" />
-                    Configurer les alertes
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Share className="h-4 w-4 mr-2" />
-                    Partager l'analyse
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Ajouter un commentaire admin
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+        {/* 
+          ⚠️ Ne modifiez pas l'UI des résultats ici !
+          Toute modification doit se faire dans src/components/result/ResultPage.tsx
+        */}
+        <ResultPage
+          mode="user"
+          companyData={companyData}
+          scores={scores}
+          enrichedData={enrichedData}
+          loading={loading}
+          errors={errors}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
       </div>
     </div>
   );

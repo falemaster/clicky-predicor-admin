@@ -1,16 +1,19 @@
+/**
+ * ⚠️ NE PAS MODIFIER L'UI DES RÉSULTATS ICI !
+ * L'UI des résultats est dans src/components/result/ResultPage.tsx
+ * Ce fichier ne gère que l'enveloppe admin (header, sauvegarde, etc.)
+ */
+
 import { useState, useEffect } from "react";
 import { useCompanyData } from "@/hooks/useCompanyData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AIDataIndicator } from "@/components/ui/ai-data-indicator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ResultPage } from "@/components/result/ResultPage";
+import { RESULT_TABS } from "@/components/result/resultTabs";
+import { buildCompanyDisplay } from "@/utils/buildCompanyDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -102,54 +105,50 @@ const EditableField: React.FC<EditableFieldProps> = ({
   isAIGenerated = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value);
+  const [tempValue, setTempValue] = useState(value);
 
   useEffect(() => {
-    setEditValue(value);
+    setTempValue(value);
   }, [value]);
 
   const handleSave = () => {
-    onSave(editValue);
+    onSave(tempValue);
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditValue(value);
+    setTempValue(value);
     setIsEditing(false);
   };
 
   if (isEditing) {
     return (
-      <div className="space-y-1">
-        {label && (
-          <label className="text-xs font-medium text-foreground uppercase tracking-wide">
-            {label}
-          </label>
-        )}
-        <div className="flex items-center space-x-2 w-full">
-          {icon && <div className="text-muted-foreground flex-shrink-0">{icon}</div>}
+      <div className="space-y-2">
+        {label && <Label className="text-sm font-medium">{label}</Label>}
+        <div className="flex items-start space-x-2">
           {multiline ? (
             <Textarea
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
               placeholder={placeholder}
-              className="flex-1 min-h-[80px]"
+              className="flex-1"
+              rows={3}
             />
           ) : (
             <Input
-              type={type}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
               placeholder={placeholder}
+              type={type}
               className="flex-1"
             />
           )}
-          <div className="flex space-x-1 flex-shrink-0">
-            <Button size="sm" variant="default" onClick={handleSave}>
-              <Check className="h-3 w-3" />
+          <div className="flex space-x-1">
+            <Button size="sm" onClick={handleSave} className="h-10">
+              <Check className="h-4 w-4" />
             </Button>
-            <Button size="sm" variant="outline" onClick={handleCancel}>
-              <X className="h-3 w-3" />
+            <Button size="sm" variant="outline" onClick={handleCancel} className="h-10">
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -157,130 +156,115 @@ const EditableField: React.FC<EditableFieldProps> = ({
     );
   }
 
-  const displayValue = value || placeholder;
-  const isPlaceholder = !value;
-
   return (
-    <div className="space-y-1">
-      {label && (
-        <label className="text-xs font-medium text-foreground uppercase tracking-wide flex items-center gap-2">
-          {label}
-          {isAIGenerated && <AIDataIndicator variant="mini" />}
-        </label>
-      )}
-      <div 
-        className="flex items-center space-x-2 cursor-pointer hover:bg-muted/50 p-2 rounded group transition-colors"
-        onClick={() => setIsEditing(true)}
-      >
-        {icon && <div className="text-muted-foreground flex-shrink-0">{icon}</div>}
-        <span className={`text-sm flex-1 ${isPlaceholder ? 'text-muted-foreground bg-muted px-2 py-1 rounded blur-sm' : ''}`}>
-          {displayValue}
-        </span>
-        {badge && (
-          <Badge variant="secondary" className="text-xs flex-shrink-0">
-            {badge}
-          </Badge>
+    <div className="group relative">
+      {label && <Label className="text-sm font-medium mb-1 block">{label}</Label>}
+      <div className="flex items-center space-x-2 min-h-[40px] p-2 rounded border border-transparent hover:border-border hover:bg-muted/30 cursor-pointer transition-colors"
+           onClick={() => setIsEditing(true)}>
+        {icon && <span className="text-muted-foreground">{icon}</span>}
+        <span className="flex-1 text-sm">{value || placeholder}</span>
+        {badge && <Badge variant="secondary" className="text-xs">{badge}</Badge>}
+        {isAIGenerated && (
+          <Tooltip>
+            <TooltipTrigger>
+              <Bot className="h-3 w-3 text-primary" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Données générées par IA</p>
+            </TooltipContent>
+          </Tooltip>
         )}
-        <Edit className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+        <Edit className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
     </div>
   );
 };
 
-const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) => {
-  const { data: companyData, loading, errors, refetch } = useCompanyData({ 
-    siren, 
-    autoFetch: true 
-  });
-  const { toast } = useToast();
-  
-  const [activeTab, setActiveTab] = useState("overview");
-  const [formData, setFormData] = useState<Partial<CompanyFullData>>({});
+export function CompanyWYSIWYGEditor({ siren }: CompanyWYSIWYGEditorProps) {
+  const [activeTab, setActiveTab] = useState(RESULT_TABS[0].key);
+  const [formData, setFormData] = useState<CompanyFullData | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    economic: false,
-    financial: false,
-    compliance: false,
-    certifications: false,
-    procedures: false,
-    fiscal: false,
-    governance: false
+  const { toast } = useToast();
+  
+  // Utiliser le hook de données d'entreprise
+  const { data, loading, errors, fetchCompanyData, refetch } = useCompanyData({
+    siren,
+    autoFetch: true
   });
 
-  useEffect(() => {
-    if (companyData) {
-      // Initialize formData with company data and admin settings
-      const formDataWithAdminSettings = {
-        ...companyData,
-        adminSettings: {
-          showDataQualityDashboard: (companyData as any)?.adminSettings?.showDataQualityDashboard || false,
-          ...(companyData as any)?.adminSettings
-        }
-      } as any;
-      setFormData(formDataWithAdminSettings);
-    }
-  }, [companyData]);
+  // ⚠️ UTILISATION DU BUILDER PARTAGÉ - Ne pas dupliquer la logique de mapping !
+  const displayData = buildCompanyDisplay(formData || data);
 
-  const updateField = (path: string[], value: string) => {
-    setFormData(prevData => {
-      const newData = { ...prevData };
-      let current: any = newData;
-      
-      for (let i = 0; i < path.length - 1; i++) {
-        if (!current[path[i]]) {
-          current[path[i]] = {};
-        }
-        current = current[path[i]];
+  // Initialiser formData quand les données arrivent
+  useEffect(() => {
+    if (data && !formData) {
+      setFormData(data);
+    }
+  }, [data, formData]);
+
+  // Fonction utilitaire pour obtenir une valeur imbriquée
+  const getNestedValue = (obj: any, path: string[]): string => {
+    const value = path.reduce((current, key) => current?.[key], obj);
+    return value || '';
+  };
+
+  // Fonction utilitaire pour définir une valeur imbriquée
+  const setNestedValue = (obj: any, path: string[], value: string): any => {
+    const newObj = { ...obj };
+    let current = newObj;
+    
+    for (let i = 0; i < path.length - 1; i++) {
+      const key = path[i];
+      if (!current[key] || typeof current[key] !== 'object') {
+        current[key] = {};
+      } else {
+        current[key] = { ...current[key] };
       }
-      
-      current[path[path.length - 1]] = value;
-      return newData;
-    });
+      current = current[key];
+    }
+    
+    const lastKey = path[path.length - 1];
+    current[lastKey] = value;
+    
+    return newObj;
+  };
+
+  // Fonction pour mettre à jour un champ
+  const updateField = (path: string[], value: string) => {
+    if (!formData) return;
+    
+    const updatedData = setNestedValue(formData, path, value);
+    setFormData(updatedData);
     setHasChanges(true);
   };
 
-  const getNestedValue = (obj: any, path: string[]): string => {
-    return path.reduce((current, key) => current?.[key], obj) || '';
-  };
+  // Fonction pour sauvegarder les données
+  const saveData = async () => {
+    if (!formData || !hasChanges) return;
 
-  const handleSave = async () => {
     setIsSaving(true);
     try {
-      const { data, error } = await supabase
-        .from('admin_companies')
+      const { error } = await supabase
+        .from('company_admin_data')
         .upsert({
-          siren: siren,
-          company_name: getNestedValue(formData, ['sirene', 'denomination']) || 'Nom inconnu',
-          siret: getNestedValue(formData, ['sirene', 'siret']),
-          naf_code: getNestedValue(formData, ['sirene', 'naf']),
-          activity: getNestedValue(formData, ['sirene', 'activitePrincipale']),
-          address: getNestedValue(formData, ['sirene', 'adresse']),
-          city: getNestedValue(formData, ['sirene', 'ville']),
-          postal_code: getNestedValue(formData, ['sirene', 'codePostal']),
-          status: getNestedValue(formData, ['sirene', 'statut']) || 'active',
-          enriched_data: JSON.parse(JSON.stringify(formData)),
-          is_manually_edited: true,
-          edited_at: new Date().toISOString(),
-          show_data_quality_dashboard: (formData as any)?.adminSettings?.showDataQualityDashboard || false
-        }, {
-          onConflict: 'siren'
-        })
-        .select()
-        .single();
+          siren: formData.sirene.siren,
+          data: formData,
+          updated_at: new Date().toISOString()
+        });
 
       if (error) throw error;
 
       setHasChanges(false);
       toast({
-        title: "Sauvegardé",
-        description: "Les modifications ont été enregistrées avec succès"
+        title: "Sauvegarde réussie",
+        description: "Les données ont été sauvegardées avec succès.",
       });
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      console.error('Erreur de sauvegarde:', error);
       toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Impossible de sauvegarder les modifications",
+        title: "Erreur de sauvegarde",
+        description: "Une erreur est survenue lors de la sauvegarde.",
         variant: "destructive"
       });
     } finally {
@@ -288,1562 +272,162 @@ const CompanyWYSIWYGEditor: React.FC<CompanyWYSIWYGEditorProps> = ({ siren }) =>
     }
   };
 
-  const handleRefresh = async () => {
+  // Fonction pour actualiser les données
+  const refreshData = async () => {
     await refetch();
+    setFormData(null); // Force la réinitialisation
+    setHasChanges(false);
     toast({
-      title: "Actualisé",
-      description: "Les données ont été rechargées depuis les APIs"
+      title: "Données actualisées",
+      description: "Les données ont été rechargées depuis les APIs.",
     });
   };
 
-  const toggleSection = (section: string) => {
-    setOpenSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
-
-  const handleScoresChange = (newScores: {
-    economic: number;
-    financial: number;
-    legal: number;
-    fiscal: number;
-    global: number;
-  }) => {
-    // Sauvegarder les nouvelles notes dans formData
-    updateField(['enriched', 'adminScores', 'economic'], newScores.economic.toString());
-    updateField(['enriched', 'adminScores', 'financial'], newScores.financial.toString());
-    updateField(['enriched', 'adminScores', 'legal'], newScores.legal.toString());
-    updateField(['enriched', 'adminScores', 'fiscal'], newScores.fiscal.toString());
-    updateField(['enriched', 'adminScores', 'global'], newScores.global.toString());
-  };
-
-  if (loading) {
+  if (loading && !formData) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Chargement des données...</span>
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Chargement des données...</p>
         </div>
       </div>
     );
   }
 
-  // Only show critical errors if no data is available at all
-  if (errors.length > 0 && (!companyData || !companyData.sirene)) {
+  if (!displayData.companyData || !displayData.scores || !displayData.enrichedData) {
     return (
-      <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-destructive">Erreurs de chargement</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {errors.map((error, index) => (
-              <div key={index} className="text-sm text-destructive">
-                <strong>{error.source}:</strong> {error.message}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+      <div className="text-center p-8 text-muted-foreground">
+        <AlertTriangle className="h-8 w-8 mx-auto mb-4" />
+        <p>Impossible de charger les données de l'entreprise</p>
+        <Button onClick={refreshData} className="mt-4">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Réessayer
+        </Button>
       </div>
     );
   }
-
-  if (!formData || !formData.sirene) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-center text-muted-foreground">Aucune donnée disponible</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Build display data similar to Analysis.tsx
-  const displayCompanyData = {
-    name: getNestedValue(formData, ['sirene', 'denomination']),
-    siren: getNestedValue(formData, ['sirene', 'siren']),
-    siret: getNestedValue(formData, ['sirene', 'siret']),
-    naf: getNestedValue(formData, ['sirene', 'naf']),
-    employees: getNestedValue(formData, ['sirene', 'effectifs']),
-    address: getNestedValue(formData, ['sirene', 'adresse']),
-    director: (() => {
-      const d = formData.pappers?.dirigeants?.[0];
-      return d ? [d.prenom, d.nom].filter(Boolean).join(' ') : '';
-    })(),
-    phone: getNestedValue(formData, ['enriched', 'contactInfo', 'phone']) || getNestedValue(formData, ['pappers', 'telephone']),
-    email: getNestedValue(formData, ['enriched', 'contactInfo', 'email']) || getNestedValue(formData, ['pappers', 'email']),
-    website: getNestedValue(formData, ['pappers', 'siteWeb']),
-    foundedYear: formData.sirene?.dateCreation ? new Date(formData.sirene.dateCreation).getFullYear().toString() : '',
-    status: getNestedValue(formData, ['sirene', 'statut']),
-    capitalSocial: (() => {
-      const pappersCapital = formData.pappers?.capitalSocial;
-      const infogreffeCapital = formData.infogreffe?.capitalSocial;
-      
-      if (pappersCapital) return `${pappersCapital.toLocaleString()} €`;
-      if (infogreffeCapital) return `${infogreffeCapital.toLocaleString()} €`;
-      return '';
-    })()
-  };
-
-  const displayScores = {
-    // Priorité aux scores admin-édités, sinon scores API
-    economic: getNestedValue(formData, ['enriched', 'adminScores', 'economic']) 
-      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'economic'])) 
-      : (formData.predictor?.scores?.global || 6.0),
-    financial: getNestedValue(formData, ['enriched', 'adminScores', 'financial']) 
-      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'financial'])) 
-      : (formData.predictor?.scores?.financier || 6.0),
-    legal: getNestedValue(formData, ['enriched', 'adminScores', 'legal']) 
-      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'legal'])) 
-      : (formData.predictor?.scores?.legal || 7.5),
-    fiscal: getNestedValue(formData, ['enriched', 'adminScores', 'fiscal']) 
-      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'fiscal'])) 
-      : (formData.predictor?.scores?.fiscal || 6.8),
-    global: getNestedValue(formData, ['enriched', 'adminScores', 'global']) 
-      ? parseFloat(getNestedValue(formData, ['enriched', 'adminScores', 'global'])) 
-      : (formData.predictor?.scores?.global || 6.0),
-    defaultRisk: formData.predictor?.probabiliteDefaut ? 
-      `${(formData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1)}%` : 
-      'Faible'
-  };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-background border-b shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="h-8 w-8 rounded bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">P</span>
-              </div>
-              <h1 className="text-xl font-semibold text-foreground">Predicor Admin</h1>
-              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                Mode Édition
-              </Badge>
-              {(() => {
-                const alertCounts = countAlertsByLevel(displayScores);
-                const globalLevel = getGlobalAlertLevel(displayScores);
-                
-                if (alertCounts.total > 0) {
-                  return (
-                    <Badge 
-                      className={
-                        globalLevel === 'critical' 
-                          ? "bg-alert-critical text-alert-critical-foreground border-transparent" 
-                          : globalLevel === 'high'
-                          ? "bg-alert-high text-alert-high-foreground border-transparent"
-                          : "bg-alert-medium text-alert-medium-foreground border-transparent"
-                      }
-                    >
-                      {alertCounts.critical > 0 && `${alertCounts.critical} Critique${alertCounts.critical > 1 ? 's' : ''}`}
-                      {alertCounts.critical === 0 && alertCounts.high > 0 && `${alertCounts.high} Alerte${alertCounts.high > 1 ? 's' : ''}`}
-                      {alertCounts.critical === 0 && alertCounts.high === 0 && `${alertCounts.medium} Vigilance${alertCounts.medium > 1 ? 's' : ''}`}
-                    </Badge>
-                  );
-                }
-                return null;
-              })()}
-              {/* Show non-critical API errors as info badge */}
-              {errors.length > 0 && companyData && (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                      <Info className="h-3 w-3 mr-1" />
-                      API partiellement indisponible
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="space-y-1">
-                      {errors.map((error, index) => (
-                        <div key={index} className="text-xs">
-                          <strong>{error.source}:</strong> {error.message}
-                        </div>
-                      ))}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => window.open(`/analysis?siren=${siren}`, '_blank')}
-                className="text-primary border-primary hover:bg-primary/10"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Voir côté utilisateur
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRefresh}
-                disabled={isSaving}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Actualiser
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={handleSave}
-                disabled={!hasChanges || isSaving}
-                className={hasChanges ? "bg-primary hover:bg-primary/90" : ""}
-              >
-                {isSaving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
+    <TooltipProvider>
+      <div className="min-h-screen bg-slate-50">
+        {/* Header Admin */}
+        <header className="bg-background border-b shadow-sm">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center space-x-4">
+                <div className="h-8 w-8 rounded bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
+                  <span className="text-primary-foreground font-bold text-sm">P</span>
+                </div>
+                <h1 className="text-xl font-semibold text-foreground">Predicor Admin</h1>
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  Mode Édition
+                </Badge>
+                {hasChanges && (
+                  <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    Modifications non sauvegardées
+                  </Badge>
                 )}
-                {isSaving ? "Sauvegarde..." : hasChanges ? "Sauvegarder" : "Sauvegardé"}
-              </Button>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={refreshData}
+                  disabled={isSaving}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Actualiser
+                </Button>
+                <Button 
+                  onClick={saveData} 
+                  disabled={!hasChanges || isSaving}
+                  size="sm"
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  Sauvegarder
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Voir côté utilisateur
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Company Header */}
-      <div className="bg-background border-b sticky top-[73px] z-40">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="h-16 w-16 rounded-lg bg-slate-100 flex items-center justify-center">
-                <Building2 className="h-8 w-8 text-slate-600" />
-              </div>
-              <div>
-                <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-3 mb-2">
-                  <EditableField
-                    value={displayCompanyData.name}
-                    placeholder="Nom de l'entreprise"
-                    onSave={(value) => updateField(['sirene', 'denomination'], value)}
-                  />
-                  <div className="flex items-center space-x-2">
+        {/* Company Header */}
+        <div className="sticky top-0 z-10 bg-background border-b">
+          <div className="container mx-auto px-6 py-6">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <div className="flex items-center space-x-4">
+                <div className="h-16 w-16 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <Building2 className="h-8 w-8 text-slate-600" />
+                </div>
+                <div>
+                  <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-3 mb-2">
+                    <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                      {displayData.companyData.name}
+                    </h2>
                     <Badge variant="secondary" className="bg-success-light text-success w-fit">
                       <CheckCircle className="h-3 w-3 mr-1" />
-                      {displayCompanyData.status || 'Actif'}
+                      {displayData.companyData.status}
                     </Badge>
                     <AlertSummaryBadge 
-                      scores={displayScores}
-                      className="shrink-0"
+                      scores={{
+                        economic: displayData.scores.global || 5.5,
+                        financial: displayData.scores.financial || 6.0,
+                        legal: displayData.scores.legal || 7.5,
+                        fiscal: displayData.scores.fiscal || 6.8
+                      }}
                     />
                   </div>
-                </div>
-                <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-6 text-sm text-muted-foreground">
-                  <span>SIREN: {displayCompanyData.siren}</span>
-                  <span>SIRET: {displayCompanyData.siret}</span>
-                  <span>{displayCompanyData.naf}</span>
+                  <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-6 text-sm text-muted-foreground">
+                    <span>SIREN: {displayData.companyData.siren}</span>
+                    <span>SIRET: {displayData.companyData.siret}</span>
+                    <span>{displayData.companyData.naf}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="text-center md:text-right">
-              <ScoreEditorModal
-                globalScore={displayScores.global}
-                economicScore={displayScores.economic}
-                financialScore={displayScores.financial}
-                legalScore={displayScores.legal}
-                fiscalScore={displayScores.fiscal}
-                onScoresChange={handleScoresChange}
-              >
-                <div className="cursor-pointer hover:bg-muted/20 p-2 rounded-lg transition-colors group">
-                  <div className="text-2xl md:text-3xl font-bold text-primary mb-1 group-hover:text-primary/80">
-                    {displayScores.global.toFixed(1)}/10
-                  </div>
-                  <div className="text-sm text-muted-foreground flex items-center justify-center md:justify-end">
-                    Score global
-                    <Edit className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
+              <div className="text-center md:text-right">
+                <div className="text-2xl md:text-3xl font-bold text-primary mb-1">
+                  {displayData.scores.global}/10
                 </div>
-              </ScoreEditorModal>
+                <div className="text-sm text-muted-foreground">Score global</div>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Main Content - ⚠️ COMPOSANT PARTAGÉ */}
+        <div className="container mx-auto px-6 py-6">
+          {/* 
+            ⚠️ Ne modifiez pas l'UI des résultats ici !
+            Toute modification doit se faire dans src/components/result/ResultPage.tsx
+          */}
+          <ResultPage
+            mode="admin"
+            companyData={displayData.companyData}
+            scores={displayData.scores}
+            enrichedData={displayData.enrichedData}
+            loading={loading}
+            errors={errors}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onEdit={(field: string, value: any) => {
+              // Adapter l'interface onEdit pour le composant partagé
+              const pathArray = field.split('.');
+              updateField(pathArray, value);
+            }}
+          />
+        </div>
       </div>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-6 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="sticky top-[183px] z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-6 pb-2">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
-              <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-              <TabsTrigger value="study">Étude approfondie</TabsTrigger>
-              <TabsTrigger value="predictive">Analyse prédictive</TabsTrigger>
-              <TabsTrigger value="reports">Rapports & Actions</TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="overview" className="space-y-6">
-            {/* Section Qualité des données - Admin Configuration */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Database className="h-5 w-5 mr-2" />
-                    Qualité des données (Configuration Admin)
-                  </div>
-                  <VisibilityToggle
-                    isVisible={(formData as any)?.adminSettings?.showDataQualitySection !== false}
-                    onToggle={(visible) => updateField(['adminSettings', 'showDataQualitySection'], visible.toString())}
-                    label="Afficher la section"
-                  />
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="data-completeness">Complétude des données (%)</Label>
-                      <EditableField
-                        value={getNestedValue(formData, ['enriched', 'dataQuality', 'completeness']) || '85'}
-                        placeholder="85"
-                        onSave={(value) => updateField(['enriched', 'dataQuality', 'completeness'], value)}
-                        type="number"
-                        label="Pourcentage de complétude"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="overall-status">Statut global</Label>
-                      <EditableField
-                        value={getNestedValue(formData, ['enriched', 'dataQuality', 'overallStatus']) || 'Données fiables'}
-                        placeholder="Données fiables"
-                        onSave={(value) => updateField(['enriched', 'dataQuality', 'overallStatus'], value)}
-                        label="Statut affiché en bas de section"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <h4 className="font-semibold">Configuration des APIs</h4>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {[
-                        { key: 'insee', label: 'INSEE/SIRENE', category: 'Données officielles' },
-                        { key: 'pappers', label: 'Pappers API', category: 'Données financières' },
-                        { key: 'rubypayeur', label: 'RubyPayeur', category: 'Score crédit' },
-                        { key: 'infogreffe', label: 'Infogreffe', category: 'Données juridiques' },
-                        { key: 'ai_enrichment', label: 'IA Enrichissement', category: 'Données simulées' },
-                        { key: 'sirius', label: 'SIRIUS', category: 'Données fiscales' },
-                        { key: 'dgfip', label: 'DGFIP', category: 'Données fiscales' },
-                        { key: 'portalis', label: 'PORTALIS', category: 'Données judiciaires' },
-                        { key: 'opale', label: 'OPALE', category: 'Données sociales' }
-                      ].map(api => (
-                        <div key={api.key} className="flex items-center justify-between p-2 border rounded">
-                          <div className="text-sm">
-                            <div className="font-medium">{api.label}</div>
-                            <div className="text-xs text-muted-foreground">{api.category}</div>
-                          </div>
-                          <Select 
-                            value={getNestedValue(formData, ['enriched', 'dataQuality', 'apis', api.key, 'status']) || 'active'}
-                            onValueChange={(value) => updateField(['enriched', 'dataQuality', 'apis', api.key, 'status'], value)}
-                          >
-                            <SelectTrigger className="w-24">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="active">
-                                <div className="flex items-center space-x-1">
-                                  <CheckCircle className="h-3 w-3 text-success" />
-                                  <span>Actif</span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="warning">
-                                <div className="flex items-center space-x-1">
-                                  <AlertTriangle className="h-3 w-3 text-warning" />
-                                  <span>Alerte</span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="inactive">
-                                <div className="flex items-center space-x-1">
-                                  <XCircle className="h-3 w-3 text-destructive" />
-                                  <span>Inactif</span>
-                                </div>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Company Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Building2 className="h-5 w-5 mr-2" />
-                  Informations générales
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <EditableField
-                      label="Adresse"
-                      value={displayCompanyData.address}
-                      placeholder="Adresse complète"
-                      onSave={(value) => updateField(['sirene', 'adresse'], value)}
-                      icon={<MapPin className="h-4 w-4" />}
-                    />
-                    <EditableField
-                      label="Dirigeant"
-                      value={displayCompanyData.director}
-                      placeholder="Nom du dirigeant"
-                      onSave={(value) => {
-                        const parts = value.trim().split(/\s+/);
-                        if (parts.length === 1) {
-                          // Un seul mot => nom seulement
-                          updateField(['pappers', 'dirigeants', '0', 'prenom'], '');
-                          updateField(['pappers', 'dirigeants', '0', 'nom'], parts[0]);
-                        } else {
-                          // Plusieurs mots => premier = prénom, reste = nom
-                          const first = parts.shift() || '';
-                          const last = parts.join(' ');
-                          updateField(['pappers', 'dirigeants', '0', 'prenom'], first);
-                          updateField(['pappers', 'dirigeants', '0', 'nom'], last);
-                        }
-                      }}
-                      icon={<User className="h-4 w-4" />}
-                    />
-                    <EditableField
-                      label="Année de création"
-                      value={displayCompanyData.foundedYear}
-                      placeholder="Année de création"
-                      onSave={(value) => updateField(['sirene', 'dateCreation'], value)}
-                      icon={<Calendar className="h-4 w-4" />}
-                      type="number"
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <EditableField
-                      label="Téléphone"
-                      value={displayCompanyData.phone}
-                      placeholder="+33 X XX XX XX XX"
-                      onSave={(value) => updateField(['pappers', 'telephone'], value)}
-                      icon={<Phone className="h-4 w-4" />}
-                      type="tel"
-                      isAIGenerated={!!getNestedValue(formData, ['enriched', 'contactInfo', 'phone'])}
-                    />
-                    <EditableField
-                      label="Email"
-                      value={displayCompanyData.email}
-                      placeholder="contact@entreprise.com"
-                      onSave={(value) => updateField(['pappers', 'email'], value)}
-                      icon={<Mail className="h-4 w-4" />}
-                      type="email"
-                      isAIGenerated={!!getNestedValue(formData, ['enriched', 'contactInfo', 'email'])}
-                    />
-                    <EditableField
-                      label="Capital social"
-                      value={displayCompanyData.capitalSocial}
-                      placeholder="Capital social (€)"
-                      onSave={(value) => updateField(['pappers', 'capitalSocial'], value)}
-                      icon={<Euro className="h-4 w-4" />}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Legal Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Shield className="h-5 w-5 mr-2" />
-                  Informations juridiques
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Forme juridique</label>
-                      <div className="font-medium mt-1">SAS, société par actions simplifiée</div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Numéro de TVA</label>
-                      <div className="font-medium mt-1">FR{displayCompanyData.siren.replace(/\s/g, '')}</div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Capital social</label>
-                      <div className="font-medium mt-1">{displayCompanyData.capitalSocial || 'Non renseigné'}</div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Inscription RCS</label>
-                      <div className="font-medium text-success mt-1 flex items-center">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        {getNestedValue(formData, ['pappers', 'dateCreation']) ? 
-                          `INSCRIT (le ${new Date(formData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
-                          'INSCRIT (au greffe de PARIS, le 15/03/2015)'
-                        }
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Inscription RNE</label>
-                      <div className="font-medium text-success mt-1 flex items-center">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        {getNestedValue(formData, ['pappers', 'dateCreation']) ? 
-                          `INSCRIT (le ${new Date(formData.pappers.dateCreation).toLocaleDateString('fr-FR')})` :
-                          'INSCRIT (le 15/03/2015)'
-                        }
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Numéro RCS</label>
-                      <div className="font-medium mt-1">{displayCompanyData.siren} R.C.S. Paris</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Activity Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Building2 className="h-5 w-5 mr-2" />
-                  Activités
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Activité principale déclarée</label>
-                    <div className="font-medium mt-1">
-                      {getNestedValue(formData, ['pappers', 'libelleNaf']) || 
-                       getNestedValue(formData, ['sirene', 'naf']) || 
-                       'Conseil en systèmes et logiciels informatiques, développement de solutions digitales sur mesure'}
-                    </div>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Code NAF</label>
-                      <div className="font-medium mt-1">{getNestedValue(formData, ['sirene', 'naf']) || '6202A'}</div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Catégorie NAF</label>
-                      <div className="font-medium mt-1">Services aux entreprises</div>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Description NAF</label>
-                    <div className="text-sm text-muted-foreground mt-1">(Conseil en systèmes et logiciels informatiques)</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Score Cards */}
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-success-light to-success/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <TrendingUp className="h-5 w-5 mr-2 text-success" />
-                    Santé Financière
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-success mb-2">{displayScores.financial.toFixed(1)}/10</div>
-                  <p className="text-sm text-success-dark">Performance financière solide avec des indicateurs positifs</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-primary-light to-primary/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <Shield className="h-5 w-5 mr-2 text-primary" />
-                    Conformité Légale
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-primary mb-2">{displayScores.legal.toFixed(1)}/10</div>
-                  <p className="text-sm text-primary-dark">Conformité réglementaire excellente</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-warning-light to-warning/20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    <AlertTriangle className="h-5 w-5 mr-2 text-warning" />
-                    Risque Prédictif
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-warning mb-2">{displayScores.defaultRisk}</div>
-                  <p className="text-sm text-warning-dark">Probabilité de défaut sur 12 mois</p>
-                </CardContent>
-              </Card>
-            </div>
-
-
-            {/* AI Analysis */}
-            <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Bot className="h-5 w-5 mr-2 text-primary" />
-                  Analyse IA Globale
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <EditableField
-                  value={getNestedValue(formData, ['enriched', 'aiAnalysis', 'summary'])}
-                  placeholder="L'entreprise présente un profil avec une performance correcte dans son secteur. Les indicateurs montrent une santé financière stable avec des opportunités d'amélioration identifiées."
-                  onSave={(value) => updateField(['enriched', 'aiAnalysis', 'summary'], value)}
-                  multiline
-                  badge="IA GPT-5"
-                />
-                <Separator />
-                <div>
-                  <h4 className="font-semibold mb-2 flex items-center">
-                    <Target className="h-4 w-4 mr-2" />
-                    Recommandations prioritaires
-                  </h4>
-                  <EditableField
-                    value={getNestedValue(formData, ['enriched', 'aiAnalysis', 'recommendations'])}
-                    placeholder="• Améliorer la trésorerie à court terme\n• Diversifier le portefeuille client\n• Renforcer les processus de conformité"
-                    onSave={(value) => updateField(['enriched', 'aiAnalysis', 'recommendations'], value)}
-                    multiline
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="study" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Étude Approfondie - Mode Édition</CardTitle>
-                <CardDescription>Configuration avancée des analyses sectorielles</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Executive Summary */}
-                <ExecutiveSummary
-                  scores={{
-                    economic: displayScores.economic,
-                    financial: displayScores.financial,
-                    legal: displayScores.legal,
-                    fiscal: displayScores.fiscal,
-                    global: displayScores.global
-                  }}
-                  companyName={displayCompanyData.name}
-                  existingSummary={{
-                    profile: getNestedValue(formData, ['enriched', 'executiveSummary', 'profile'])
-                  }}
-                  onSummaryChange={(summary) => {
-                    updateField(['enriched', 'executiveSummary', 'profile'], summary.profile);
-                  }}
-                  editable={true}
-                />
-
-                <div className="space-y-4">
-                  {/* Compliance Section */}
-                  <Card>
-                    <Collapsible 
-                      open={openSections.compliance} 
-                      onOpenChange={() => toggleSection('compliance')}
-                    >
-                      <CollapsibleTrigger asChild>
-                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                           <div className="flex items-center justify-between">
-                             <div className="flex items-center space-x-3">
-                               <Shield className="h-5 w-5 text-primary" />
-                               <div>
-                                 <CardTitle className="text-lg">Conformités et Obligations Légales</CardTitle>
-                                 <CardDescription>Analyse de la situation de conformité et cohérence déclarative</CardDescription>
-                               </div>
-                             </div>
-                             <div className="flex items-center space-x-2">
-                               <VisibilityToggle
-                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'compliance']) !== "false"}
-                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'compliance'], visible.toString())}
-                                 label="Afficher section"
-                               />
-                               <AlertBadge 
-                                 {...calculateAlert(displayScores.legal, 'legal')}
-                                 score={displayScores.legal}
-                               />
-                               {openSections.compliance ? 
-                                 <ChevronDown className="h-4 w-4" /> : 
-                                 <ChevronRight className="h-4 w-4" />
-                               }
-                             </div>
-                           </div>
-                         </CardHeader>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent>
-                        <CardContent className="space-y-6">
-                          <EditableField
-                            value={getNestedValue(formData, ['enriched', 'compliance', 'analysis']) || ''}
-                            placeholder="Analyse de conformité réglementaire..."
-                            onSave={(value) => updateField(['enriched', 'compliance', 'analysis'], value)}
-                            multiline
-                          />
-                          
-                          {/* Certifications et Agréments */}
-                          <Card>
-                            <Collapsible 
-                              open={openSections.certifications} 
-                              onOpenChange={() => toggleSection('certifications')}
-                            >
-                              <CollapsibleTrigger asChild>
-                                 <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                                   <div className="flex items-center justify-between">
-                                     <div className="flex items-center space-x-3">
-                                       <Award className="h-5 w-5 text-primary" />
-                                       <div>
-                                         <CardTitle className="text-lg">Certifications et Agréments</CardTitle>
-                                         <CardDescription>Standards qualité et agréments administratifs</CardDescription>
-                                       </div>
-                                     </div>
-                                     <div className="flex items-center space-x-2">
-                                       <VisibilityToggle
-                                         isVisible={getNestedValue(formData, ['enriched', 'visibility', 'certifications']) !== "false"}
-                                         onToggle={(visible) => updateField(['enriched', 'visibility', 'certifications'], visible.toString())}
-                                         label="Afficher sous-section"
-                                       />
-                                       {openSections.certifications ? 
-                                         <ChevronDown className="h-4 w-4" /> : 
-                                         <ChevronRight className="h-4 w-4" />
-                                       }
-                                     </div>
-                                   </div>
-                                 </CardHeader>
-                              </CollapsibleTrigger>
-                              
-                              <CollapsibleContent>
-                                <CardContent className="space-y-6">
-                                  <div className="grid md:grid-cols-2 gap-6">
-                                    {/* Certifications Qualité */}
-                                    <Card>
-                                      <CardHeader>
-                                        <CardTitle className="text-base flex items-center">
-                                          <Award className="h-4 w-4 mr-2 text-blue-500" />
-                                          Certifications Qualité
-                                        </CardTitle>
-                                        <CardDescription>Standards et certifications sectorielles</CardDescription>
-                                      </CardHeader>
-                                      <CardContent>
-                                        <div className="space-y-3">
-                                          {[
-                                            { label: 'ISO 9001:2015', slug: 'iso_9001_2015' },
-                                            { label: 'ISO 14001', slug: 'iso_14001' },
-                                            { label: 'OHSAS 18001', slug: 'ohsas_18001' },
-                                            { label: 'Certification RGE', slug: 'certification_rge' }
-                                          ].map(({ label, slug }) => (
-                                            <div key={slug} className="flex items-center justify-between space-x-2">
-                                              <span className="text-sm font-medium flex-1">{label}</span>
-                                              <Select
-                                                value={getNestedValue(formData, ['enriched', 'compliance', 'certifications', slug]) || 'Non certifiée'}
-                                                onValueChange={(value) => updateField(['enriched', 'compliance', 'certifications', slug], value)}
-                                              >
-                                                <SelectTrigger className="w-32">
-                                                  <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  <SelectItem value="NC">NC</SelectItem>
-                                                  <SelectItem value="Non certifiée">Non certifiée</SelectItem>
-                                                  <SelectItem value="Certifiée">Certifiée</SelectItem>
-                                                  <SelectItem value="En cours">En cours</SelectItem>
-                                                  <SelectItem value="Valide">Valide</SelectItem>
-                                                  <SelectItem value="Expirée">Expirée</SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                    
-                                    {/* Agréments Administratifs */}
-                                    <Card>
-                                      <CardHeader>
-                                        <CardTitle className="text-base flex items-center">
-                                          <FileCheck className="h-4 w-4 mr-2 text-green-500" />
-                                          Agréments Administratifs
-                                        </CardTitle>
-                                        <CardDescription>Autorisations et agréments obtenus</CardDescription>
-                                      </CardHeader>
-                                      <CardContent>
-                                        <div className="space-y-3">
-                                          {[
-                                            { label: 'Agrément préfectoral', slug: 'agrement_prefectoral' },
-                                            { label: 'Licence d\'exploitation', slug: 'licence_exploitation' },
-                                            { label: 'Homologation produits', slug: 'homologation_produits' },
-                                            { label: 'Autorisation ICPE', slug: 'autorisation_icpe' }
-                                          ].map(({ label, slug }) => (
-                                            <div key={slug} className="flex items-center justify-between space-x-2">
-                                              <span className="text-sm font-medium flex-1">{label}</span>
-                                              <Select
-                                                value={getNestedValue(formData, ['enriched', 'compliance', 'agreements', slug]) || 'Non applicable'}
-                                                onValueChange={(value) => updateField(['enriched', 'compliance', 'agreements', slug], value)}
-                                              >
-                                                <SelectTrigger className="w-32">
-                                                  <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  <SelectItem value="NC">NC</SelectItem>
-                                                  <SelectItem value="Non applicable">Non applicable</SelectItem>
-                                                  <SelectItem value="Valide">Valide</SelectItem>
-                                                  <SelectItem value="Obtenue">Obtenue</SelectItem>
-                                                  <SelectItem value="En cours">En cours</SelectItem>
-                                                  <SelectItem value="Renouvellement">Renouvellement</SelectItem>
-                                                  <SelectItem value="Expirée">Expirée</SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                </CardContent>
-                              </CollapsibleContent>
-                            </Collapsible>
-                          </Card>
-                          
-                          {/* Procédures Judiciaires et Légales */}
-                          <Card>
-                            <Collapsible 
-                              open={openSections.procedures} 
-                              onOpenChange={() => toggleSection('procedures')}
-                            >
-                              <CollapsibleTrigger asChild>
-                                 <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                                   <div className="flex items-center justify-between">
-                                     <div className="flex items-center space-x-3">
-                                       <Scale className="h-5 w-5 text-primary" />
-                                       <div>
-                                         <CardTitle className="text-lg">Procédures Judiciaires et Légales</CardTitle>
-                                         <CardDescription>Gestion des procédures précontentieuses et judiciaires</CardDescription>
-                                       </div>
-                                     </div>
-                                     <div className="flex items-center space-x-2">
-                                       <VisibilityToggle
-                                         isVisible={getNestedValue(formData, ['enriched', 'visibility', 'procedures']) !== "false"}
-                                         onToggle={(visible) => updateField(['enriched', 'visibility', 'procedures'], visible.toString())}
-                                         label="Afficher sous-section"
-                                       />
-                                       {openSections.procedures ? 
-                                         <ChevronDown className="h-4 w-4" /> : 
-                                         <ChevronRight className="h-4 w-4" />
-                                       }
-                                     </div>
-                                   </div>
-                                 </CardHeader>
-                              </CollapsibleTrigger>
-                              
-                              <CollapsibleContent>
-                                <CardContent className="space-y-6">
-                                  <div className="grid md:grid-cols-2 gap-6">
-                                    {/* Procédures Précontentieuses */}
-                                    <Card>
-                                      <CardHeader>
-                                        <CardTitle className="text-base flex items-center">
-                                          <AlertTriangle className="h-4 w-4 mr-2 text-amber-500" />
-                                          Procédures Précontentieuses
-                                        </CardTitle>
-                                        <CardDescription>Source affichée: FIBEN</CardDescription>
-                                      </CardHeader>
-                                      <CardContent>
-                                        <div className="space-y-3">
-                                          {[
-                                            { label: 'Mise en demeure', slug: 'mise_en_demeure' },
-                                            { label: 'Commandement de payer par huissier', slug: 'commandement_de_payer_par_huissier' },
-                                            { label: 'Résiliation de contrat', slug: 'resiliation_de_contrat' },
-                                            { label: 'Inscription privilèges/nantissements', slug: 'inscription_privileges_nantissements' },
-                                            { label: 'Radiation d\'office du RCS', slug: 'radiation_doffice_du_rcs' },
-                                            { label: 'Procédure amiable', slug: 'procedure_amiable' },
-                                            { label: 'Déclaration de créance', slug: 'declaration_de_creance' }
-                                          ].map(({ label, slug }) => (
-                                            <div key={slug} className="flex items-center justify-between space-x-2">
-                                              <span className="text-sm font-medium flex-1">{label}</span>
-                                              <Select
-                                                value={getNestedValue(formData, ['enriched', 'compliance', 'legalProcedures', slug]) || 'NC'}
-                                                onValueChange={(value) => updateField(['enriched', 'compliance', 'legalProcedures', slug], value)}
-                                              >
-                                                <SelectTrigger className="w-32">
-                                                  <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  <SelectItem value="NC">NC</SelectItem>
-                                                  <SelectItem value="Aucune">Aucune</SelectItem>
-                                                  <SelectItem value="1 en cours">1 en cours</SelectItem>
-                                                  <SelectItem value="1 active">1 active</SelectItem>
-                                                  <SelectItem value="2 actives">2 actives</SelectItem>
-                                                  <SelectItem value="3+ actives">3+ actives</SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                    
-                                    {/* Procédures Judiciaires */}
-                                    <Card>
-                                      <CardHeader>
-                                        <CardTitle className="text-base flex items-center">
-                                          <Gavel className="h-4 w-4 mr-2 text-red-500" />
-                                          Procédures Judiciaires
-                                        </CardTitle>
-                                        <CardDescription>Source affichée: PORTALIS</CardDescription>
-                                      </CardHeader>
-                                      <CardContent>
-                                        <div className="space-y-3">
-                                          {[
-                                            { label: 'Assignation Tribunal de commerce', slug: 'assignation_tribunal_de_commerce' },
-                                            { label: 'Injonction de payer', slug: 'injonction_de_payer' },
-                                            { label: 'Référé commercial', slug: 'refere_commercial' },
-                                            { label: 'Redressement judiciaire', slug: 'redressement_judiciaire' },
-                                            { label: 'Liquidation judiciaire', slug: 'liquidation_judiciaire' },
-                                            { label: 'Sauvegarde', slug: 'sauvegarde' },
-                                            { label: 'Appel des décisions', slug: 'appel_des_decisions' },
-                                            { label: 'Contentieux prud\'homal', slug: 'contentieux_prudhomal' },
-                                            { label: 'Contentieux administratif', slug: 'contentieux_administratif' }
-                                          ].map(({ label, slug }) => (
-                                            <div key={slug} className="flex items-center justify-between space-x-2">
-                                              <span className="text-sm font-medium flex-1">{label}</span>
-                                              <Select
-                                                value={getNestedValue(formData, ['enriched', 'compliance', 'judicialProcedures', slug]) || 'NC'}
-                                                onValueChange={(value) => updateField(['enriched', 'compliance', 'judicialProcedures', slug], value)}
-                                              >
-                                                <SelectTrigger className="w-32">
-                                                  <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  <SelectItem value="NC">NC</SelectItem>
-                                                  <SelectItem value="Aucun">Aucun</SelectItem>
-                                                  <SelectItem value="Non">Non</SelectItem>
-                                                  <SelectItem value="1 en cours">1 en cours</SelectItem>
-                                                  <SelectItem value="1 active">1 active</SelectItem>
-                                                  <SelectItem value="2 actives">2 actives</SelectItem>
-                                                  <SelectItem value="3+ actives">3+ actives</SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                </CardContent>
-                              </CollapsibleContent>
-                            </Collapsible>
-                          </Card>
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-
-                  {/* Fiscal Mitigation Section */}
-                  <Card>
-                    <Collapsible 
-                      open={openSections.fiscal} 
-                      onOpenChange={() => toggleSection('fiscal')}
-                    >
-                      <CollapsibleTrigger asChild>
-                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                           <div className="flex items-center justify-between">
-                             <div className="flex items-center space-x-3">
-                               <CreditCard className="h-5 w-5 text-primary" />
-                               <div>
-                                 <CardTitle className="text-lg">Mitigation Fiscale</CardTitle>
-                                 <CardDescription>Optimisation et stratégies de gestion fiscale</CardDescription>
-                               </div>
-                             </div>
-                             <div className="flex items-center space-x-2">
-                               <VisibilityToggle
-                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'fiscal']) !== "false"}
-                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'fiscal'], visible.toString())}
-                                 label="Afficher section"
-                               />
-                               <AlertBadge 
-                                 {...calculateAlert(displayScores.fiscal, 'fiscal')}
-                                 score={displayScores.fiscal}
-                               />
-                               {openSections.fiscal ? 
-                                 <ChevronDown className="h-4 w-4" /> : 
-                                 <ChevronRight className="h-4 w-4" />
-                               }
-                             </div>
-                           </div>
-                         </CardHeader>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent>
-                        <CardContent className="space-y-4">
-                          <EditableField
-                            value={getNestedValue(formData, ['enriched', 'fiscal', 'strategies']) || ''}
-                            placeholder="Stratégies fiscales et optimisations..."
-                            onSave={(value) => updateField(['enriched', 'fiscal', 'strategies'], value)}
-                            multiline
-                          />
-                          <EditableField
-                            value={getNestedValue(formData, ['enriched', 'fiscal', 'recommendations']) || ''}
-                            placeholder="Recommandations fiscales..."
-                            onSave={(value) => updateField(['enriched', 'fiscal', 'recommendations'], value)}
-                            multiline
-                          />
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-
-                  {/* Financial Analysis Section */}
-                  <Card>
-                    <Collapsible 
-                      open={openSections.financial} 
-                      onOpenChange={() => toggleSection('financial')}
-                    >
-                      <CollapsibleTrigger asChild>
-                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                           <div className="flex items-center justify-between">
-                             <div className="flex items-center space-x-3">
-                               <CreditCard className="h-5 w-5 text-primary" />
-                               <div>
-                                 <CardTitle className="text-lg">Situation Financière</CardTitle>
-                                 <CardDescription>Santé financière et ratios de gestion</CardDescription>
-                               </div>
-                             </div>
-                             <div className="flex items-center space-x-2">
-                               <VisibilityToggle
-                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'financial']) !== "false"}
-                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'financial'], visible.toString())}
-                                 label="Afficher section"
-                               />
-                               <AlertBadge 
-                                 {...calculateAlert(displayScores.financial, 'financial')}
-                                 score={displayScores.financial}
-                               />
-                               {openSections.financial ? 
-                                 <ChevronDown className="h-4 w-4" /> : 
-                                 <ChevronRight className="h-4 w-4" />
-                               }
-                             </div>
-                           </div>
-                         </CardHeader>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent>
-                        <CardContent className="space-y-4">
-                          <EditableField
-                            value={getNestedValue(formData, ['enriched', 'financial', 'analysis']) || ''}
-                            placeholder="Analyse de la situation financière..."
-                            onSave={(value) => updateField(['enriched', 'financial', 'analysis'], value)}
-                            multiline
-                          />
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-
-                  {/* Economic Analysis Section */}
-                  <Card>
-                    <Collapsible 
-                      open={openSections.economic} 
-                      onOpenChange={() => toggleSection('economic')}
-                    >
-                      <CollapsibleTrigger asChild>
-                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                           <div className="flex items-center justify-between">
-                             <div className="flex items-center space-x-3">
-                               <TrendingUp className="h-5 w-5 text-primary" />
-                               <div>
-                                 <CardTitle className="text-lg">Analyse Économique et Commerciale</CardTitle>
-                                 <CardDescription>Configuration des données de marché</CardDescription>
-                               </div>
-                             </div>
-                             <div className="flex items-center space-x-2">
-                               <VisibilityToggle
-                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'economic']) !== "false"}
-                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'economic'], visible.toString())}
-                                 label="Afficher section"
-                               />
-                               <AlertBadge 
-                                 {...calculateAlert(displayScores.economic, 'economic')}
-                                 score={displayScores.economic}
-                               />
-                               {openSections.economic ? 
-                                 <ChevronDown className="h-4 w-4" /> : 
-                                 <ChevronRight className="h-4 w-4" />
-                               }
-                             </div>
-                           </div>
-                         </CardHeader>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent>
-                        <CardContent className="space-y-4">
-                          <EditableField
-                            value={getNestedValue(formData, ['enriched', 'economic', 'analysis']) || ''}
-                            placeholder="Analyse économique et commerciale..."
-                            onSave={(value) => updateField(['enriched', 'economic', 'analysis'], value)}
-                            multiline
-                          />
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-
-                  {/* Governance Section */}
-                  <Card>
-                    <Collapsible 
-                      open={openSections.governance} 
-                      onOpenChange={() => toggleSection('governance')}
-                    >
-                      <CollapsibleTrigger asChild>
-                         <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                           <div className="flex items-center justify-between">
-                             <div className="flex items-center space-x-3">
-                               <Crown className="h-5 w-5 text-primary" />
-                               <div>
-                                 <CardTitle className="text-lg">Structuration, Gouvernance et Management</CardTitle>
-                                 <CardDescription>Organisation, processus de décision et management</CardDescription>
-                               </div>
-                             </div>
-                             <div className="flex items-center space-x-2">
-                               <VisibilityToggle
-                                 isVisible={getNestedValue(formData, ['enriched', 'visibility', 'governance']) !== "false"}
-                                 onToggle={(visible) => updateField(['enriched', 'visibility', 'governance'], visible.toString())}
-                                 label="Afficher section"
-                               />
-                               <AlertBadge 
-                                 {...calculateAlert(displayScores.legal, 'legal')}
-                                 score={displayScores.legal}
-                               />
-                               {openSections.governance ? 
-                                 <ChevronDown className="h-4 w-4" /> : 
-                                 <ChevronRight className="h-4 w-4" />
-                               }
-                             </div>
-                           </div>
-                         </CardHeader>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent>
-                        <CardContent className="space-y-4">
-                          <EditableField
-                            value={getNestedValue(formData, ['enriched', 'governance', 'analysis']) || ''}
-                            placeholder="Analyse des risques organisationnels, points forts et axes d'amélioration..."
-                            onSave={(value) => updateField(['enriched', 'governance', 'analysis'], value)}
-                            multiline
-                          />
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-                 </div>
-               </CardContent>
-             </Card>
-           </TabsContent>
-
-           <TabsContent value="predictive" className="space-y-6">
-             {/* Analyse IA */}
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center">
-                   <Bot className="h-5 w-5 mr-2" />
-                   Analyse IA
-                 </CardTitle>
-                 <CardDescription>Probabilités de défaut et confiance du modèle</CardDescription>
-               </CardHeader>
-               <CardContent className="space-y-4">
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                   <div className="space-y-2">
-                     <label className="text-sm font-medium">Risque 3 mois (%)</label>
-                     <EditableField
-                       value={formData.predictor?.probabiliteDefaut?.mois3 ? (formData.predictor.probabiliteDefaut.mois3 * 100).toFixed(1) : ''}
-                       placeholder="2.1"
-                       onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois3'], (parseFloat(value) / 100).toString())}
-                       type="number"
-                     />
-                   </div>
-                   <div className="space-y-2">
-                     <label className="text-sm font-medium">Risque 6 mois (%)</label>
-                     <EditableField
-                       value={formData.predictor?.probabiliteDefaut?.mois6 ? (formData.predictor.probabiliteDefaut.mois6 * 100).toFixed(1) : ''}
-                       placeholder="3.8"
-                       onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois6'], (parseFloat(value) / 100).toString())}
-                       type="number"
-                     />
-                   </div>
-                   <div className="space-y-2">
-                     <label className="text-sm font-medium">Risque 12 mois (%)</label>
-                     <EditableField
-                       value={formData.predictor?.probabiliteDefaut?.mois12 ? (formData.predictor.probabiliteDefaut.mois12 * 100).toFixed(1) : ''}
-                       placeholder="4.9"
-                       onSave={(value) => updateField(['predictor', 'probabiliteDefaut', 'mois12'], (parseFloat(value) / 100).toString())}
-                       type="number"
-                     />
-                   </div>
-                   <div className="space-y-2">
-                     <label className="text-sm font-medium">Confiance IA (%)</label>
-                     <EditableField
-                       value={getNestedValue(formData, ['predictor', 'confidence']) || '85'}
-                       placeholder="85"
-                       onSave={(value) => updateField(['predictor', 'confidence'], value)}
-                       type="number"
-                     />
-                   </div>
-                 </div>
-               </CardContent>
-             </Card>
-
-             {/* Évolution du Risque Prédictif */}
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center">
-                   <LineChartIcon className="h-5 w-5 mr-2" />
-                   Évolution du Risque Prédictif (12 mois)
-                 </CardTitle>
-                 <CardDescription>Projection mensuelle basée sur les algorithmes d'IA avancés</CardDescription>
-               </CardHeader>
-               <CardContent className="space-y-4">
-                 <EditableField
-                   label="Description de l'évolution"
-                   value={getNestedValue(formData, ['enriched', 'predictive', 'evolution']) || ''}
-                   placeholder="Projection mensuelle du risque de défaut sur 12 mois..."
-                   onSave={(value) => updateField(['enriched', 'predictive', 'evolution'], value)}
-                   multiline
-                 />
-                 <div className="grid md:grid-cols-3 gap-4">
-                   <EditableField
-                     label="Tendance générale"
-                     value={getNestedValue(formData, ['enriched', 'predictive', 'trend']) || ''}
-                     placeholder="Stable, croissant, décroissant"
-                     onSave={(value) => updateField(['enriched', 'predictive', 'trend'], value)}
-                   />
-                   <EditableField
-                     label="Pic de risque (mois)"
-                     value={getNestedValue(formData, ['enriched', 'predictive', 'peakMonth']) || ''}
-                     placeholder="Juin 2024"
-                     onSave={(value) => updateField(['enriched', 'predictive', 'peakMonth'], value)}
-                   />
-                   <EditableField
-                     label="Moyenne secteur (%)"
-                     value={getNestedValue(formData, ['enriched', 'predictive', 'sectorAverage']) || ''}
-                     placeholder="12.5"
-                     onSave={(value) => updateField(['enriched', 'predictive', 'sectorAverage'], value)}
-                     type="number"
-                   />
-                 </div>
-               </CardContent>
-             </Card>
-
-             {/* Tests de Résistance */}
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center">
-                   <Shield className="h-5 w-5 mr-2" />
-                   Tests de Résistance
-                 </CardTitle>
-                 <CardDescription>Simulation de scénarios de crise</CardDescription>
-               </CardHeader>
-               <CardContent className="space-y-4">
-                 <div className="grid md:grid-cols-2 gap-6">
-                   <div className="space-y-4">
-                     <h4 className="font-semibold">Scénarios Économiques</h4>
-                     <EditableField
-                       label="Récession -10%"
-                       value={getNestedValue(formData, ['enriched', 'stressTest', 'recession']) || ''}
-                       placeholder="Impact: 6.8%, Probabilité: 15%"
-                       onSave={(value) => updateField(['enriched', 'stressTest', 'recession'], value)}
-                     />
-                     <EditableField
-                       label="Inflation +5%"
-                       value={getNestedValue(formData, ['enriched', 'stressTest', 'inflation']) || ''}
-                       placeholder="Impact: 4.1%, Probabilité: 40%"
-                       onSave={(value) => updateField(['enriched', 'stressTest', 'inflation'], value)}
-                     />
-                     <EditableField
-                       label="Hausse taux +3%"
-                       value={getNestedValue(formData, ['enriched', 'stressTest', 'interestRates']) || ''}
-                       placeholder="Impact: 3.7%, Probabilité: 35%"
-                       onSave={(value) => updateField(['enriched', 'stressTest', 'interestRates'], value)}
-                     />
-                   </div>
-                   <div className="space-y-4">
-                     <h4 className="font-semibold">Scénarios Spécifiques</h4>
-                     <EditableField
-                       label="Perte client majeur"
-                       value={getNestedValue(formData, ['enriched', 'stressTest', 'clientLoss']) || ''}
-                       placeholder="Impact: 8.2%, Probabilité: 25%"
-                       onSave={(value) => updateField(['enriched', 'stressTest', 'clientLoss'], value)}
-                     />
-                     <EditableField
-                       label="Crise secteur"
-                       value={getNestedValue(formData, ['enriched', 'stressTest', 'sectorCrisis']) || ''}
-                       placeholder="Impact: 5.4%, Probabilité: 20%"
-                       onSave={(value) => updateField(['enriched', 'stressTest', 'sectorCrisis'], value)}
-                     />
-                     <EditableField
-                       label="Analyse globale"
-                       value={getNestedValue(formData, ['enriched', 'stressTest', 'globalAnalysis']) || ''}
-                       placeholder="Synthèse des tests de résistance..."
-                       onSave={(value) => updateField(['enriched', 'stressTest', 'globalAnalysis'], value)}
-                       multiline
-                     />
-                   </div>
-                 </div>
-               </CardContent>
-             </Card>
-
-             {/* Facteurs Discriminants IA */}
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center">
-                   <Brain className="h-5 w-5 mr-2" />
-                   Facteurs Discriminants IA
-                 </CardTitle>
-                 <CardDescription>Variables clés identifiées par l'intelligence artificielle</CardDescription>
-               </CardHeader>
-               <CardContent className="space-y-4">
-                 <div className="grid md:grid-cols-2 gap-6">
-                   <div className="space-y-4">
-                     <EditableField
-                       label="Signaux faibles détectés"
-                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'weakSignals']) || ''}
-                       placeholder="Trend CA positif détecté, Recrutements récents (+5), Délais paiement +2 jours..."
-                       onSave={(value) => updateField(['enriched', 'aiFactors', 'weakSignals'], value)}
-                       multiline
-                     />
-                     <EditableField
-                       label="Variables importantes"
-                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'keyVariables']) || ''}
-                       placeholder="Flux de trésorerie, Ratio d'endettement, Croissance CA..."
-                       onSave={(value) => updateField(['enriched', 'aiFactors', 'keyVariables'], value)}
-                       multiline
-                     />
-                   </div>
-                   <div className="space-y-4">
-                     <EditableField
-                       label="Algorithme utilisé"
-                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'algorithm']) || ''}
-                       placeholder="XGBoost v2.1 - Précision 94.2%"
-                       onSave={(value) => updateField(['enriched', 'aiFactors', 'algorithm'], value)}
-                     />
-                     <EditableField
-                       label="Variables analysées"
-                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'variablesCount']) || ''}
-                       placeholder="247"
-                       onSave={(value) => updateField(['enriched', 'aiFactors', 'variablesCount'], value)}
-                       type="number"
-                     />
-                     <EditableField
-                       label="Base d'entraînement"
-                       value={getNestedValue(formData, ['enriched', 'aiFactors', 'trainingData']) || ''}
-                       placeholder="450K entreprises"
-                       onSave={(value) => updateField(['enriched', 'aiFactors', 'trainingData'], value)}
-                     />
-                   </div>
-                 </div>
-               </CardContent>
-             </Card>
-
-             {/* Insights Machine Learning */}
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center">
-                   <Zap className="h-5 w-5 mr-2" />
-                   Insights Machine Learning
-                 </CardTitle>
-                 <CardDescription>Analyses avancées et recommandations automatisées</CardDescription>
-               </CardHeader>
-               <CardContent className="space-y-4">
-                 <EditableField
-                   label="Recommandations automatisées"
-                   value={getNestedValue(formData, ['enriched', 'mlInsights', 'recommendations']) || ''}
-                   placeholder="Surveiller URSSAF mensuel, Diversifier top 3 clients, Renforcer trésorerie Q4..."
-                   onSave={(value) => updateField(['enriched', 'mlInsights', 'recommendations'], value)}
-                   multiline
-                 />
-                 <div className="grid md:grid-cols-2 gap-6">
-                   <EditableField
-                     label="Patterns détectés"
-                     value={getNestedValue(formData, ['enriched', 'mlInsights', 'patterns']) || ''}
-                     placeholder="Saisonnalité forte Q4, Corrélation CA/effectifs..."
-                     onSave={(value) => updateField(['enriched', 'mlInsights', 'patterns'], value)}
-                     multiline
-                   />
-                   <EditableField
-                     label="Alertes préventives"
-                     value={getNestedValue(formData, ['enriched', 'mlInsights', 'alerts']) || ''}
-                     placeholder="Monitoring hebdomadaire requis, Seuil critique détecté..."
-                     onSave={(value) => updateField(['enriched', 'mlInsights', 'alerts'], value)}
-                     multiline
-                   />
-                 </div>
-               </CardContent>
-             </Card>
-
-             {/* Conformité et Santé Fiscale */}
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center">
-                   <Gavel className="h-5 w-5 mr-2" />
-                   Conformité et Santé Fiscale
-                 </CardTitle>
-                 <CardDescription>Évaluation prédictive du risque de vérification fiscale</CardDescription>
-               </CardHeader>
-               <CardContent className="space-y-4">
-                 <div className="grid md:grid-cols-3 gap-4">
-                   <EditableField
-                     label="Probabilité contrôle 36 mois (%)"
-                     value={getNestedValue(formData, ['enriched', 'fiscal', 'auditRisk36']) || ''}
-                     placeholder="18"
-                     onSave={(value) => updateField(['enriched', 'fiscal', 'auditRisk36'], value)}
-                     type="number"
-                   />
-                   <EditableField
-                     label="Score risque fiscal (%)"
-                     value={getNestedValue(formData, ['enriched', 'fiscal', 'fiscalScore']) || ''}
-                     placeholder="12"
-                     onSave={(value) => updateField(['enriched', 'fiscal', 'fiscalScore'], value)}
-                     type="number"
-                   />
-                   <EditableField
-                     label="Écart secteur (pts)"
-                     value={getNestedValue(formData, ['enriched', 'fiscal', 'sectorGap']) || ''}
-                     placeholder="-6"
-                     onSave={(value) => updateField(['enriched', 'fiscal', 'sectorGap'], value)}
-                     type="number"
-                   />
-                 </div>
-                 
-                 <div className="space-y-4 mt-6">
-                   <h4 className="font-semibold">Facteurs de Risque Détectés</h4>
-                   <div className="grid md:grid-cols-2 gap-4">
-                     <EditableField
-                       label="Cohérence TVA/CA"
-                       value={getNestedValue(formData, ['enriched', 'fiscal', 'vatConsistency']) || ''}
-                       placeholder="Conforme"
-                       onSave={(value) => updateField(['enriched', 'fiscal', 'vatConsistency'], value)}
-                     />
-                     <EditableField
-                       label="Croissance CA"
-                       value={getNestedValue(formData, ['enriched', 'fiscal', 'revenueGrowth']) || ''}
-                       placeholder="Attention - Rapide"
-                       onSave={(value) => updateField(['enriched', 'fiscal', 'revenueGrowth'], value)}
-                     />
-                     <EditableField
-                       label="Ratios sectoriels"
-                       value={getNestedValue(formData, ['enriched', 'fiscal', 'sectorRatios']) || ''}
-                       placeholder="Normaux"
-                       onSave={(value) => updateField(['enriched', 'fiscal', 'sectorRatios'], value)}
-                     />
-                     <EditableField
-                       label="Régularité déclarative"
-                       value={getNestedValue(formData, ['enriched', 'fiscal', 'declarationRegularity']) || ''}
-                       placeholder="Exemplaire"
-                       onSave={(value) => updateField(['enriched', 'fiscal', 'declarationRegularity'], value)}
-                     />
-                   </div>
-                 </div>
-
-                 <div className="space-y-4 mt-6">
-                   <h4 className="font-semibold">Stratégie de Mitigation Fiscale</h4>
-                   <EditableField
-                     value={getNestedValue(formData, ['enriched', 'fiscal', 'mitigationStrategy']) || ''}
-                     placeholder="Documentation renforcée, Conformité TVA, Audit préventif, Veille réglementaire..."
-                     onSave={(value) => updateField(['enriched', 'fiscal', 'mitigationStrategy'], value)}
-                     multiline
-                   />
-                 </div>
-               </CardContent>
-             </Card>
-
-             {/* Simulation de Scénarios */}
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center">
-                   <Target className="h-5 w-5 mr-2" />
-                   Simulation de Scénarios
-                 </CardTitle>
-                 <CardDescription>Modélisation interactive des impacts futurs</CardDescription>
-               </CardHeader>
-               <CardContent className="space-y-4">
-                 <div className="grid md:grid-cols-2 gap-6">
-                   <div className="space-y-4">
-                     <h4 className="font-semibold">Scénarios de Croissance</h4>
-                     <EditableField
-                       label="Croissance +20%"
-                       value={getNestedValue(formData, ['enriched', 'scenarios', 'growth20']) || ''}
-                       placeholder="Impact sur le score: +0.8, Risque 12 mois: 3.2%"
-                       onSave={(value) => updateField(['enriched', 'scenarios', 'growth20'], value)}
-                       multiline
-                     />
-                     <EditableField
-                       label="Stagnation 0%"
-                       value={getNestedValue(formData, ['enriched', 'scenarios', 'stagnation']) || ''}
-                       placeholder="Impact sur le score: -0.3, Risque 12 mois: 5.8%"
-                       onSave={(value) => updateField(['enriched', 'scenarios', 'stagnation'], value)}
-                       multiline
-                     />
-                   </div>
-                   <div className="space-y-4">
-                     <h4 className="font-semibold">Scénarios de Crise</h4>
-                     <EditableField
-                       label="Récession -15%"
-                       value={getNestedValue(formData, ['enriched', 'scenarios', 'recession15']) || ''}
-                       placeholder="Impact sur le score: -1.2, Risque 12 mois: 12.4%"
-                       onSave={(value) => updateField(['enriched', 'scenarios', 'recession15'], value)}
-                       multiline
-                     />
-                     <EditableField
-                       label="Renforcement BFR"
-                       value={getNestedValue(formData, ['enriched', 'scenarios', 'workingCapital']) || ''}
-                       placeholder="Impact sur la trésorerie et recommandations..."
-                       onSave={(value) => updateField(['enriched', 'scenarios', 'workingCapital'], value)}
-                       multiline
-                     />
-                   </div>
-                 </div>
-               </CardContent>
-             </Card>
-           </TabsContent>
-
-          <TabsContent value="reports" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Rapports & Actions - Mode Édition</CardTitle>
-                <CardDescription>Configuration des rapports et actions disponibles</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-semibold flex items-center">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Configuration des rapports
-                    </h4>
-                    <EditableField
-                      value={getNestedValue(formData, ['enriched', 'reports', 'executiveSummary'])}
-                      placeholder="Résumé exécutif personnalisé..."
-                      onSave={(value) => updateField(['enriched', 'reports', 'executiveSummary'], value)}
-                      multiline
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <h4 className="font-semibold flex items-center">
-                      <Bell className="h-4 w-4 mr-2" />
-                      Alertes et notifications
-                    </h4>
-                    <EditableField
-                      value={getNestedValue(formData, ['enriched', 'alerts', 'settings'])}
-                      placeholder="Configuration des seuils d'alerte..."
-                      onSave={(value) => updateField(['enriched', 'alerts', 'settings'], value)}
-                      multiline
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+    </TooltipProvider>
   );
-};
+}
 
 export { CompanyWYSIWYGEditor };

@@ -278,6 +278,13 @@ export interface EnrichedData {
     legalProcedures?: Record<string, string>;
     judicialProcedures?: Record<string, string>;
   };
+  adminScores?: {
+    economic: string;
+    financial: string;
+    legal: string;
+    fiscal: string;
+    global: string;
+  };
   metadata: {
     dataQuality: string;
     sources: string;

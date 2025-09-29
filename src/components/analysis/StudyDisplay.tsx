@@ -1,611 +1,771 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { DataWithSource } from "@/components/ui/data-with-source";
+import { ChevronDown, ChevronUp, Shield, Calculator, TrendingUp, Building, Award, AlertTriangle, CheckCircle, XCircle, Clock, FileText } from "lucide-react";
 import { EditableField } from "@/components/ui/editable-field";
+import { EditableSelect } from "@/components/ui/editable-select";
 import { VisibilityToggle } from "@/components/admin/VisibilityToggle";
 import { useEditing } from "@/components/result/EditingContext";
-import { calculateFinancialScore, calculateRiskScore } from "@/utils/scoreCalculator";
-import { 
-  TrendingUp, 
-  ChevronDown, 
-  ChevronRight, 
-  Shield, 
-  Crown,
-  BarChart3,
-  CheckCircle,
-  FileText,
-  Users,
-  Award,
-  Euro,
-  Target,
-  Activity,
-  Calendar
-} from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
+import type { DisplayEnrichedData } from "@/utils/buildCompanyDisplay";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 
 interface StudyDisplayProps {
-  companyData?: any;
+  companyData?: DisplayEnrichedData | null;
 }
 
 export function StudyDisplay({ companyData }: StudyDisplayProps) {
   const { isEditing, onEdit } = useEditing();
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    compliance: false,
+  const [openSections, setOpenSections] = useState({
+    compliance: true,
     fiscal: false,
     financial: false,
     economic: false,
-    governance: false
+    governance: false,
+    certifications: false
   });
 
-  // Get visibility settings with sub-encarts
-  const encartVisibility = companyData?.encartVisibility?.study || {
-    compliance: true,
-    fiscal: true,
-    financial: true,
-    economic: true,
-    governance: true,
-    // Sub-encarts
-    compliance_audit: true,
-    compliance_fiscal: true,
-    compliance_social: true,
-    fiscal_declarations: true,
-    fiscal_evolution: true,
-    fiscal_optimization: true,
-    financial_ratios: true,
-    financial_evolution: true,
-    financial_cashflow: true,
-    economic_market: true,
-    economic_competition: true,
-    economic_performance: true,
-    governance_structure: true,
-    governance_management: true,
-    governance_control: true
-  };
-
-  const toggleSection = (section: string) => {
+  const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
   };
 
-  // Calculate scores
-  const financialScore = companyData ? calculateFinancialScore(companyData) : { score: 0, source: 'unavailable' };
-  const riskScore = companyData ? calculateRiskScore(companyData) : { score: 0, source: 'unavailable' };
-
-  const getBilansData = () => {
-    const bilans = companyData?.pappers?.bilans || [];
-    return bilans.slice(0, 4).map((bilan: any, index: number) => ({
-      period: bilan.millesime || `${new Date().getFullYear() - index}`,
-      liquidite: bilan.ratioLiquidite || 1.5,
-      rentabilite: bilan.chiffreAffaires > 0 ? ((bilan.resultatNet || 0) / bilan.chiffreAffaires * 100) : 0,
-      solvabilite: bilan.capitauxPropres && bilan.totalActif ? (bilan.capitauxPropres / bilan.totalActif * 100) : 50
-    }));
+  const encartVisibility = companyData?.encartVisibility?.study || {
+    compliance: true,
+    compliance_audit: true,
+    procedures_bodacc: true,
+    procedures_portalis: true,
+    fiscal: true,
+    fiscal_evolution: true,
+    tax_strategy: true,
+    financial: true,
+    financial_ratios: true,
+    balance_analysis: true,
+    economic: true,
+    market_position: true,
+    competitive_analysis: true,
+    governance: true,
+    management_quality: true,
+    board_composition: true,
+    certifications: true,
+    iso_certifications: true,
+    quality_labels: true
   };
 
-  const financialRatios = getBilansData();
-
-  const getComplianceScore = () => {
-    let score = 7.0;
-    const procedures = companyData?.bodacc?.procedures || [];
-    if (procedures.length > 0) score -= procedures.length * 1.5;
-    if (financialRatios.length > 0) score += 0.5;
-    return Math.max(Math.min(score, 10), 1);
+  const handleVisibilityToggle = (field: string, visible: boolean) => {
+    onEdit?.(`encartVisibility.study.${field}`, visible);
   };
 
-  const complianceScore = getComplianceScore();
+  // Options for dropdowns
+  const procedureStatusOptions = [
+    { value: "aucune", label: "Aucune" },
+    { value: "1_active", label: "1 active" },
+    { value: "2-5_actives", label: "2-5 actives" },
+    { value: "6+_actives", label: "6+ actives" },
+    { value: "non_applicable", label: "Non applicable" }
+  ];
 
-  // Data for charts
+  const complianceStatusOptions = [
+    { value: "conforme", label: "Conforme" },
+    { value: "non_conforme", label: "Non conforme" },
+    { value: "partiellement_conforme", label: "Partiellement conforme" },
+    { value: "en_cours", label: "En cours de vérification" }
+  ];
+
+  const fiscalStatusOptions = [
+    { value: "à_jour", label: "À jour" },
+    { value: "retard", label: "En retard" },
+    { value: "non_applicable", label: "Non applicable" },
+    { value: "en_cours", label: "En cours" }
+  ];
+
+  const certificationStatusOptions = [
+    { value: "certifié", label: "Certifié" },
+    { value: "en_cours", label: "En cours" },
+    { value: "non_certifié", label: "Non certifié" },
+    { value: "non_applicable", label: "Non applicable" }
+  ];
+
+  const qualityStatusOptions = [
+    { value: "excellent", label: "Excellent" },
+    { value: "bon", label: "Bon" },
+    { value: "moyen", label: "Moyen" },
+    { value: "faible", label: "Faible" },
+    { value: "non_évalué", label: "Non évalué" }
+  ];
+
+  // Mock data for charts
   const fiscalEvolution = [
-    { annee: '2020', tva: 85000, is: 15000 },
-    { annee: '2021', tva: 92000, is: 18000 },
-    { annee: '2022', tva: 98000, is: 22000 },
-    { annee: '2023', tva: 105000, is: 25000 }
+    { year: '2021', tva: 98, is: 100, cet: 95 },
+    { year: '2022', tva: 95, is: 98, cet: 100 },
+    { year: '2023', tva: 100, is: 100, cet: 98 },
+    { year: '2024', tva: 100, is: 100, cet: 100 }
   ];
 
   const marketEvolution = [
-    { year: '2020', marche: 100, entreprise: 95 },
-    { year: '2021', marche: 108, entreprise: 112 },
-    { year: '2022', marche: 115, entreprise: 125 },
-    { year: '2023', marche: 122, entreprise: 138 }
+    { period: 'T1 2023', performance: 85, marché: 80 },
+    { period: 'T2 2023', performance: 88, marché: 82 },
+    { period: 'T3 2023', performance: 92, marché: 85 },
+    { period: 'T4 2023', performance: 95, marché: 87 },
+    { period: 'T1 2024', performance: 97, marché: 89 }
   ];
 
-  const competitionData = [
-    { name: 'Entreprise', value: 35, color: '#0088FE' },
-    { name: 'Concurrent A', value: 28, color: '#00C49F' },
-    { name: 'Concurrent B', value: 22, color: '#FFBB28' },
-    { name: 'Autres', value: 15, color: '#FF8042' }
-  ];
+  const getStatusIcon = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'conforme':
+      case 'à_jour':
+      case 'certifié':
+      case 'excellent':
+      case 'bon':
+        return <CheckCircle className="h-4 w-4 text-success" />;
+      case 'non_conforme':
+      case 'retard':
+      case 'non_certifié':
+      case 'faible':
+        return <XCircle className="h-4 w-4 text-destructive" />;
+      case 'en_cours':
+      case 'partiellement_conforme':
+      case 'moyen':
+        return <Clock className="h-4 w-4 text-warning" />;
+      case 'aucune':
+      case 'non_applicable':
+      case 'non_évalué':
+        return <AlertTriangle className="h-4 w-4 text-muted-foreground" />;
+      default:
+        return <FileText className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'conforme':
+      case 'à_jour':
+      case 'certifié':
+      case 'excellent':
+        return <Badge variant="default">Excellent</Badge>;
+      case 'bon':
+        return <Badge variant="secondary">Bon</Badge>;
+      case 'moyen':
+      case 'partiellement_conforme':
+        return <Badge variant="outline">Moyen</Badge>;
+      case 'non_conforme':
+      case 'retard':
+      case 'faible':
+        return <Badge variant="destructive">À risque</Badge>;
+      default:
+        return <Badge variant="secondary">Non évalué</Badge>;
+    }
+  };
+
+  if (!companyData?.study) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Aucune donnée d'étude approfondie disponible
+      </div>
+    );
+  }
 
   return (
-    <TooltipProvider>
-      <div className="space-y-4">
-        {/* 1. Conformités et Obligations Légales */}
-        {(encartVisibility.compliance || isEditing) && (
-          <Card>
-            {isEditing && (
-              <div className="p-4 border-b bg-muted/50">
-                <VisibilityToggle
-                  isVisible={encartVisibility.compliance}
-                  onToggle={(visible) => onEdit?.('encartVisibility.study.compliance', visible)}
-                  label="Conformités et Obligations Légales"
-                />
+    <div className="space-y-4">
+      {/* Section Conformités et Obligations Légales */}
+      {encartVisibility.compliance && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Conformités et Obligations Légales</CardTitle>
+                {getStatusBadge(companyData.study.compliance.obligations_status)}
               </div>
-            )}
-            <Collapsible open={openSections.compliance} onOpenChange={() => toggleSection('compliance')}>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Shield className="h-5 w-5 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Conformités et Obligations Légales</CardTitle>
-                        <CardDescription>Analyse de la situation de conformité</CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <EditableField
-                        value={complianceScore.toFixed(1)}
-                        field="study.compliance.global_score"
-                        badge={<Badge variant="secondary" className="bg-primary/10 text-primary">Acceptable {complianceScore.toFixed(1)}/10</Badge>}
-                        displayValue={`Acceptable ${complianceScore.toFixed(1)}/10`}
-                      />
-                      {openSections.compliance ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </div>
-                  </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent>
-                <CardContent className="space-y-6">
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {/* Score d'Audit */}
-                    {(encartVisibility.compliance_audit || isEditing) && (
-                      <Card>
-                        {isEditing && (
-                          <div className="p-2 border-b bg-muted/20">
-                            <VisibilityToggle  
-                              isVisible={encartVisibility.compliance_audit}
-                              onToggle={(visible) => onEdit?.('encartVisibility.study.compliance_audit', visible)}
-                              label="Score d'Audit"
-                              className="text-xs"
-                            />
-                          </div>
-                        )}
-                        <CardHeader>
-                          <CardTitle className="text-base flex items-center">
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Score d'Audit
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm">Conformité globale</span>
-                              <EditableField
-                                value={complianceScore.toFixed(1)}
-                                field="study.compliance.global_score"
-                                badge={<Badge variant="secondary">{complianceScore.toFixed(1)}/10</Badge>}
-                                displayValue={`${complianceScore.toFixed(1)}/10`}
-                              />
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm">RGPD</span>
-                              <EditableField
-                                value="8.2"
-                                field="study.compliance.rgpd_score"
-                                badge={<Badge variant="secondary">8.2/10</Badge>}
-                                displayValue="8.2/10"
-                              />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    {/* Obligations Fiscales */}  
-                    {(encartVisibility.compliance_fiscal || isEditing) && (
-                      <Card>
-                        {isEditing && (
-                          <div className="p-2 border-b bg-muted/20">
-                            <VisibilityToggle  
-                              isVisible={encartVisibility.compliance_fiscal}
-                              onToggle={(visible) => onEdit?.('encartVisibility.study.compliance_fiscal', visible)}
-                              label="Obligations Fiscales"
-                              className="text-xs"
-                            />
-                          </div>
-                        )}
-                        <CardHeader>
-                          <CardTitle className="text-base flex items-center">
-                            <FileText className="h-4 w-4 mr-2" />
-                            Obligations Fiscales
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center text-sm">
-                              <span>TVA</span>
-                              <EditableField
-                                value="À jour"
-                                field="study.fiscal.tva_status"
-                                badge={<Badge variant="outline" className="text-xs bg-success-light text-success">À jour</Badge>}
-                                displayValue="À jour"
-                              />
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                              <span>IS 2023</span>
-                              <EditableField
-                                value="Déposé"
-                                field="study.fiscal.is_2023"
-                                badge={<Badge variant="outline" className="text-xs bg-success-light text-success">Déposé</Badge>}
-                                displayValue="Déposé"
-                              />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    {/* Obligations Sociales */}
-                    {(encartVisibility.compliance_social || isEditing) && (
-                      <Card>
-                        {isEditing && (
-                          <div className="p-2 border-b bg-muted/20">
-                            <VisibilityToggle  
-                              isVisible={encartVisibility.compliance_social}
-                              onToggle={(visible) => onEdit?.('encartVisibility.study.compliance_social', visible)}
-                              label="Obligations Sociales"
-                              className="text-xs"
-                            />
-                          </div>
-                        )}
-                        <CardHeader>
-                          <CardTitle className="text-base flex items-center">
-                            <Users className="h-4 w-4 mr-2" />
-                            Obligations Sociales
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center text-sm">
-                              <span>URSSAF</span>
-                              <EditableField
-                                value="À jour"
-                                field="study.social.urssaf"
-                                badge={<Badge variant="outline" className="text-xs bg-success-light text-success">À jour</Badge>}
-                                displayValue="À jour"
-                              />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
-        )}
-
-        {/* 2. Obligations Fiscales */}
-        {(encartVisibility.fiscal || isEditing) && (
-          <Card>
-            {isEditing && (
-              <div className="p-4 border-b bg-muted/50">
-                <VisibilityToggle
-                  isVisible={encartVisibility.fiscal}
-                  onToggle={(visible) => onEdit?.('encartVisibility.study.fiscal', visible)}  
-                  label="Obligations Fiscales"
-                />
+              <div className="flex items-center space-x-2">
+                {isEditing && (
+                  <VisibilityToggle
+                    isVisible={encartVisibility.compliance}
+                    onToggle={(visible) => handleVisibilityToggle('compliance', visible)}
+                    label="Conformité"
+                  />
+                )}
+                <Collapsible open={openSections.compliance} onOpenChange={() => toggleSection('compliance')}>
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center">
+                      {openSections.compliance ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+                  </CollapsibleTrigger>
+                </Collapsible>
               </div>
-            )}
-            <Collapsible open={openSections.fiscal} onOpenChange={() => toggleSection('fiscal')}>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <FileText className="h-5 w-5 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Obligations Fiscales</CardTitle>
-                        <CardDescription>Analyse des obligations fiscales</CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <EditableField
-                        value="7.8"
-                        field="study.fiscal.global_score"
-                        badge={<Badge variant="secondary" className="bg-primary/10 text-primary">Bon 7.8/10</Badge>}
-                        displayValue="Bon 7.8/10"
-                      />
-                      {openSections.fiscal ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </div>
-                  </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent>
-                <CardContent>
-                  {(encartVisibility.fiscal_evolution || isEditing) && (
-                    <Card>
+            </div>
+          </CardHeader>
+          <Collapsible open={openSections.compliance} onOpenChange={() => toggleSection('compliance')}>
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                {/* Procédures BODACC */}
+                {encartVisibility.procedures_bodacc && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Procédures Précontentieuses (BODACC)</h4>
                       {isEditing && (
-                        <div className="p-2 border-b bg-muted/20">
-                          <VisibilityToggle  
-                            isVisible={encartVisibility.fiscal_evolution}
-                            onToggle={(visible) => onEdit?.('encartVisibility.study.fiscal_evolution', visible)}
-                            label="Évolution Fiscale"
-                            className="text-xs"
-                          />
-                        </div>
+                        <VisibilityToggle
+                          isVisible={encartVisibility.procedures_bodacc}
+                          onToggle={(visible) => handleVisibilityToggle('procedures_bodacc', visible)}
+                          label="BODACC"
+                        />
                       )}
-                      <CardHeader>
-                        <CardTitle className="text-base">Évolution Fiscale</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="h-48">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={fiscalEvolution}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="annee" />
-                              <YAxis />
-                              <RechartsTooltip />
-                              <Bar dataKey="tva" fill="#8884d8" name="TVA" />
-                              <Bar dataKey="is" fill="#82ca9d" name="IS" />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
-        )}
-
-        {/* 3. Situation Financière */}
-        {(encartVisibility.financial || isEditing) && (
-          <Card>
-            {isEditing && (
-              <div className="p-4 border-b bg-muted/50">
-                <VisibilityToggle
-                  isVisible={encartVisibility.financial}
-                  onToggle={(visible) => onEdit?.('encartVisibility.study.financial', visible)}
-                  label="Situation Financière"
-                />
-              </div>
-            )}
-            <Collapsible open={openSections.financial} onOpenChange={() => toggleSection('financial')}>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <BarChart3 className="h-5 w-5 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Situation Financière</CardTitle>
-                        <CardDescription>Analyse financière détaillée</CardDescription>
-                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <EditableField
-                        value={financialScore.score.toFixed(1)}
-                        field="study.financial.global_score"
-                        badge={<Badge variant="secondary" className="bg-primary/10 text-primary">Correct {financialScore.score.toFixed(1)}/10</Badge>}
-                        displayValue={`Correct ${financialScore.score.toFixed(1)}/10`}
-                      />
-                      {openSections.financial ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    <EditableSelect
+                      value={companyData.study.compliance.procedures_bodacc.status}
+                      field="procedures_bodacc_status"
+                      options={procedureStatusOptions}
+                      icon={getStatusIcon(companyData.study.compliance.procedures_bodacc.status)}
+                      badge={<Badge variant="outline">{companyData.study.compliance.procedures_bodacc.count} détectées</Badge>}
+                    />
+                  </div>
+                )}
+
+                {/* Procédures Portalis */}
+                {encartVisibility.procedures_portalis && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Procédures Judiciaires (Portalis)</h4>
+                      {isEditing && (
+                        <VisibilityToggle
+                          isVisible={encartVisibility.procedures_portalis}
+                          onToggle={(visible) => handleVisibilityToggle('procedures_portalis', visible)}
+                          label="Portalis"
+                        />
+                      )}
+                    </div>
+                    <EditableSelect
+                      value={companyData.study.compliance.procedures_portalis.status}
+                      field="procedures_portalis_status"
+                      options={procedureStatusOptions}
+                      icon={getStatusIcon(companyData.study.compliance.procedures_portalis.status)}
+                      badge={<Badge variant="outline">{companyData.study.compliance.procedures_portalis.count} actives</Badge>}
+                    />
+                  </div>
+                )}
+
+                {/* Audit de conformité */}
+                {encartVisibility.compliance_audit && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Audit de Conformité</h4>
+                      {isEditing && (
+                        <VisibilityToggle
+                          isVisible={encartVisibility.compliance_audit}
+                          onToggle={(visible) => handleVisibilityToggle('compliance_audit', visible)}
+                          label="Audit"
+                        />
+                      )}
+                    </div>
+                    <EditableField
+                      value={companyData.study.compliance.compliance_audit}
+                      field="compliance_audit"
+                      multiline
+                      icon={<FileText className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={companyData.study.compliance.legal_risk_analysis}
+                      field="legal_risk_analysis"
+                      multiline
+                      icon={<AlertTriangle className="h-4 w-4" />}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+      )}
+
+      {/* Section Mitigation Fiscale */}
+      {encartVisibility.fiscal && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Calculator className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Mitigation Fiscale</CardTitle>
+                {getStatusBadge("à_jour")}
+              </div>
+              <div className="flex items-center space-x-2">
+                {isEditing && (
+                  <VisibilityToggle
+                    isVisible={encartVisibility.fiscal}
+                    onToggle={(visible) => handleVisibilityToggle('fiscal', visible)}
+                    label="Fiscal"
+                  />
+                )}
+                <Collapsible open={openSections.fiscal} onOpenChange={() => toggleSection('fiscal')}>
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center">
+                      {openSections.fiscal ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+                  </CollapsibleTrigger>
+                </Collapsible>
+              </div>
+            </div>
+          </CardHeader>
+          <Collapsible open={openSections.fiscal} onOpenChange={() => toggleSection('fiscal')}>
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                {/* Déclarations fiscales */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <EditableSelect
+                    value={companyData.study.fiscal.tva_declarations}
+                    field="tva_declarations"
+                    options={fiscalStatusOptions}
+                    icon={getStatusIcon(companyData.study.fiscal.tva_declarations)}
+                    badge={<Badge variant="outline">TVA</Badge>}
+                  />
+                  <EditableSelect
+                    value={companyData.study.fiscal.is_declarations}
+                    field="is_declarations"
+                    options={fiscalStatusOptions}
+                    icon={getStatusIcon(companyData.study.fiscal.is_declarations)}
+                    badge={<Badge variant="outline">IS</Badge>}
+                  />
+                  <EditableSelect
+                    value={companyData.study.fiscal.cet_declarations}
+                    field="cet_declarations"
+                    options={fiscalStatusOptions}
+                    icon={getStatusIcon(companyData.study.fiscal.cet_declarations)}
+                    badge={<Badge variant="outline">CET</Badge>}
+                  />
+                </div>
+
+                {/* Évolution fiscale */}
+                {encartVisibility.fiscal_evolution && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Évolution des Obligations Fiscales</h4>
+                      {isEditing && (
+                        <VisibilityToggle
+                          isVisible={encartVisibility.fiscal_evolution}
+                          onToggle={(visible) => handleVisibilityToggle('fiscal_evolution', visible)}
+                          label="Évolution"
+                        />
+                      )}
+                    </div>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={fiscalEvolution}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="year" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="tva" stroke="#8884d8" strokeWidth={2} />
+                          <Line type="monotone" dataKey="is" stroke="#82ca9d" strokeWidth={2} />
+                          <Line type="monotone" dataKey="cet" stroke="#ffc658" strokeWidth={2} />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </div>
                   </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent>
-                <CardContent>
-                  {(encartVisibility.financial_ratios || isEditing) && (
-                    <Card>
-                      {isEditing && (
-                        <div className="p-2 border-b bg-muted/20">
-                          <VisibilityToggle  
-                            isVisible={encartVisibility.financial_ratios}
-                            onToggle={(visible) => onEdit?.('encartVisibility.study.financial_ratios', visible)}
-                            label="Ratios Financiers"
-                            className="text-xs"
-                          />
-                        </div>
-                      )}
-                      <CardHeader>
-                        <CardTitle className="text-base">Ratios Financiers</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm">Liquidité</span>
-                            <EditableField
-                              value="1.50"
-                              field="study.financial.liquidity_ratio"
-                              badge={<Badge variant="outline">1.50</Badge>}
-                              displayValue="1.50"
-                            />
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm">Solvabilité</span>
-                            <EditableField
-                              value="45.0%"
-                              field="study.financial.solvency_ratio"
-                              badge={<Badge variant="outline">45.0%</Badge>}
-                              displayValue="45.0%"
-                            />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
-        )}
+                )}
 
-        {/* 4. Performance Économique */}
-        {(encartVisibility.economic || isEditing) && (
-          <Card>
-            {isEditing && (
-              <div className="p-4 border-b bg-muted/50">
-                <VisibilityToggle
-                  isVisible={encartVisibility.economic}
-                  onToggle={(visible) => onEdit?.('encartVisibility.study.economic', visible)}
-                  label="Performance Économique"
-                />
-              </div>
-            )}
-            <Collapsible open={openSections.economic} onOpenChange={() => toggleSection('economic')}>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <TrendingUp className="h-5 w-5 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Performance Économique</CardTitle>
-                        <CardDescription>Analyse de performance</CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <EditableField
-                        value="6.8"
-                        field="study.economic.global_score"
-                        badge={<Badge variant="secondary" className="bg-primary/10 text-primary">Correct 6.8/10</Badge>}
-                        displayValue="Correct 6.8/10"
-                      />
-                      {openSections.economic ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </div>
-                  </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent>
-                <CardContent>
-                  {(encartVisibility.economic_market || isEditing) && (
-                    <Card>
+                {/* Stratégie fiscale */}
+                {encartVisibility.tax_strategy && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Stratégie d'Optimisation</h4>
                       {isEditing && (
-                        <div className="p-2 border-b bg-muted/20">
-                          <VisibilityToggle  
-                            isVisible={encartVisibility.economic_market}
-                            onToggle={(visible) => onEdit?.('encartVisibility.study.economic_market', visible)}
-                            label="Positionnement Marché"
-                            className="text-xs"
-                          />
-                        </div>
+                        <VisibilityToggle
+                          isVisible={encartVisibility.tax_strategy}
+                          onToggle={(visible) => handleVisibilityToggle('tax_strategy', visible)}
+                          label="Stratégie"
+                        />
                       )}
-                      <CardHeader>
-                        <CardTitle className="text-base">Positionnement Marché</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="h-48">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={marketEvolution}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="year" />
-                              <YAxis />
-                              <RechartsTooltip />
-                              <Line type="monotone" dataKey="marche" stroke="#8884d8" name="Marché" />
-                              <Line type="monotone" dataKey="entreprise" stroke="#82ca9d" name="Entreprise" />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
-        )}
+                    </div>
+                    <EditableField
+                      value={companyData.study.fiscal.fiscal_optimization}
+                      field="fiscal_optimization"
+                      multiline
+                      icon={<Calculator className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={companyData.study.fiscal.tax_strategy}
+                      field="tax_strategy"
+                      multiline
+                      icon={<TrendingUp className="h-4 w-4" />}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+      )}
 
-        {/* 5. Gouvernance */}
-        {(encartVisibility.governance || isEditing) && (
-          <Card>
-            {isEditing && (
-              <div className="p-4 border-b bg-muted/50">
-                <VisibilityToggle
-                  isVisible={encartVisibility.governance}
-                  onToggle={(visible) => onEdit?.('encartVisibility.study.governance', visible)}
-                  label="Gouvernance"
-                />
+      {/* Section Situation Financière */}
+      {encartVisibility.financial && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Situation Financière</CardTitle>
+                {getStatusBadge("bon")}
               </div>
-            )}
-            <Collapsible open={openSections.governance} onOpenChange={() => toggleSection('governance')}>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Crown className="h-5 w-5 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Gouvernance</CardTitle>
-                        <CardDescription>Structure de gouvernance</CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <EditableField
-                        value="7.2"
-                        field="study.governance.global_score"
-                        badge={<Badge variant="secondary" className="bg-primary/10 text-primary">Bon 7.2/10</Badge>}
-                        displayValue="Bon 7.2/10"
-                      />
-                      {openSections.governance ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </div>
-                  </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent>
-                <CardContent>
-                  {(encartVisibility.governance_structure || isEditing) && (
-                    <Card>
+              <div className="flex items-center space-x-2">
+                {isEditing && (
+                  <VisibilityToggle
+                    isVisible={encartVisibility.financial}
+                    onToggle={(visible) => handleVisibilityToggle('financial', visible)}
+                    label="Financier"
+                  />
+                )}
+                <Collapsible open={openSections.financial} onOpenChange={() => toggleSection('financial')}>
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center">
+                      {openSections.financial ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+                  </CollapsibleTrigger>
+                </Collapsible>
+              </div>
+            </div>
+          </CardHeader>
+          <Collapsible open={openSections.financial} onOpenChange={() => toggleSection('financial')}>
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                {/* Analyses financières */}
+                {encartVisibility.balance_analysis && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Analyses Financières Approfondies</h4>
                       {isEditing && (
-                        <div className="p-2 border-b bg-muted/20">
-                          <VisibilityToggle  
-                            isVisible={encartVisibility.governance_structure}
-                            onToggle={(visible) => onEdit?.('encartVisibility.study.governance_structure', visible)}
-                            label="Structure Dirigeants"
-                            className="text-xs"
-                          />
-                        </div>
+                        <VisibilityToggle
+                          isVisible={encartVisibility.balance_analysis}
+                          onToggle={(visible) => handleVisibilityToggle('balance_analysis', visible)}
+                          label="Analyses"
+                        />
                       )}
-                      <CardHeader>
-                        <CardTitle className="text-base">Structure Dirigeants</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm">Président</span>
-                            <EditableField
-                              value="M. MARTIN Jean"
-                              field="study.governance.president_name"
-                              displayValue="M. MARTIN Jean"
-                            />
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm">Nb administrateurs</span>
-                            <EditableField
-                              value="5"
-                              field="study.governance.board_members_count"
-                              badge={<Badge variant="outline">5</Badge>}
-                              displayValue="5"
-                            />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
-        )}
-      </div>
-    </TooltipProvider>
+                    </div>
+                    <EditableField
+                      value={companyData.study.financial.balance_analysis}
+                      field="balance_analysis"
+                      multiline
+                      icon={<TrendingUp className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={companyData.study.financial.cash_flow_analysis}
+                      field="cash_flow_analysis"
+                      multiline
+                      icon={<Calculator className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={companyData.study.financial.profitability_analysis}
+                      field="profitability_analysis"
+                      multiline
+                      icon={<TrendingUp className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={companyData.study.financial.financial_recommendations}
+                      field="financial_recommendations"
+                      multiline
+                      icon={<FileText className="h-4 w-4" />}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+      )}
+
+      {/* Section Analyse Économique */}
+      {encartVisibility.economic && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Analyse Économique et Commerciale</CardTitle>
+                {getStatusBadge("bon")}
+              </div>
+              <div className="flex items-center space-x-2">
+                {isEditing && (
+                  <VisibilityToggle
+                    isVisible={encartVisibility.economic}
+                    onToggle={(visible) => handleVisibilityToggle('economic', visible)}
+                    label="Économique"
+                  />
+                )}
+                <Collapsible open={openSections.economic} onOpenChange={() => toggleSection('economic')}>
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center">
+                      {openSections.economic ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+                  </CollapsibleTrigger>
+                </Collapsible>
+              </div>
+            </div>
+          </CardHeader>
+          <Collapsible open={openSections.economic} onOpenChange={() => toggleSection('economic')}>
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                {/* Positionnement marché */}
+                {encartVisibility.market_position && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Positionnement Marché</h4>
+                      {isEditing && (
+                        <VisibilityToggle
+                          isVisible={encartVisibility.market_position}
+                          onToggle={(visible) => handleVisibilityToggle('market_position', visible)}
+                          label="Position"
+                        />
+                      )}
+                    </div>
+                    <EditableField
+                      value={companyData.study.economic.market_position}
+                      field="market_position"
+                      multiline
+                      icon={<TrendingUp className="h-4 w-4" />}
+                    />
+                  </div>
+                )}
+
+                {/* Analyse concurrentielle */}
+                {encartVisibility.competitive_analysis && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Analyse Concurrentielle</h4>
+                      {isEditing && (
+                        <VisibilityToggle
+                          isVisible={encartVisibility.competitive_analysis}
+                          onToggle={(visible) => handleVisibilityToggle('competitive_analysis', visible)}
+                          label="Concurrence"
+                        />
+                      )}
+                    </div>
+                    <EditableField
+                      value={companyData.study.economic.competitive_analysis}
+                      field="competitive_analysis"
+                      multiline
+                      icon={<Building className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={companyData.study.economic.growth_strategy}
+                      field="growth_strategy"
+                      multiline
+                      icon={<TrendingUp className="h-4 w-4" />}
+                    />
+                  </div>
+                )}
+
+                {/* Évolution du marché */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Évolution Performance vs Marché</h4>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={marketEvolution}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="period" />
+                        <YAxis />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="performance" stroke="#8884d8" strokeWidth={2} name="Performance Entreprise" />
+                        <Line type="monotone" dataKey="marché" stroke="#82ca9d" strokeWidth={2} name="Moyenne Marché" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+      )}
+
+      {/* Section Gouvernance */}
+      {encartVisibility.governance && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Building className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Structuration, Gouvernance et Management</CardTitle>
+                <Badge variant="outline">{companyData.study.governance.governance_score}/10</Badge>
+              </div>
+              <div className="flex items-center space-x-2">
+                {isEditing && (
+                  <VisibilityToggle
+                    isVisible={encartVisibility.governance}
+                    onToggle={(visible) => handleVisibilityToggle('governance', visible)}
+                    label="Gouvernance"
+                  />
+                )}
+                <Collapsible open={openSections.governance} onOpenChange={() => toggleSection('governance')}>
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center">
+                      {openSections.governance ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+                  </CollapsibleTrigger>
+                </Collapsible>
+              </div>
+            </div>
+          </CardHeader>
+          <Collapsible open={openSections.governance} onOpenChange={() => toggleSection('governance')}>
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                {/* Qualité du management */}
+                {encartVisibility.management_quality && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Qualité du Management</h4>
+                      {isEditing && (
+                        <VisibilityToggle
+                          isVisible={encartVisibility.management_quality}
+                          onToggle={(visible) => handleVisibilityToggle('management_quality', visible)}
+                          label="Management"
+                        />
+                      )}
+                    </div>
+                    <EditableField
+                      value={companyData.study.governance.management_quality}
+                      field="management_quality"
+                      multiline
+                      icon={<Building className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={companyData.study.governance.leadership_analysis}
+                      field="leadership_analysis"
+                      multiline
+                      icon={<FileText className="h-4 w-4" />}
+                    />
+                  </div>
+                )}
+
+                {/* Composition du conseil */}
+                {encartVisibility.board_composition && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Composition du Conseil</h4>
+                      {isEditing && (
+                        <VisibilityToggle
+                          isVisible={encartVisibility.board_composition}
+                          onToggle={(visible) => handleVisibilityToggle('board_composition', visible)}
+                          label="Conseil"
+                        />
+                      )}
+                    </div>
+                    <EditableField
+                      value={companyData.study.governance.board_composition}
+                      field="board_composition"
+                      multiline
+                      icon={<Building className="h-4 w-4" />}
+                    />
+                    <EditableField
+                      value={companyData.study.governance.control_systems}
+                      field="control_systems"
+                      multiline
+                      icon={<Shield className="h-4 w-4" />}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+      )}
+
+      {/* Section Certifications et Agréments */}
+      {encartVisibility.certifications && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Award className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Certifications et Agréments</CardTitle>
+                {getStatusBadge("non_applicable")}
+              </div>
+              <div className="flex items-center space-x-2">
+                {isEditing && (
+                  <VisibilityToggle
+                    isVisible={encartVisibility.certifications}
+                    onToggle={(visible) => handleVisibilityToggle('certifications', visible)}
+                    label="Certifications"
+                  />
+                )}
+                <Collapsible open={openSections.certifications} onOpenChange={() => toggleSection('certifications')}>
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center">
+                      {openSections.certifications ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+                  </CollapsibleTrigger>
+                </Collapsible>
+              </div>
+            </div>
+          </CardHeader>
+          <Collapsible open={openSections.certifications} onOpenChange={() => toggleSection('certifications')}>
+            <CollapsibleContent>
+              <CardContent className="space-y-6">
+                {/* Certifications ISO */}
+                {encartVisibility.iso_certifications && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Certifications ISO</h4>
+                      {isEditing && (
+                        <VisibilityToggle
+                          isVisible={encartVisibility.iso_certifications}
+                          onToggle={(visible) => handleVisibilityToggle('iso_certifications', visible)}
+                          label="ISO"
+                        />
+                      )}
+                    </div>
+                    <EditableSelect
+                      value={companyData.study.certifications.iso_certifications}
+                      field="iso_certifications"
+                      options={certificationStatusOptions}
+                      icon={<Award className="h-4 w-4" />}
+                      badge={<Badge variant="outline">ISO 9001/14001</Badge>}
+                    />
+                  </div>
+                )}
+
+                {/* Labels qualité */}
+                {encartVisibility.quality_labels && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Labels Qualité</h4>
+                      {isEditing && (
+                        <VisibilityToggle
+                          isVisible={encartVisibility.quality_labels}
+                          onToggle={(visible) => handleVisibilityToggle('quality_labels', visible)}
+                          label="Labels"
+                        />
+                      )}
+                    </div>
+                    <EditableSelect
+                      value={companyData.study.certifications.quality_labels}
+                      field="quality_labels"
+                      options={certificationStatusOptions}
+                      icon={<Award className="h-4 w-4" />}
+                      badge={<Badge variant="outline">Qualité France</Badge>}
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <EditableSelect
+                    value={companyData.study.certifications.industry_approvals}
+                    field="industry_approvals"
+                    options={certificationStatusOptions}
+                    icon={<Award className="h-4 w-4" />}
+                    badge={<Badge variant="outline">Agréments sectoriels</Badge>}
+                  />
+                  <EditableSelect
+                    value={companyData.study.certifications.environmental_certifications}
+                    field="environmental_certifications"
+                    options={certificationStatusOptions}
+                    icon={<Award className="h-4 w-4" />}
+                    badge={<Badge variant="outline">Environnement</Badge>}
+                  />
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+      )}
+    </div>
   );
 }

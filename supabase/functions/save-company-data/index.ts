@@ -30,6 +30,7 @@ serve(async (req) => {
     // Préparer les données enrichies pour la sauvegarde
     const enrichedData = {
       ...companyData,
+      study: companyData.study || {},
       encartVisibility,
       lastEdited: new Date().toISOString(),
       editorInfo

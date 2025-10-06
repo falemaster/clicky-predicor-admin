@@ -68,6 +68,11 @@ const Index = () => {
             </nav>
 
             <div className="flex items-center space-x-4">
+              <Link to="/admin">
+                <Button variant="outline" size="sm">
+                  Admin
+                </Button>
+              </Link>
               <Button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
                 Souscrire Premium
               </Button>

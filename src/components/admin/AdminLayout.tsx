@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation, Outlet } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   LayoutDashboard, 
   Users, 
@@ -56,6 +57,7 @@ const adminNavItems = [
 
 function AdminSidebar() {
   const location = useLocation();
+  const { signOut, user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   
   const isActive = (path: string) => location.pathname === path;
@@ -102,15 +104,20 @@ function AdminSidebar() {
         </SidebarContent>
 
         {/* Footer */}
-        <div className="border-t p-4">
+        <div className="border-t p-4 space-y-2">
+          {!collapsed && user?.email && (
+            <p className="text-xs text-muted-foreground truncate px-2">
+              {user.email}
+            </p>
+          )}
           <Button 
             variant="outline" 
             size="sm" 
             className="w-full justify-start" 
-            onClick={() => window.location.href = '/'}
+            onClick={signOut}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            {!collapsed && "Retour au site"}
+            {!collapsed && "Déconnexion"}
           </Button>
         </div>
       </div>
